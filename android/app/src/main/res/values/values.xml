@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gcm_defaultSenderId" translatable="false">448418284324</string>
+    <string name="google_api_key" translatable="false">AIzaSyAOjZrQB9nDJwTipMHKbF5SYz3mpWNlpoA</string>
+    <string name="google_app_id" translatable="false">1:448418284324:android:2c1d9fbdaefaf7021029b1</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyAOjZrQB9nDJwTipMHKbF5SYz3mpWNlpoA</string>
+    <string name="google_storage_bucket" translatable="false">pawfectcare-f4101.appspot.com</string>
+    <string name="project_id" translatable="false">pawfectcare-f4101</string>
+</resources>
