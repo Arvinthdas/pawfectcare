@@ -1,7 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';  // Import Firebase Authentication
-import 'login_screen.dart';   // Ensure this import is correct
-import 'home_screen.dart';    // Import your HomeScreen for redirection after successful registration
+import 'package:http/http.dart' as http;
+import 'package:firebase_auth/firebase_auth.dart';
+import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   @override
@@ -17,9 +18,57 @@ class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController _confirmPasswordController = TextEditingController();
 
   bool _isLoading = false;
-  bool _isPasswordVisible = false; // Add this for password visibility toggle
-  bool _isConfirmPasswordVisible = false; // For confirm password visibility toggle
+  bool _isPasswordVisible = false;
+  bool _isConfirmPasswordVisible = false;
+  String? _quote;
 
+  final String apiKey = 'XOfHWWJgQcCgZGlFEREVDQ==DWSUUw0KN5cGogaA'; // Replace with your API Ninja key
+  final String zeroBounceApiKey = 'f9bf0e1152d5400795b03e6d4dca6165'; // Replace with your ZeroBounce API key
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchRandomHappinessQuote(); // Fetch the random happiness quote on screen load
+  }
+
+  Future<void> _fetchRandomHappinessQuote() async {
+    final url = Uri.parse('https://api.api-ninjas.com/v1/quotes?category=happiness');
+    try {
+      final response = await http.get(
+        url,
+        headers: {'X-Api-Key': apiKey}, // Add API key to the request header
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          _quote = data[0]['quote']; // Get the first quote from the response
+        });
+      } else {
+        setState(() {
+          _quote = "Happiness is the best gift for your pet!";
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _quote = "Error loading quote.";
+      });
+    }
+  }
+
+  Future<bool> _validateEmail(String email) async {
+    final url = Uri.parse('https://api.zerobounce.net/v2/validate?api_key=$zeroBounceApiKey&email=$email');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      return data['status'] == 'valid'; // Return true if the email is valid
+    } else {
+      throw Exception("Failed to validate email");
+    }
+  }
+
+  // Dispose controllers
   @override
   void dispose() {
     _emailController.dispose();
@@ -28,21 +77,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  // Function to toggle password visibility
-  void _togglePasswordVisibility() {
-    setState(() {
-      _isPasswordVisible = !_isPasswordVisible;
-    });
-  }
-
-  // Function to toggle confirm password visibility
-  void _toggleConfirmPasswordVisibility() {
-    setState(() {
-      _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
-    });
-  }
-
-  // Add more complex password validation
+  // Validate password with more constraints
   String? _validatePassword(String? value) {
     if (value == null || value.isEmpty) {
       return 'Password cannot be empty';
@@ -62,6 +97,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
+      // Validate the email before registration
+      bool isValidEmail = await _validateEmail(_emailController.text.trim());
+      if (!isValidEmail) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Invalid email address")),
+        );
+        return;
+      }
+
       if (_passwordController.text == _confirmPasswordController.text) {
         setState(() {
           _isLoading = true;
@@ -72,11 +116,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
             email: _emailController.text.trim(),
             password: _passwordController.text.trim(),
           );
-          // Navigate to LoginScreen after successful registration
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => LoginScreen()),
-          );
+          User? user = userCredential.user;
+
+          if (user != null) {
+            // Navigate to LoginScreen after successful registration
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => LoginScreen()),
+            );
+          }
         } on FirebaseAuthException catch (e) {
           String message;
           switch (e.code) {
@@ -105,10 +153,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  // Build the UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF7EFF1), // Light background color
+      backgroundColor: Color(0xFFF7EFF1),
       body: Stack(
         children: [
           Positioned(
@@ -116,7 +165,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             left: -50,
             child: CircleAvatar(
               radius: 100,
-              backgroundColor: Color(0xFFE2BF65).withOpacity(0.4), // Faded yellow color
+              backgroundColor: Color(0xFFE2BF65).withOpacity(0.4),
             ),
           ),
           Positioned(
@@ -124,7 +173,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             right: -50,
             child: CircleAvatar(
               radius: 100,
-              backgroundColor: Color(0xFF61481C), // Dark brown color
+              backgroundColor: Color(0xFF61481C),
             ),
           ),
           Center(
@@ -135,15 +184,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Replace 'My APP Icon' text with your image
-                    Image.asset(
-                      'assets/images/Pawfectcare.png', // Path to your image
-                      height: 150,          // Adjust height as needed
-                      width: 150,           // Adjust width as needed
+                    SizedBox(height: 20),
+                    Text(
+                      "Hey there! 👋",
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.2,
+                        color: Colors.black,
+                      ),
                     ),
-                    SizedBox(height: 40),
-
-                    // Email Input
+                    SizedBox(height: 10),
+                    _quote != null
+                        ? Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Text(
+                        _quote!,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontStyle: FontStyle.italic,
+                          color: Colors.grey[700],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    )
+                        : CircularProgressIndicator(),
+                    SizedBox(height: 20),
                     TextFormField(
                       controller: _emailController,
                       decoration: InputDecoration(
@@ -164,18 +230,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       },
                     ),
                     SizedBox(height: 20),
-
-                    // Password Input with toggle visibility
                     TextFormField(
                       controller: _passwordController,
-                      obscureText: !_isPasswordVisible,  // Use the state to toggle visibility
+                      obscureText: !_isPasswordVisible,
                       decoration: InputDecoration(
                         prefixIcon: Icon(Icons.lock),
                         suffixIcon: IconButton(
                           icon: Icon(
                             _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
                           ),
-                          onPressed: _togglePasswordVisibility,  // Toggle visibility
+                          onPressed: _togglePasswordVisibility,
                         ),
                         hintText: 'Password',
                         border: OutlineInputBorder(
@@ -188,18 +252,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       validator: _validatePassword,
                     ),
                     SizedBox(height: 20),
-
-                    // Confirm Password Input with toggle visibility
                     TextFormField(
                       controller: _confirmPasswordController,
-                      obscureText: !_isConfirmPasswordVisible,  // Use the state to toggle visibility
+                      obscureText: !_isConfirmPasswordVisible,
                       decoration: InputDecoration(
                         prefixIcon: Icon(Icons.lock),
                         suffixIcon: IconButton(
                           icon: Icon(
                             _isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off,
                           ),
-                          onPressed: _toggleConfirmPasswordVisibility,  // Toggle visibility
+                          onPressed: _toggleConfirmPasswordVisibility,
                         ),
                         hintText: 'Confirm Password',
                         border: OutlineInputBorder(
@@ -217,54 +279,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       },
                     ),
                     SizedBox(height: 20),
-
-                    // Register Button
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFFE2BF65),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        onPressed: _isLoading ? null : _register, // Disable button when loading
-                        child: _isLoading
-                            ? CircularProgressIndicator(color: Colors.black)
-                            : Text(
-                          'REGISTER',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                          ),
+                    _isLoading
+                        ? CircularProgressIndicator()
+                        : ElevatedButton(
+                      onPressed: _register,
+                      child: Text('Register'),
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.black,
+                        backgroundColor: Color(0xFFE2BF65),
+                        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 100),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                     ),
                     SizedBox(height: 20),
-
-                    Text('or connect with'),
-                    SizedBox(height: 20),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text('Already have an account?'),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (context) => LoginScreen()),
-                            );
-                          },
-                          child: Text(
-                            'Login',
-                            style: TextStyle(
-                              color: Color(0xFFE2BF65),
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => LoginScreen()),
+                        );
+                      },
+                      child: Text(
+                        'Already have an account? Login',
+                        style: TextStyle(
+                          color: Color(0xFF61481C),
                         ),
-                      ],
+                      ),
                     ),
                   ],
                 ),
@@ -274,5 +316,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ],
       ),
     );
+  }
+
+  void _togglePasswordVisibility() {
+    setState(() {
+      _isPasswordVisible = !_isPasswordVisible;
+    });
+  }
+
+  void _toggleConfirmPasswordVisibility() {
+    setState(() {
+      _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
+    });
   }
 }
