@@ -11,10 +11,9 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.6
-  # Add additional dependencies below
-  provider: ^6.0.0 # If you're managing state
-  cached_network_image: ^3.2.1 # For caching images
-  flutter_svg: ^1.0.3 # If you're using SVG images
+  provider: ^6.0.0 # For state management
+  cached_network_image: ^3.2.1 # For image caching
+  flutter_svg: ^1.0.3 # For SVG image support
   firebase_core: ^3.5.0
   firebase_auth: ^5.3.0
   cloud_firestore: ^5.4.2 # Firestore for database
@@ -22,14 +21,20 @@ dependencies:
   firebase_analytics: ^11.3.2
   firebase_messaging: ^15.1.2
   google_sign_in: ^6.2.1
-  image_picker: ^1.1.2
-  http: ^0.13.4
-
+  image_picker: ^1.1.2 # For picking images
+  http: ^0.13.4 # For making HTTP requests
+  url_launcher: ^6.0.9 # For launching URLs
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.11.0 # Add flutter_launcher_icons
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/Pawfectcare.png" # App icon path
 
 flutter:
   uses-material-design: true
@@ -41,6 +46,11 @@ flutter:
     - assets/images/roudy.png
     - assets/images/Pawfectcare.png
     - assets/images/google.png
+    - assets/images/no_pets.png
 
-
-
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700 # Define the weight for bold fonts

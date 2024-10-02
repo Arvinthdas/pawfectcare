@@ -67,7 +67,6 @@ class _MainScreenState extends State<MainScreen> {
     NutritionPage(),       // Index 2
     ExerciseMonitoringPage(),      // Index 3
     GroomingPage(),      // Index 4
-    PetProfileScreen(),    // Index 5
   ];
 
   void _onItemTapped(int index) {
@@ -86,7 +85,7 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Color(0xFFE2BF65),
         selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.grey,
+        unselectedItemColor: Colors.white,
         currentIndex: _selectedIndex,
         type: BottomNavigationBarType.fixed,
         items: [
@@ -109,10 +108,6 @@ class _MainScreenState extends State<MainScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.content_cut_outlined, size: 30),
             label: 'GROOMING',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.pets_outlined, size: 30),
-            label: 'PET PROFILE',
           ),
         ],
         onTap: _onItemTapped,
