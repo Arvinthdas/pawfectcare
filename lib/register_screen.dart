@@ -119,11 +119,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
           User? user = userCredential.user;
 
           if (user != null) {
-            // Navigate to LoginScreen after successful registration
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => LoginScreen()),
+            // Show success message
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Account created successfully!")),
             );
+
+            // Navigate to LoginScreen after showing success message
+            Future.delayed(Duration(seconds: 2), () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => LoginScreen()),
+              );
+            });
           }
         } on FirebaseAuthException catch (e) {
           String message;

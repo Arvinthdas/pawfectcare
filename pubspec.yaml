@@ -47,6 +47,11 @@ flutter:
     - assets/images/Pawfectcare.png
     - assets/images/google.png
     - assets/images/no_pets.png
+    - assets/icons/petprofile.png
+    - assets/icons/health.png
+    - assets/icons/nutrition.png
+    - assets/icons/exercise.png
+    - assets/icons/grooming.png
 
   fonts:
     - family: Poppins

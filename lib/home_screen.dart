@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'addpets_screen.dart';
 import 'login_screen.dart';
 import 'userprofile_screen.dart';
+import 'petprofile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -18,10 +19,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   User? _currentUser;
   List<Map<String, dynamic>> _pets = [];
+  List<DocumentSnapshot> _petDocs = [];
   List _articles = [];
 
-  // API key for NewsAPI
-  final String apiKey = '784971b15e5c460e943f7e70adba0831';
+  final String apiKey = '784971b15e5c460e943f7e70adba0831'; // Replace with your actual API key
 
   @override
   void initState() {
@@ -31,22 +32,25 @@ class _HomeScreenState extends State<HomeScreen> {
     _fetchNewsArticles();
   }
 
-  // Fetch pet data from Firestore
   Future<void> _fetchPets() async {
     if (_currentUser != null) {
-      QuerySnapshot snapshot = await _firestore
-          .collection('users')
-          .doc(_currentUser!.uid)
-          .collection('pets')
-          .get();
+      try {
+        QuerySnapshot snapshot = await _firestore
+            .collection('users')
+            .doc(_currentUser!.uid)
+            .collection('pets')
+            .get();
 
-      setState(() {
-        _pets = snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
-      });
+        setState(() {
+          _pets = snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+          _petDocs = snapshot.docs;
+        });
+      } catch (e) {
+        print("Error fetching pets: $e");
+      }
     }
   }
 
-  // Fetch news articles from the News API (limit to 20)
   Future<void> _fetchNewsArticles() async {
     final url = 'https://newsapi.org/v2/everything?q=pets&pageSize=20&apiKey=$apiKey';
     try {
@@ -98,6 +102,37 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  Future<void> _confirmDeletePet(DocumentSnapshot petDoc) async {
+    final bool shouldDelete = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Delete Pet'),
+          content: Text('Are you sure you want to delete this pet?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('No'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text('Yes'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldDelete) {
+      try {
+        await petDoc.reference.delete();
+        _fetchPets(); // Refresh the pet list after deletion
+      } catch (e) {
+        print("Error deleting pet: $e");
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,13 +140,13 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: Color(0xFFF7EFF1),
         elevation: 0,
-        leadingWidth: 200,  // Increase the width for the title
+        leadingWidth: 200,
         leading: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Text(
             'Pawfectcare',
             style: TextStyle(
-              fontFamily: 'Poppins',  // Apply custom font
+              fontFamily: 'Poppins',
               fontSize: 23,
               fontWeight: FontWeight.bold,
               color: Colors.black,
@@ -124,11 +159,10 @@ class _HomeScreenState extends State<HomeScreen> {
               if (value == 'My Profile') {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => UserProfilePage()), // Navigate to profile page
+                  MaterialPageRoute(builder: (context) => UserProfilePage()),
                 );
               } else if (value == 'Log Out') {
-                _logOut();  // Call the log out method with confirmation dialog
+                _logOut();
               }
             },
             itemBuilder: (BuildContext context) {
@@ -150,7 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Stack(
         children: [
           Padding(
-            padding: const EdgeInsets.only(top: 120),
+            padding: const EdgeInsets.only(top: 20),
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,13 +204,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             Text(
                               'Your Pets',
                               style: TextStyle(
-                                fontFamily: 'Poppins',  // Apply custom font
+                                fontFamily: 'Poppins',
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             SizedBox(height: 10),
-
                             _pets.isNotEmpty
                                 ? GridView.builder(
                               shrinkWrap: true,
@@ -190,57 +223,81 @@ class _HomeScreenState extends State<HomeScreen> {
                               itemCount: _pets.length,
                               itemBuilder: (context, index) {
                                 final pet = _pets[index];
-                                return Column(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(10),
-                                      child: pet['imageUrl'] != null
-                                          ? Image.network(
-                                        pet['imageUrl'],
-                                        height: 100,
-                                        width: 100,
-                                        fit: BoxFit.cover,
-                                      )
-                                          : Image.asset(
-                                        'assets/images/placeholder.png',
-                                        height: 100,
-                                        width: 100,
-                                        fit: BoxFit.cover,
+                                final petDoc = _petDocs[index];
+
+                                return GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => PetProfileScreen(
+                                          petName: pet['name'],
+                                          petBreed: pet['breed'],
+                                          petImageUrl: pet['imageUrl'] ?? 'assets/images/placeholder.png',
+                                          isFemale: pet['gender'] == 'Female',
+                                          petWeight: pet['weight'] ?? 0.0,
+                                          petAge: pet['age']?.toString() ?? '',
+                                          petType: pet['type'] ?? 'Unknown',
+                                          ageType: pet['ageType'] ?? 'Years',
+                                          petId: petDoc.id,
+                                          userId: _currentUser!.uid,
+                                        ),
                                       ),
-                                    ),
-                                    SizedBox(height: 8),
-                                    Text(
-                                      pet['name'] ?? 'Unknown',
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins',  // Apply custom font
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
+                                    ).then((_) {
+                                      _fetchPets(); // Refresh pets after returning
+                                    });
+                                  },
+                                  onLongPress: () => _confirmDeletePet(petDoc),
+                                  child: Column(
+                                    children: [
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(10),
+                                        child: pet['imageUrl'] != null
+                                            ? Image.network(
+                                          pet['imageUrl'],
+                                          height: 100,
+                                          width: 100,
+                                          fit: BoxFit.cover,
+                                        )
+                                            : Image.asset(
+                                          'assets/images/placeholder.png',
+                                          height: 100,
+                                          width: 100,
+                                          fit: BoxFit.cover,
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      pet['breed'] ?? '',
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins',  // Apply custom font
-                                        fontSize: 14,
-                                        color: Colors.grey[600],
+                                      SizedBox(height: 8),
+                                      Text(
+                                        pet['name'] ?? 'Unknown',
+                                        style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                      Text(
+                                        pet['breed'] ?? '',
+                                        style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 14,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 );
                               },
                             )
                                 : Text('No pets added yet.'),
-
                             SizedBox(height: 20),
                             Center(
                               child: ElevatedButton.icon(
                                 onPressed: () async {
                                   await Navigator.push(
                                     context,
-                                    MaterialPageRoute(
-                                        builder: (context) => AddPetsScreen()),
+                                    MaterialPageRoute(builder: (context) => AddPetsScreen()),
                                   );
-                                  _fetchPets();
+                                  _fetchPets(); // Refresh pets after adding a new one
                                 },
                                 icon: Icon(Icons.add),
                                 label: Text('Add More Pets'),
@@ -250,9 +307,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10),
                                   ),
-                                  textStyle: TextStyle(
-                                    fontFamily: 'Poppins',  // Apply custom font
-                                  ),
                                 ),
                               ),
                             ),
@@ -261,7 +315,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
-
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Card(
@@ -277,13 +330,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             Text(
                               'Latest Pet News',
                               style: TextStyle(
-                                fontFamily: 'Poppins',  // Apply custom font
+                                fontFamily: 'Poppins',
                                 fontSize: 22,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             SizedBox(height: 10),
-
                             _articles.isNotEmpty
                                 ? ListView.builder(
                               shrinkWrap: true,
@@ -305,7 +357,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     Text(
                                       article['title'],
                                       style: TextStyle(
-                                          fontFamily: 'Poppins',  // Apply custom font
+                                          fontFamily: 'Poppins',
                                           fontSize: 18,
                                           fontWeight: FontWeight.bold),
                                     ),
@@ -313,7 +365,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     Text(
                                       article['description'] ?? 'No description available',
                                       style: TextStyle(
-                                        fontFamily: 'Poppins',  // Apply custom font
+                                        fontFamily: 'Poppins',
                                         fontSize: 16,
                                       ),
                                     ),

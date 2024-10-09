@@ -26,6 +26,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: AuthChecker(),  // Checks if the user is logged in or not
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -39,10 +40,12 @@ class AuthChecker extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           // Show a loading screen while checking the auth state
-          return Center(child: CircularProgressIndicator());
+          return Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
         } else if (snapshot.hasData) {
-          // If user is logged in, navigate to the MainScreen
-          return MainScreen();
+          // If user is logged in, navigate to the HomeScreen (with no BottomNavigationBar)
+          return HomeScreen();
         } else {
           // If user is not logged in, navigate to LoginScreen
           return LoginScreen();
@@ -53,16 +56,15 @@ class AuthChecker extends StatelessWidget {
 }
 
 // Main screen that contains the BottomNavigationBar
-class MainScreen extends StatefulWidget {
+class PetDetailsScreen extends StatefulWidget {
   @override
-  _MainScreenState createState() => _MainScreenState();
+  _PetDetailsScreenState createState() => _PetDetailsScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _PetDetailsScreenState extends State<PetDetailsScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
-    HomeScreen(),         // Index 0
     PetHealthScreen(),     // Index 1
     NutritionPage(),       // Index 2
     ExerciseMonitoringPage(),      // Index 3
@@ -78,6 +80,10 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Pet Details'),
+        backgroundColor: Color(0xFFE2BF65),
+      ),
       body: IndexedStack(
         index: _selectedIndex,
         children: _pages,
@@ -89,10 +95,6 @@ class _MainScreenState extends State<MainScreen> {
         currentIndex: _selectedIndex,
         type: BottomNavigationBarType.fixed,
         items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined, size: 30),
-            label: 'HOME',
-          ),
           BottomNavigationBarItem(
             icon: Icon(Icons.local_hospital_outlined, size: 30),
             label: 'HEALTH',
