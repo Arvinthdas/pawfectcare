@@ -58,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // Navigate to the home/main screen (HomeScreen)
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => MainScreen()),
+        MaterialPageRoute(builder: (context) => HomeScreen()),
       );
     } on FirebaseAuthException catch (e) {
       String message;
@@ -115,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
       // Navigate to the MainScreen after successful login
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => MainScreen()),
+        MaterialPageRoute(builder: (context) => HomeScreen()),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -172,10 +172,13 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset(
-                    'assets/images/Pawfectcare.png',
-                    height: 200,
-                    width: 200,
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(80), // Adjust the value for more or less rounding
+                    child: Image.asset(
+                      'assets/images/Pawfectcare.png',
+                      height: 200,
+                      width: 200,
+                    ),
                   ),
                   SizedBox(height: 40),
 

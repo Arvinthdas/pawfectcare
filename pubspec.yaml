@@ -24,6 +24,8 @@ dependencies:
   image_picker: ^1.1.2 # For picking images
   http: ^0.13.4 # For making HTTP requests
   url_launcher: ^6.0.9 # For launching URLs
+  flutter_local_notifications: ^17.2.3
+  timezone: ^0.9.4
 
 dev_dependencies:
   flutter_test:
@@ -47,6 +49,11 @@ flutter:
     - assets/images/Pawfectcare.png
     - assets/images/google.png
     - assets/images/no_pets.png
+    - assets/icons/petprofile.png
+    - assets/icons/health.png
+    - assets/icons/nutrition.png
+    - assets/icons/exercise.png
+    - assets/icons/grooming.png
 
   fonts:
     - family: Poppins
