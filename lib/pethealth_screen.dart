@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
 import 'addmedicalrecords_screen.dart';
 import 'addvaccination_screen.dart';
 import 'healthdocsdetails_screen.dart'; // Assuming this screen shows details of medical records
@@ -313,9 +314,17 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
 
         // Filter records to include only past vaccinations
         final pastRecords = records.where((record) {
-          final vaccinationDate = DateTime.parse(record['date']);
-          return vaccinationDate.isBefore(now) || vaccinationDate.isAtSameMomentAs(now); // Check if the vaccination date is before or the same as now
+          final dateString = record['date']; // Fetching the date string from Firestore
+          final dateFormat = DateFormat('dd/MM/yyyy HH:mm'); // Adjust format as needed
+          try {
+            final vaccinationDate = dateFormat.parse(dateString);
+            return vaccinationDate.isBefore(now) || vaccinationDate.isAtSameMomentAs(now); // Check if the vaccination date is in the past
+          } catch (e) {
+            print('Error parsing date: $e');
+            return false; // Skip this record if the date format is invalid
+          }
         }).toList();
+
 
         return ListView.builder(
           shrinkWrap: true,
@@ -363,6 +372,7 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
 
 
   // Fetch upcoming vaccinations from Firestore and render them as cards
+
   Widget _buildUpcomingVaccinations() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
@@ -387,10 +397,19 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
         final records = snapshot.data!.docs;
         final DateTime now = DateTime.now(); // Get the current date and time
 
+        // Format for parsing the date in the format you saved it (DD/MM/YYYY HH:mm)
+        final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
+
         // Filter records to include only future vaccinations
         final upcomingRecords = records.where((record) {
-          final vaccinationDate = DateTime.parse(record['date']);
-          return vaccinationDate.isAfter(now); // Check if the vaccination date is after now
+          final dateString = record['date']; // This is the string saved in Firestore
+          try {
+            final vaccinationDate = dateFormat.parse(dateString); // Parse the date string
+            return vaccinationDate.isAfter(now); // Check if the vaccination date is after now
+          } catch (e) {
+            print('Error parsing date: $e'); // Handle the error if date format is invalid
+            return false;
+          }
         }).toList();
 
         return ListView.builder(
@@ -411,6 +430,7 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
       },
     );
   }
+
 
 
   // Display vaccination guidelines

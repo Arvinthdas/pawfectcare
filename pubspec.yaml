@@ -26,6 +26,10 @@ dependencies:
   url_launcher: ^6.0.9 # For launching URLs
   flutter_local_notifications: ^17.2.3
   timezone: ^0.9.4
+  intl: ^0.19.0
+  android_intent_plus: ^5.1.0
+  device_info_plus: ^11.0.0
+  permission_handler: ^11.3.1
 
 dev_dependencies:
   flutter_test:

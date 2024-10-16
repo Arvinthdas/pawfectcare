@@ -4,6 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
+import 'package:intl/intl.dart'; // For date formatting
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 class AddVaccinationScreen extends StatefulWidget {
   final String petId;
@@ -28,9 +32,51 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
   File? _selectedDocument;
   bool _isUploading = false;
 
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  FlutterLocalNotificationsPlugin();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeNotifications();
+    tz.initializeTimeZones(); // Initialize time zones
+    tz.setLocalLocation(tz.getLocation('Asia/Kuala_Lumpur')); // Set Malaysia Time
+  }
+
+  Future<void> _initializeNotifications() async {
+    const AndroidInitializationSettings initializationSettingsAndroid =
+    AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    final InitializationSettings initializationSettings =
+    InitializationSettings(android: initializationSettingsAndroid);
+
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+
+    // Create the notification channel
+    _createNotificationChannel();
+  }
+
+  Future<void> _createNotificationChannel() async {
+    const AndroidNotificationChannel channel = AndroidNotificationChannel(
+      'vaccination_channel', // Channel ID
+      'Vaccination Notifications', // Channel name
+      description: 'This channel is for vaccination notifications',
+      importance: Importance.max, // Importance level
+    );
+
+    final AndroidFlutterLocalNotificationsPlugin? androidPlugin =
+    flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+
+    if (androidPlugin != null) {
+      await androidPlugin.createNotificationChannel(channel);
+    }
+  }
+
   // Function to pick an image or document from the device
   Future<void> _pickDocument() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final pickedFile =
+    await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _selectedDocument = File(pickedFile.path);
@@ -40,6 +86,16 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
 
   // Function to save vaccination details to Firestore
   Future<void> _addVaccination() async {
+    if (_vaccineNameController.text.isEmpty ||
+        _dateController.text.isEmpty ||
+        _veterinarianController.text.isEmpty ||
+        _clinicController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please fill in all required fields')),
+      );
+      return;
+    }
+
     User? user = _auth.currentUser;
     if (user != null) {
       setState(() {
@@ -54,20 +110,52 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
         documentUrl = await _uploadImageToStorage(uid, _selectedDocument!);
       }
 
-      // Add vaccination details to Firestore
-      await _firestore.collection('users').doc(uid).collection('pets')
-          .doc(widget.petId).collection('vaccinations').add({
-        'vaccineName': _vaccineNameController.text,
-        'date': _dateController.text,
-        'veterinarian': _veterinarianController.text,
-        'clinic': _clinicController.text,
-        'notes': _notesController.text,
-        'documentUrl': documentUrl,
-      });
+      try {
+        // Parse the vaccination date
+        DateTime vaccinationDateTime =
+        DateFormat('dd/MM/yyyy HH:mm').parse(_dateController.text);
 
-      setState(() {
-        _isUploading = false;
-      });
+        // Ensure you are scheduling for a future time
+        if (vaccinationDateTime.isBefore(DateTime.now())) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Please select a future date and time.')),
+          );
+          return;
+        }
+
+        // Add vaccination details to Firestore
+        await _firestore
+            .collection('users')
+            .doc(uid)
+            .collection('pets')
+            .doc(widget.petId)
+            .collection('vaccinations')
+            .add({
+          'vaccineName': _vaccineNameController.text,
+          'date': _dateController.text,
+          'veterinarian': _veterinarianController.text,
+          'clinic': _clinicController.text,
+          'notes': _notesController.text,
+          'documentUrl': documentUrl,
+        });
+
+        // Schedule notification
+        await _scheduleNotification(vaccinationDateTime);
+
+        // Show confirmation and clear the form
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Vaccination added successfully!')),
+        );
+        _clearForm();
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error adding vaccination: $e')),
+        );
+      } finally {
+        setState(() {
+          _isUploading = false;
+        });
+      }
 
       Navigator.pop(context); // Go back after adding the vaccination
     }
@@ -75,11 +163,50 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
 
   // Function to upload an image to Firebase Storage
   Future<String> _uploadImageToStorage(String uid, File imageFile) async {
-    String fileName = 'vaccinations/$uid/${DateTime.now().millisecondsSinceEpoch}.jpg';
-    Reference storageRef = _storage.ref().child(fileName);
-    UploadTask uploadTask = storageRef.putFile(imageFile);
-    TaskSnapshot snapshot = await uploadTask;
-    return await snapshot.ref.getDownloadURL(); // Get the download URL
+    try {
+      String fileName =
+          'vaccinations/$uid/${DateTime.now().millisecondsSinceEpoch}.jpg';
+      Reference storageRef = _storage.ref().child(fileName);
+      UploadTask uploadTask = storageRef.putFile(imageFile);
+      TaskSnapshot snapshot = await uploadTask;
+      return await snapshot.ref.getDownloadURL();
+    } catch (e) {
+      print('Error uploading image: $e');
+      return '';
+    }
+  }
+
+  // Function to schedule notification
+  Future<void> _scheduleNotification(DateTime vaccinationDate) async {
+    tz.TZDateTime scheduledDate =
+    tz.TZDateTime.from(vaccinationDate, tz.local); // Ensure using local time
+
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+    AndroidNotificationDetails(
+      'vaccination_channel',
+      'Vaccination Notifications',
+      channelDescription: 'Channel for vaccination notifications',
+      importance: Importance.max,
+      priority: Priority.high,
+      showWhen: false,
+    );
+
+    const NotificationDetails platformChannelSpecifics =
+    NotificationDetails(android: androidPlatformChannelSpecifics);
+
+    try {
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        0,
+        'Vaccination Reminder',
+        'Your pet is due for a vaccination!',
+        scheduledDate,
+        platformChannelSpecifics,
+        uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime,
+      );
+    } catch (e) {
+      print("Error scheduling notification: $e");
+    }
   }
 
   // Function to show Date and Time Picker
@@ -107,15 +234,25 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
           pickedTime.minute,
         );
 
-        // Format the selected date and time as desired
-        String formattedDateTime = "${selectedDateTime.toLocal()}".split(' ')[0] + " " +
-            "${pickedTime.hour}:${pickedTime.minute.toString().padLeft(2, '0')}";
+        // Format the selected date and time
+        String formattedDateTime =
+        DateFormat('dd/MM/yyyy HH:mm').format(selectedDateTime);
 
         setState(() {
           _dateController.text = formattedDateTime;
         });
       }
     }
+  }
+
+  // Function to clear the form
+  void _clearForm() {
+    _vaccineNameController.clear();
+    _dateController.clear();
+    _veterinarianController.clear();
+    _clinicController.clear();
+    _notesController.clear();
+    _selectedDocument = null;
   }
 
   @override
@@ -153,7 +290,7 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
                 fillColor: Colors.grey[200],
               ),
               readOnly: true,
-              onTap: _selectDateTime, // Show the date and time picker
+              onTap: _selectDateTime,
             ),
             SizedBox(height: 15),
             Text('Veterinarian *', style: TextStyle(fontWeight: FontWeight.bold)),
