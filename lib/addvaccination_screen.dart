@@ -52,7 +52,6 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
 
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
-    // Create the notification channel
     _createNotificationChannel();
   }
 
@@ -73,7 +72,6 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
     }
   }
 
-  // Function to pick an image or document from the device
   Future<void> _pickDocument() async {
     final pickedFile =
     await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -84,7 +82,6 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
     }
   }
 
-  // Function to save vaccination details to Firestore
   Future<void> _addVaccination() async {
     if (_vaccineNameController.text.isEmpty ||
         _dateController.text.isEmpty ||
@@ -92,6 +89,23 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
         _clinicController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Please fill in all required fields')),
+      );
+      return;
+    }
+
+    DateTime? vaccinationDate;
+    try {
+      vaccinationDate =
+          DateFormat('dd/MM/yyyy HH:mm').parse(_dateController.text);
+      if (vaccinationDate.isBefore(DateTime.now())) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please select a future date and time.')),
+        );
+        return;
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please enter a valid date format.')),
       );
       return;
     }
@@ -105,25 +119,11 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
       String uid = user.uid;
       String documentUrl = '';
 
-      // Upload document to storage if selected
       if (_selectedDocument != null) {
         documentUrl = await _uploadImageToStorage(uid, _selectedDocument!);
       }
 
       try {
-        // Parse the vaccination date
-        DateTime vaccinationDateTime =
-        DateFormat('dd/MM/yyyy HH:mm').parse(_dateController.text);
-
-        // Ensure you are scheduling for a future time
-        if (vaccinationDateTime.isBefore(DateTime.now())) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Please select a future date and time.')),
-          );
-          return;
-        }
-
-        // Add vaccination details to Firestore
         await _firestore
             .collection('users')
             .doc(uid)
@@ -139,10 +139,8 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
           'documentUrl': documentUrl,
         });
 
-        // Schedule notification
-        await _scheduleNotification(vaccinationDateTime);
+        await _scheduleNotification(vaccinationDate);
 
-        // Show confirmation and clear the form
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Vaccination added successfully!')),
         );
@@ -157,11 +155,10 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
         });
       }
 
-      Navigator.pop(context); // Go back after adding the vaccination
+      Navigator.pop(context);
     }
   }
 
-  // Function to upload an image to Firebase Storage
   Future<String> _uploadImageToStorage(String uid, File imageFile) async {
     try {
       String fileName =
@@ -176,10 +173,9 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
     }
   }
 
-  // Function to schedule notification
   Future<void> _scheduleNotification(DateTime vaccinationDate) async {
     tz.TZDateTime scheduledDate =
-    tz.TZDateTime.from(vaccinationDate, tz.local); // Ensure using local time
+    tz.TZDateTime.from(vaccinationDate, tz.local);
 
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
     AndroidNotificationDetails(
@@ -209,7 +205,6 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
     }
   }
 
-  // Function to show Date and Time Picker
   Future<void> _selectDateTime() async {
     DateTime? pickedDate = await showDatePicker(
       context: context,
@@ -225,7 +220,6 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
       );
 
       if (pickedTime != null) {
-        // Combine picked date and time
         DateTime selectedDateTime = DateTime(
           pickedDate.year,
           pickedDate.month,
@@ -234,7 +228,6 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
           pickedTime.minute,
         );
 
-        // Format the selected date and time
         String formattedDateTime =
         DateFormat('dd/MM/yyyy HH:mm').format(selectedDateTime);
 
@@ -245,14 +238,34 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
     }
   }
 
-  // Function to clear the form
   void _clearForm() {
     _vaccineNameController.clear();
     _dateController.clear();
     _veterinarianController.clear();
     _clinicController.clear();
     _notesController.clear();
-    _selectedDocument = null;
+    setState(() {
+      _selectedDocument = null;
+      _isUploading = false;
+    });
+  }
+
+  Widget _buildImagePreview() {
+    if (_selectedDocument != null) {
+      return Image.file(
+        _selectedDocument!,
+        height: 150,
+        width: 150,
+        fit: BoxFit.cover,
+      );
+    } else {
+      return Placeholder(
+        fallbackHeight: 150,
+        fallbackWidth: 150,
+        color: Colors.grey,
+        strokeWidth: 2,
+      );
+    }
   }
 
   @override
@@ -330,21 +343,9 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
               maxLines: 3,
             ),
             SizedBox(height: 15),
-            Text('Upload Document/Image', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text('Upload Image', style: TextStyle(fontWeight: FontWeight.bold)),
             SizedBox(height: 5),
-            _selectedDocument != null
-                ? Image.file(
-              _selectedDocument!,
-              height: 150,
-              width: 150,
-              fit: BoxFit.cover,
-            )
-                : Placeholder(
-              fallbackHeight: 150,
-              fallbackWidth: 150,
-              color: Colors.grey,
-              strokeWidth: 2,
-            ),
+            _buildImagePreview(),
             SizedBox(height: 15),
             ElevatedButton(
               onPressed: _pickDocument,

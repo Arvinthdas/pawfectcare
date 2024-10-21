@@ -30,6 +30,7 @@ dependencies:
   android_intent_plus: ^5.1.0
   device_info_plus: ^11.0.0
   permission_handler: ^11.3.1
+  fl_chart: ^0.69.0
 
 dev_dependencies:
   flutter_test:

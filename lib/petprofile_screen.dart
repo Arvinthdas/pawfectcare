@@ -381,18 +381,30 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
         children: [
           _buildProfileView(), // PetProfileView
           PetHealthScreen(petId: widget.petId, userId: widget.userId), // Pass petId and userId
-          NutritionPage(),   // Pass petId and userId
-          ExerciseMonitoringPage(), // Pass petId and userId
-          GroomingPage(),   // Pass petId and userId
+          NutritionPage(),   // petId: widget.petId, userId: widget.userId
+          ExerciseMonitoringPage(), // petId: widget.petId, userId: widget.userId
+          GroomingPage(petId: widget.petId, userId: widget.userId),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Color(0xFFE2BF65),
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.grey.shade700,
+        selectedItemColor: Color(0xFF048A81), // Color for selected label
+        unselectedItemColor: Colors.black, // Color for unselected label
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         type: BottomNavigationBarType.fixed,
+        selectedLabelStyle: TextStyle(
+          fontFamily: 'Poppins',
+          fontWeight: FontWeight.bold,
+          fontSize: 15, // Set your desired font size for selected item
+          color: Colors.grey, // Ensure this matches the selectedItemColor
+        ),
+        unselectedLabelStyle: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontFamily: 'Poppins',
+          fontSize: 13, // Set your desired font size for unselected item
+          color: Colors.black, // Ensure this matches the unselectedItemColor
+        ),
         items: [
           BottomNavigationBarItem(
             icon: Image.asset('assets/icons/petprofile.png', height: 30),
@@ -416,6 +428,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
           ),
         ],
       ),
+
     );
   }
 

@@ -1,234 +1,316 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+import 'addgrooming_screen.dart'; // Assume this is the screen to add grooming tasks
+import 'groomingdetails_screen.dart'; // Screen to show details of grooming tasks
 
 class GroomingPage extends StatefulWidget {
+  final String petId;
+  final String userId;
+
+  GroomingPage({required this.petId, required this.userId});
+
   @override
   _GroomingPageState createState() => _GroomingPageState();
 }
 
-class _GroomingPageState extends State<GroomingPage> {
+class _GroomingPageState extends State<GroomingPage> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF7EFF1),
       appBar: AppBar(
         backgroundColor: Color(0xFFE2BF65),
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
         title: Text(
-          'Grooming Schedule',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
+          'Grooming',
+          style: TextStyle(color: Colors.black, fontSize: 24, fontWeight: FontWeight.bold),
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.save_outlined, color: Colors.white),
-            onPressed: () {
-              // Save/update functionality
-            },
-          ),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Grooming History Section
-            Text(
-              'Grooming History',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 10),
-            GroomingCard(
-              date: 'Mon 01 Aug',
-              service: 'Full Grooming',
-              groomer: 'Groomer A',
-            ),
-            GroomingCard(
-              date: 'Tue 15 Aug',
-              service: 'Bath and Brush',
-              groomer: 'Groomer B',
-            ),
-            SizedBox(height: 20),
-            // Reminders Section
-            Text(
-              'Grooming Reminders',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 10),
-            ReminderCard(
-              reminder: 'Next grooming due in 2 weeks.',
-            ),
-            SizedBox(height: 20),
-            // Grooming Tips Section
-            Text(
-              'Grooming Tips',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 10),
-            TipsCard(
-              tip: 'Regular brushing helps reduce shedding and keeps your pet’s coat healthy.',
-            ),
-            TipsCard(
-              tip: 'Trim your pet’s nails regularly to avoid overgrowth and discomfort.',
-            ),
+        bottom: TabBar(
+          controller: _tabController,
+          indicatorColor: Colors.white,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.black,
+          tabs: [
+            Tab(text: 'Grooming Task History'),
+            Tab(text: 'Skin & Coat Health'),
           ],
         ),
       ),
-    );
-  }
-}
-
-class GroomingCard extends StatelessWidget {
-  final String date;
-  final String service;
-  final String groomer;
-
-  GroomingCard({
-    required this.date,
-    required this.service,
-    required this.groomer,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 15),
-      padding: EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6,
-            offset: Offset(0, 3),
-          ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          _buildGroomingScheduleTab(),
+          _buildSkinCoatHealthTab(),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    );
+  }
+
+  // Grooming Schedule Tab
+  Widget _buildGroomingScheduleTab() {
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
+          _buildSectionHeader('Grooming Task History', onAddPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AddGroomingScreen(petId: widget.petId, userId: widget.userId),
+              ),
+            );
+          }),
+          SizedBox(height: 10),
+          TextField(
+            onChanged: (value) => setState(() => _searchQuery = value),
+            decoration: InputDecoration(
+              labelText: 'Search Grooming Tasks',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          SizedBox(height: 10),
+          _buildGroomingTasks(),
+          SizedBox(height: 20),
+          _buildUpcomingGroomingTasks(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGroomingTasks() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.userId)
+          .collection('pets')
+          .doc(widget.petId)
+          .collection('groomingTasks')
+          .where('date', isLessThanOrEqualTo: DateTime.now())
+          .orderBy('date', descending: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error fetching grooming tasks'));
+        }
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return Center(child: Text('No grooming tasks available'));
+        }
+
+        final tasks = snapshot.data!.docs.where((task) {
+          final taskName = task['taskName']?.toLowerCase() ?? '';
+          return taskName.contains(_searchQuery.toLowerCase());
+        }).toList();
+
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          itemCount: tasks.length,
+          itemBuilder: (context, index) {
+            final task = tasks[index];
+            return _buildGroomingCard(
+              task['taskName'] ?? 'No Task Name',
+              task['date'] ?? Timestamp.now(), // Handle date properly
+              task['productsUsed'] ?? 'No Products Used',
+              task['notes'] ?? 'No Notes',
+              task,
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildUpcomingGroomingTasks() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.userId)
+          .collection('pets')
+          .doc(widget.petId)
+          .collection('groomingTasks')
+          .where('date', isGreaterThan: DateTime.now())
+          .orderBy('date', descending: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error fetching upcoming grooming tasks'));
+        }
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return Center(child: Text('No upcoming grooming tasks available'));
+        }
+
+        final upcomingTasks = snapshot.data!.docs;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Upcoming Grooming Tasks', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: upcomingTasks.length,
+              itemBuilder: (context, index) {
+                final task = upcomingTasks[index];
+                return _buildGroomingCard(
+                  task['taskName'] ?? 'No Task Name',
+                  task['date'] ?? Timestamp.now(), // Handle date properly
+                  task['productsUsed'] ?? 'No Products Used',
+                  task['notes'] ?? 'No Notes',
+                  task,
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildGroomingCard(String taskName, dynamic date, String productsUsed, String notes, DocumentSnapshot taskRecord) {
+    String formattedDate;
+
+    if (date is Timestamp) {
+      formattedDate = DateFormat('dd/MM/yyyy HH:mm').format(date.toDate());
+    } else {
+      formattedDate = date.toString(); // Fallback in case of any issue
+    }
+
+    return InkWell(
+      onTap: () {
+        // Navigate to grooming details screen with valid petId and userId
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => GroomingDetailScreen(
+              groomingRecord: taskRecord,
+              petId: widget.petId, // Ensure you're passing the petId
+              userId: widget.userId, // Ensure you're passing the userId
+            ),
+          ),
+        );
+      },
+      onLongPress: () {
+        _showDeleteDialog(taskRecord);
+      },
+      child: Card(
+        color: Colors.white,
+        elevation: 3,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                date,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                service,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black54,
-                ),
-              ),
-              Text(
-                groomer,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.black54,
-                ),
-              ),
+              Text(taskName, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text('Date: $formattedDate', style: TextStyle(fontSize: 16, color: Colors.grey[700])),
+              Text('Products Used: $productsUsed', style: TextStyle(fontSize: 16, color: Colors.grey[700])),
+              Text('Notes: $notes', style: TextStyle(fontSize: 16, color: Colors.grey[700])),
             ],
           ),
-          Icon(Icons.chevron_right, color: Colors.black54),
-        ],
+        ),
       ),
     );
   }
-}
 
-class ReminderCard extends StatelessWidget {
-  final String reminder;
 
-  ReminderCard({required this.reminder});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6,
-            offset: Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              reminder,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
+  Future<void> _showDeleteDialog(DocumentSnapshot taskRecord) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Delete Grooming Task'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('Are you sure you want to delete this grooming task?'),
+              ],
             ),
           ),
-          Icon(Icons.chevron_right, color: Colors.black54),
-        ],
-      ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Delete'),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.red,
+              ),
+              onPressed: () async {
+                await taskRecord.reference.delete();
+                Navigator.of(context).pop();
+                _showMessage('Grooming task deleted successfully.');
+              },
+            ),
+          ],
+        );
+      },
     );
   }
-}
 
-class TipsCard extends StatelessWidget {
-  final String tip;
+  // Skin & Coat Health Tab
+  Widget _buildSkinCoatHealthTab() {
+    return Center(
+      child: Text('Skin and Coat Health Tracker Content'),
+    );
+  }
 
-  TipsCard({required this.tip});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 6,
-            offset: Offset(0, 3),
+  Widget _buildSectionHeader(String title, {required VoidCallback onAddPressed}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              tip,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+        ),
+        TextButton(
+          onPressed: onAddPressed,
+          child: Row(
+            children: [
+              Icon(Icons.add, color: Colors.black),
+              Text('Add', style: TextStyle(color: Colors.black)),
+            ],
           ),
-          Icon(Icons.chevron_right, color: Colors.black54),
-        ],
-      ),
+        ),
+      ],
+    );
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
     );
   }
 }

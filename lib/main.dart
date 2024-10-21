@@ -3,25 +3,29 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 import 'login_screen.dart';
 import 'home_screen.dart';
 
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-FlutterLocalNotificationsPlugin();
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+  // Initialize timezone and set the local timezone
+  tz.initializeTimeZones();
+  tz.setLocalLocation(tz.getLocation('Asia/Kuala_Lumpur')); // Set to your local timezone
+
   await _initializeNotifications(); // Initialize notifications
   runApp(MyApp());
 }
 
 Future<void> _initializeNotifications() async {
-  const AndroidInitializationSettings initializationSettingsAndroid =
-  AndroidInitializationSettings('@mipmap/ic_launcher');
+  const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
 
-  final InitializationSettings initializationSettings =
-  InitializationSettings(android: initializationSettingsAndroid);
+  final InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
 
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
@@ -37,9 +41,7 @@ Future<void> _createNotificationChannel() async {
     importance: Importance.max, // Importance level
   );
 
-  final AndroidFlutterLocalNotificationsPlugin? androidPlugin =
-  flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
-      AndroidFlutterLocalNotificationsPlugin>();
+  final AndroidFlutterLocalNotificationsPlugin? androidPlugin = flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
 
   if (androidPlugin != null) {
     await androidPlugin.createNotificationChannel(channel);
