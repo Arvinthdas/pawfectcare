@@ -1,0 +1,1412 @@
+{
+    "Cat Breeds": [
+        {
+            "name": "Abyssinian",
+            "average_weight_kg": [2.7, 5.4],
+            "average_height_cm": [20, 25],
+            "dietary_recommendations": "High-protein diet to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Kitten-specific food for growth.",
+                "adult": "Balanced diet for energy.",
+                "senior": "Senior diet to support joint health."
+            },
+            "special_considerations": "Genetic testing for PK-Def and PRA is recommended.",
+            "activity_level": "High",
+            "exercise_recommendations": "Daily play sessions.",
+            "age_related_exercise": {
+                "kitten": "Interactive play to develop skills.",
+                "adult": "Regular activities like climbing.",
+                "senior": "Gentle exercise to maintain mobility."
+            },
+            "special_health_considerations": "Monitor for dental and genetic issues."
+        },
+
+        {
+            "name": "Aegean",
+            "average_weight_kg": [3.6, 4.5],
+            "average_height_cm": [20, 25],
+            "dietary_recommendations": "High-protein diet with animal-based protein to support their active nature.",
+            "age_related_recommendations": {
+                "kitten": "Kitten food rich in protein for healthy development.",
+                "adult": "Balanced diet for energy and overall health.",
+                "senior": "Senior-specific diet to manage age-related conditions."
+            },
+            "special_considerations": "Moderate grooming needed due to seasonal shedding.",
+            "activity_level": "High",
+            "exercise_recommendations": "Daily interactive play, especially with water-related toys.",
+            "age_related_exercise": {
+                "kitten": "Play sessions to enhance motor skills.",
+                "adult": "Engaging activities to maintain fitness.",
+                "senior": "Gentle exercises to promote mobility."
+            },
+            "special_health_considerations": "Monitor for conditions like renal failure and hypothyroidism."
+        },
+
+        {
+            "name": "American Bobtail",
+            "average_weight_kg": [3.2, 7.3],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "Balanced diet suitable for medium-sized breeds.",
+            "age_related_recommendations": {
+                "kitten": "Kitten-specific diet for healthy growth.",
+                "adult": "Maintain a diet with adequate protein.",
+                "senior": "Senior-specific food to support joint health."
+            },
+            "special_considerations": "Groom regularly, especially during shedding seasons.",
+            "activity_level": "Moderate",
+            "exercise_recommendations": "Interactive play and activities.",
+            "age_related_exercise": {
+                "kitten": "Play sessions to develop coordination.",
+                "adult": "Regular exercise to maintain fitness.",
+                "senior": "Gentle play to stay active."
+            },
+            "special_health_considerations": "Monitor for obesity and dental health."
+        },
+
+        {
+            "name": "American Curl",
+            "average_weight_kg": [2.3, 4.5],
+            "average_height_cm": [23, 28],
+            "dietary_recommendations": "Balanced diet suitable for active, medium-sized breeds.",
+            "age_related_recommendations": {
+                "kitten": "High-quality kitten food to support growth.",
+                "adult": "Well-balanced diet to maintain health.",
+                "senior": "Diet focused on joint health and weight management."
+            },
+            "special_considerations": "Regular veterinary check-ups to monitor ear health due to unique ear structure.",
+            "activity_level": "Moderate to high",
+            "exercise_recommendations": "Interactive play and climbing activities are encouraged.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular playtime to maintain fitness.",
+                "senior": "Gentle exercises to keep them active without strain."
+            },
+            "special_health_considerations": "Monitor for potential genetic issues, particularly related to their ears."
+        },
+
+        {
+            "name": "American Shorthair",
+            "average_weight_kg": [3.6, 6.8],
+            "average_height_cm": [20, 25],
+            "dietary_recommendations": "High-protein diet to support their active lifestyle and maintain muscle mass.",
+            "age_related_recommendations": {
+                "kitten": "Kitten-formulated food for proper growth.",
+                "adult": "Balanced diet to sustain energy levels and health.",
+                "senior": "Senior diet that focuses on joint health and weight management."
+            },
+            "special_considerations": "Regular veterinary check-ups to monitor for common health issues.",
+            "activity_level": "Moderate",
+            "exercise_recommendations": "Daily playtime is essential to keep them stimulated.",
+            "age_related_exercise": {
+                "kitten": "Active play sessions to build coordination.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Watch for potential health issues like hyperthyroidism and obesity."
+        },
+        
+        {
+            "name": "American Wirehair",
+            "average_weight_kg": [3.2, 6.8],
+            "average_height_cm": [23, 28],
+            "dietary_recommendations": "High-quality, protein-rich diet to support their muscular build.",
+            "age_related_recommendations": {
+                "kitten": "Special kitten food for proper growth.",
+                "adult": "Balanced diet to maintain energy and muscle health.",
+                "senior": "Diet aimed at maintaining joint health and overall well-being."
+            },
+            "special_considerations": "Minimal grooming due to their unique wiry coat; regular vet check-ups are important.",
+            "activity_level": "Moderate to high",
+            "exercise_recommendations": "Daily play and interaction are essential.",
+            "age_related_exercise": {
+                "kitten": "Active play to develop motor skills.",
+                "adult": "Regular exercise to keep them fit.",
+                "senior": "Gentle activities to maintain mobility."
+            },
+            "special_health_considerations": "Monitor for common feline health issues."
+        },
+
+        {
+            "name": "Arabian Mau",
+            "average_weight_kg": [3.6, 7.3],
+            "average_height_cm": [20, 25],
+            "dietary_recommendations": "High-quality diet with adequate protein to support their energetic lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious kitten food to support growth.",
+                "adult": "Balanced diet to maintain health and energy.",
+                "senior": "Diet that focuses on joint health and overall well-being."
+            },
+            "special_considerations": "Regular vet check-ups recommended as they can be prone to obesity if overfed.",
+            "activity_level": "High",
+            "exercise_recommendations": "Daily play and mental stimulation are crucial.",
+            "age_related_exercise": {
+                "kitten": "Active play to develop coordination and skills.",
+                "adult": "Regular play sessions to burn off energy.",
+                "senior": "Gentle activities to maintain mobility."
+            },
+            "special_health_considerations": "Monitor for weight management to avoid obesity-related issues."
+        },
+
+        {
+            "name": "Australian Mist",
+            "average_weight_kg": [3.6, 7.3],
+            "average_height_cm": [20, 25],
+            "dietary_recommendations": "High-quality diet with adequate protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious kitten food to support growth.",
+                "adult": "Balanced diet to maintain health and energy.",
+                "senior": "Diet that focuses on maintaining weight and overall well-being."
+            },
+            "special_considerations": "Regular vet check-ups are recommended to monitor general health.",
+            "activity_level": "Moderate",
+            "exercise_recommendations": "Daily play and mental stimulation are important.",
+            "age_related_exercise": {
+                "kitten": "Active play to develop coordination.",
+                "adult": "Regular play sessions to burn energy.",
+                "senior": "Gentle activities to maintain mobility."
+            },
+            "special_health_considerations": "Generally healthy, but regular veterinary care is essential."
+        },
+
+        {
+            "name": "Balinese",
+            "average_weight_kg": [2.3, 5.4],
+            "average_height_cm": [20, 25],
+            "dietary_recommendations": "High-protein diet to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for kittens to support growth.",
+                "adult": "Balanced diet to maintain energy and overall health.",
+                "senior": "Diet focused on joint health and weight management."
+            },
+            "special_considerations": "Regular grooming is minimal due to their single coat.",
+            "activity_level": "High",
+            "exercise_recommendations": "Daily playtime and mental stimulation are essential.",
+            "age_related_exercise": {
+                "kitten": "Interactive play to develop skills.",
+                "adult": "Regular activities to keep them engaged.",
+                "senior": "Gentle exercise to maintain mobility."
+            },
+            "special_health_considerations": "Monitor for potential genetic health issues."
+        },
+
+        {
+            "name": "Bambino",
+            "average_weight_kg": [2.7, 4.1],
+            "average_height_cm": [23, 30],
+            "dietary_recommendations": "High-protein diet suitable for their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for kittens to support growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focused on overall well-being."
+            },
+            "special_considerations": "Care must be taken to protect their skin due to hairlessness.",
+            "activity_level": "Moderate",
+            "exercise_recommendations": "Regular play sessions are important.",
+            "age_related_exercise": {
+                "kitten": "Interactive play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for potential health issues related to their unique genetics."
+        },
+        
+        {
+            "name": "Bengal",
+            "average_weight_kg": [4.5, 6.8],
+            "average_height_cm": [30, 35],
+            "dietary_recommendations": "High-protein diet to support their active lifestyle and muscle development.",
+            "age_related_recommendations": {
+                "kitten": "Special food formulated for growth and development.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on overall well-being and weight management."
+            },
+            "special_considerations": "Requires social interaction and should not be left alone for long periods.",
+            "activity_level": "High",
+            "exercise_recommendations": "Daily playtime and mental stimulation are essential.",
+            "age_related_exercise": {
+                "kitten": "Interactive play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for potential health issues related to their genetics."
+        },
+        
+        {
+            "name": "Birman",
+            "average_weight_kg": [5.4, 6.8],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet with adequate protein to support their muscular build.",
+            "age_related_recommendations": {
+                "kitten": "Special food formulated for growth and development.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on overall well-being."
+            },
+            "special_considerations": "Low-maintenance grooming due to their silky coat.",
+            "activity_level": "Moderate",
+            "exercise_recommendations": "Regular play and interaction are important.",
+            "age_related_exercise": {
+                "kitten": "Interactive play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for potential genetic health issues."
+        },
+        
+        {
+            "name": "Bombay",
+            "average_weight_kg": [3.6, 6.8],
+            "average_height_cm": [23, 28],
+            "dietary_recommendations": "High-quality diet with adequate protein to support their muscular build.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for kittens to support growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on overall well-being."
+            },
+            "special_considerations": "Requires social interaction and should not be left alone for long periods.",
+            "activity_level": "Moderate",
+            "exercise_recommendations": "Daily playtime and mental stimulation are essential.",
+            "age_related_exercise": {
+                "kitten": "Interactive play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for potential health issues related to their genetics."
+        },
+        
+        {
+            "name": "British Longhair",
+            "average_weight_kg": [3.6, 7.3],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet with adequate protein to support their muscular build.",
+            "age_related_recommendations": {
+                "kitten": "Special food formulated for growth and development.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on overall well-being."
+            },
+            "special_considerations": "Regular grooming to maintain coat health.",
+            "activity_level": "Moderate",
+            "exercise_recommendations": "Regular play and interaction are important.",
+            "age_related_exercise": {
+                "kitten": "Interactive play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for potential genetic health issues."
+        },
+        
+        {
+            "name": "British Shorthair",
+            "average_weight_kg": [3.6, 7.3],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet with adequate protein to support their muscular build.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for kittens to support growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on overall well-being."
+            },
+            "special_considerations": "Minimal grooming due to their dense coat.",
+            "activity_level": "Low to moderate",
+            "exercise_recommendations": "Regular playtime is essential.",
+            "age_related_exercise": {
+                "kitten": "Active play to develop coordination.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for potential health issues related to their genetics."
+        },
+
+        {
+            "name": "Burmese",
+            "average_weight_kg": [3.6, 5.4],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet with adequate protein to support their energetic lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for kittens to support growth.",
+                "adult": "Balanced diet to maintain energy and overall health.",
+                "senior": "Diet focused on overall well-being."
+            },
+            "special_considerations": "Social cats that thrive on interaction; not suitable for long periods alone.",
+            "activity_level": "High",
+            "exercise_recommendations": "Daily playtime and mental stimulation are essential.",
+            "age_related_exercise": {
+                "kitten": "Interactive play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for potential genetic health issues."
+        },
+        
+        {
+            "name": "Burmilla",
+            "average_weight_kg": [3.6, 6.8],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet with adequate protein to support their energetic lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for kittens to support growth.",
+                "adult": "Balanced diet to maintain energy and overall health.",
+                "senior": "Diet focused on overall well-being."
+            },
+            "special_considerations": "Regular grooming is needed to maintain coat health.",
+            "activity_level": "Moderate to high",
+            "exercise_recommendations": "Daily playtime and mental stimulation are essential.",
+            "age_related_exercise": {
+                "kitten": "Interactive play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for potential health issues related to their genetics."
+        },
+        
+        {
+            "name": "California Spangled",
+            "average_weight_kg": [3.6, 6.8],
+            "average_height_cm": [20, 25],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet for energy and health.",
+                "senior": "Diet focusing on overall well-being."
+            },
+            "special_considerations": "Requires regular interaction and mental stimulation.",
+            "activity_level": "High",
+            "exercise_recommendations": "Daily playtime with interactive toys.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Regular vet check-ups advised."
+        },
+
+        {
+            "name": "Chantilly-Tiffany",
+            "average_weight_kg": [3.6, 5.4],
+            "average_height_cm": [40, 50],
+            "dietary_recommendations": "High-quality diet with adequate protein.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food for growth.",
+                "adult": "Balanced diet for health.",
+                "senior": "Diet focusing on managing weight."
+            },
+            "special_considerations": "Regular grooming to prevent matting.",
+            "activity_level": "Moderate",
+            "exercise_recommendations": "Daily playtime and mental stimulation.",
+            "age_related_exercise": {
+                "kitten": "Interactive play.",
+                "adult": "Regular activities.",
+                "senior": "Gentle exercises."
+            },
+            "special_health_considerations": "Monitor for obesity."
+        },
+        
+        {
+            "name": "Chartreux",
+            "average_weight_kg": [4.5, 7.3],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food for growth.",
+                "adult": "Balanced diet for energy.",
+                "senior": "Diet focusing on overall well-being."
+            },
+            "special_considerations": "Regular grooming necessary.",
+            "activity_level": "Moderate",
+            "exercise_recommendations": "Interactive play and mental stimulation.",
+            "age_related_exercise": {
+                "kitten": "Interactive play.",
+                "adult": "Regular activities.",
+                "senior": "Gentle exercises."
+            },
+            "special_health_considerations": "Monitor for obesity."
+        },
+
+        {
+            "name": "Chausie",
+            "average_weight_kg": [4.5, 6.8],
+            "average_height_cm": [30, 40],
+            "dietary_recommendations": "High-quality, protein-rich diet.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food for growth.",
+                "adult": "Balanced diet for health.",
+                "senior": "Diet focusing on managing weight."
+            },
+            "special_considerations": "Requires stimulation and interaction.",
+            "activity_level": "High",
+            "exercise_recommendations": "Daily interactive play.",
+            "age_related_exercise": {
+                "kitten": "Interactive play.",
+                "adult": "Regular activities.",
+                "senior": "Gentle exercises."
+            },
+            "special_health_considerations": "Monitor for obesity."
+        },
+
+        {
+            "name": "Cheetoh",
+            "average_weight_kg": [5.4, 11.3],
+            "average_height_cm": [20, 38],
+            "dietary_recommendations": "High-quality, protein-rich diet.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food for growth.",
+                "adult": "Balanced diet for energy.",
+                "senior": "Diet focusing on managing weight."
+            },
+            "special_considerations": "Needs interaction and playtime.",
+            "activity_level": "High",
+            "exercise_recommendations": "Daily interactive play.",
+            "age_related_exercise": {
+                "kitten": "Active play.",
+                "adult": "Regular activities.",
+                "senior": "Gentle exercises."
+            },
+            "special_health_considerations": "Monitor for potential health issues."
+        },
+
+        {
+            "name": "Colorpoint Shorthair",
+            "average_weight_kg": [2.3, 4.5],
+            "average_height_cm": [25, 35],
+            "dietary_recommendations": "High-quality, protein-rich diet.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food for growth.",
+                "adult": "Balanced diet for health.",
+                "senior": "Diet focusing on maintaining a healthy weight."
+            },
+            "special_considerations": "Highly vocal; may require companionship.",
+            "activity_level": "High",
+            "exercise_recommendations": "Interactive play.",
+            "age_related_exercise": {
+                "kitten": "Active play.",
+                "adult": "Regular activities.",
+                "senior": "Gentle exercises."
+            },
+            "special_health_considerations": "Prone to certain genetic conditions."
+        },
+
+        {
+            "name": "Cornish Rex",
+            "average_weight_kg": [2.3, 4.5],
+            "average_height_cm": [20, 30],
+            "dietary_recommendations": "High-quality, protein-rich diet.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food for growth.",
+                "adult": "Balanced diet for energy.",
+                "senior": "Diet focusing on overall well-being."
+            },
+            "special_considerations": "Sensitive to temperatures; requires regular grooming.",
+            "activity_level": "High",
+            "exercise_recommendations": "Interactive play and mental stimulation.",
+            "age_related_exercise": {
+                "kitten": "Active play.",
+                "adult": "Regular activities.",
+                "senior": "Gentle exercises."
+            },
+            "special_health_considerations": "Monitor for genetic health issues."
+        },
+
+        {
+            "name": "Cymric",
+            "average_weight_kg": [4.5, 7.3],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet to support their muscular build and energy levels.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for kittens to support growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on overall well-being."
+            },
+            "special_considerations": "May not do well if left alone for long periods; requires companionship.",
+            "activity_level": "Moderate",
+            "exercise_recommendations": "Engaging play sessions to stimulate activity.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for potential genetic health issues."
+        },
+
+        {
+            "name": "Aphrodite Cyprus",
+            "average_weight_kg": [4.5, 10.9],
+            "average_height_cm": [30, 35],
+            "dietary_recommendations": "High-quality, protein-rich diet to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for kittens to support growth.",
+                "adult": "Balanced diet for energy and overall health.",
+                "senior": "Diet focusing on weight management and overall well-being."
+            },
+            "special_considerations": "Very social and affectionate; does not do well alone for long periods.",
+            "activity_level": "High",
+            "exercise_recommendations": "Requires plenty of playtime and mental stimulation.",
+            "age_related_exercise": {
+                "kitten": "Interactive play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Generally healthy, but monitor for ear infections and hairballs."
+        },
+
+        {
+            "name": "Devon Rex",
+            "average_weight_kg": [2.7, 4.5],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for kittens to support growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on overall well-being."
+            },
+            "special_considerations": "Very social and affectionate; enjoys being part of family activities.",
+            "activity_level": "High",
+            "exercise_recommendations": "Daily playtime and mental stimulation are essential.",
+            "age_related_exercise": {
+                "kitten": "Interactive play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for common genetic issues and ensure regular vet check-ups."
+        },
+        
+        {
+            "name": "Donskoy",
+            "average_weight_kg": [3.6, 6.8],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for kittens to support growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on overall well-being."
+            },
+            "special_considerations": "Very social and affectionate; thrives on companionship.",
+            "activity_level": "High",
+            "exercise_recommendations": "Requires plenty of playtime and mental stimulation.",
+            "age_related_exercise": {
+                "kitten": "Interactive play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for potential skin issues due to their hairless nature."
+        },
+
+        {
+            "name": "Chinese Dragon Li",
+            "average_weight_kg": [4.5, 6.8],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-protein diet to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for kittens to support growth.",
+                "adult": "Balanced diet to maintain energy and overall health.",
+                "senior": "Diet focusing on managing weight and overall well-being."
+            },
+            "special_considerations": "Known for their friendly and sociable nature; thrives in active households.",
+            "activity_level": "High",
+            "exercise_recommendations": "Requires plenty of interactive playtime and mental stimulation.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Generally healthy but may be prone to certain genetic conditions."
+        },
+        
+        {
+            "name": "Egyptian Mau",
+            "average_weight_kg": [3.6, 5.4],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on overall well-being."
+            },
+            "special_considerations": "Known for their loyalty; early socialization is crucial.",
+            "activity_level": "Moderate to high",
+            "exercise_recommendations": "Interactive play and climbing opportunities are essential.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for genetic health issues."
+        },
+
+        {
+            "name": "European Burmese",
+            "average_weight_kg": [3.6, 5.4],
+            "average_height_cm": [30, 35],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on weight management and overall well-being."
+            },
+            "special_considerations": "Social and affectionate; thrives in active households.",
+            "activity_level": "High",
+            "exercise_recommendations": "Daily interactive playtime and mental stimulation.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for common health issues such as obesity."
+        },
+
+        {
+            "name": "Exotic Shorthair",
+            "average_weight_kg": [3.6, 6.8],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet to maintain energy and support their overall health.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain health.",
+                "senior": "Diet focusing on weight management and overall well-being."
+            },
+            "special_considerations": "Gentle and affectionate; requires regular grooming despite short hair.",
+            "activity_level": "Moderate",
+            "exercise_recommendations": "Encourage playtime and mental stimulation.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for potential health issues associated with flat-faced breeds."
+        },
+        
+        {
+            "name": "Havana",
+            "average_weight_kg": [3.6, 5.4],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on weight management and overall well-being."
+            },
+            "special_considerations": "Known for their affectionate nature; enjoys companionship.",
+            "activity_level": "Moderate",
+            "exercise_recommendations": "Daily playtime and mental stimulation are essential.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for potential health issues associated with their genetics."
+        },
+
+        {
+            "name": "Himalayan",
+            "average_weight_kg": [3.6, 6.8],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on weight management and overall well-being."
+            },
+            "special_considerations": "Gentle and affectionate; prefers a calm environment.",
+            "activity_level": "Moderate",
+            "exercise_recommendations": "Encourage playtime with interactive toys.",
+            "age_related_exercise": {
+                "kitten": "Interactive play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for health issues associated with flat-faced breeds."
+        },
+        
+        {
+            "name": "Japanese Bobtail",
+            "average_weight_kg": [3.6, 5.4],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on overall well-being."
+            },
+            "special_considerations": "Very active and intelligent; enjoys companionship.",
+            "activity_level": "High",
+            "exercise_recommendations": "Interactive play and mental stimulation are essential.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for health issues associated with their genetics."
+        },
+        
+        {
+            "name": "Japanese Bobtail",
+            "average_weight_kg": [3.6, 5.4],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on overall well-being."
+            },
+            "special_considerations": "Very active and intelligent; enjoys companionship.",
+            "activity_level": "High",
+            "exercise_recommendations": "Interactive play and mental stimulation are essential.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for health issues associated with their genetics."
+        },
+
+        {
+            "name": "Khao Manee",
+            "average_weight_kg": [3.6, 5.4],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on weight management and overall well-being."
+            },
+            "special_considerations": "Known for their playful and sociable nature; requires companionship.",
+            "activity_level": "High",
+            "exercise_recommendations": "Interactive play and mental stimulation are essential.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for genetic health issues."
+        },
+        
+        {
+            "name": "Korat",
+            "average_weight_kg": [2.7, 6.8],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their energetic lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on overall well-being."
+            },
+            "special_considerations": "Social and affectionate; enjoys companionship.",
+            "activity_level": "Moderate to high",
+            "exercise_recommendations": "Interactive play and climbing opportunities are essential.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for genetic health issues."
+        },
+        
+        {
+            "name": "Kurilian",
+            "average_weight_kg": [4.5, 6.8],
+            "average_height_cm": [30, 35],
+            "dietary_recommendations": "High-quality, protein-rich diet to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on overall well-being."
+            },
+            "special_considerations": "Very social and intelligent; enjoys interactive play.",
+            "activity_level": "Moderate to high",
+            "exercise_recommendations": "Requires plenty of playtime and mental stimulation.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for potential health issues associated with their genetics."
+        },
+        
+        {
+            "name": "LaPerm",
+            "average_weight_kg": [2.7, 6.8],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on weight management and overall well-being."
+            },
+            "special_considerations": "Known for their curly coats; they require regular grooming to prevent matting.",
+            "activity_level": "Moderate to high",
+            "exercise_recommendations": "Daily playtime and mental stimulation are essential.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Generally healthy but should be monitored for any genetic health issues."
+        },
+
+        {
+            "name": "Maine Coon",
+            "average_weight_kg": [5.4, 8.2],
+            "average_height_cm": [25, 40],
+            "dietary_recommendations": "High-quality diet rich in protein to support their large and muscular build.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on weight management and overall well-being."
+            },
+            "special_considerations": "Gentle giants known for their friendly disposition; good with families and other pets.",
+            "activity_level": "Moderate to high",
+            "exercise_recommendations": "Daily interactive playtime and mental stimulation are essential.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for genetic conditions, particularly hypertrophic cardiomyopathy (HCM)."
+        },
+
+        {
+            "name": "Malayan",
+            "average_weight_kg": [3.5, 7],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on weight management and overall well-being."
+            },
+            "special_considerations": "Friendly and affectionate; enjoys attention and companionship.",
+            "activity_level": "Moderate to high",
+            "exercise_recommendations": "Daily interactive play and mental stimulation are essential.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Generally healthy, but monitor for conditions like progressive retinal atrophy and hypokalemia."
+        },
+
+        {
+            "name": "Manx",
+            "average_weight_kg": [3.6, 6.8],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on overall well-being."
+            },
+            "special_considerations": "Known for their taillessness; some have partial tails.",
+            "activity_level": "Moderate",
+            "exercise_recommendations": "Interactive play and climbing opportunities are essential.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for spinal issues associated with their unique genetic trait."
+        },
+
+        {
+            "name": "Munchkin",
+            "average_weight_kg": [2.7, 4.5],
+            "average_height_cm": [20, 25],
+            "dietary_recommendations": "High-quality diet to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on overall well-being."
+            },
+            "special_considerations": "Known for their short legs; should not be overbred.",
+            "activity_level": "Moderate to high",
+            "exercise_recommendations": "Encourage playtime and mental stimulation.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Generally healthy, but monitor for potential back issues due to their stature."
+        },
+
+        {
+            "name": "Nebelung",
+            "average_weight_kg": [2.7, 5.4],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on weight management and overall well-being."
+            },
+            "special_considerations": "Known for their affectionate and gentle nature; they may be reserved around strangers.",
+            "activity_level": "Moderate",
+            "exercise_recommendations": "Regular interactive play and mental stimulation.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for potential genetic health issues."
+        },
+
+        {
+            "name": "Norwegian Forest",
+            "average_weight_kg": [4.5, 8.2],
+            "average_height_cm": [30, 35],
+            "dietary_recommendations": "High-quality diet rich in protein to support their robust build.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on weight management and overall well-being."
+            },
+            "special_considerations": "Gentle and friendly; enjoys being part of family activities.",
+            "activity_level": "Moderate to high",
+            "exercise_recommendations": "Encourage playtime with climbing and interactive toys.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for genetic conditions, especially related to their size and strength."
+        },
+
+        {
+            "name": "Ocicat",
+            "average_weight_kg": [4.5, 9.1],
+            "average_height_cm": [23, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on overall well-being."
+            },
+            "special_considerations": "Outgoing and friendly; enjoys companionship and play.",
+            "activity_level": "High",
+            "exercise_recommendations": "Requires plenty of interactive playtime.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for potential health issues related to their genetics."
+        },
+
+        {
+            "name": "Oriental",
+            "average_weight_kg": [3.6, 6.8],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on weight management and overall well-being."
+            },
+            "special_considerations": "Highly social and affectionate; does not do well alone.",
+            "activity_level": "High",
+            "exercise_recommendations": "Requires plenty of interactive playtime.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for potential health issues related to their genetics."
+        },
+        
+        {
+            "name": "Persian",
+            "average_weight_kg": [3.6, 7.3],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their luxurious coat and overall health.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on overall well-being."
+            },
+            "special_considerations": "Gentle and calm; requires regular grooming due to their long coat.",
+            "activity_level": "Low to moderate",
+            "exercise_recommendations": "Interactive play and gentle exercise are beneficial.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for health issues related to brachycephalic traits and potential genetic conditions."
+        },
+        
+        {
+            "name": "Pixie-bob",
+            "average_weight_kg": [4.5, 6.8],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on overall well-being."
+            },
+            "special_considerations": "Known for their polydactyl traits; requires social interaction.",
+            "activity_level": "Moderate to high",
+            "exercise_recommendations": "Requires plenty of playtime and mental stimulation.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Generally healthy but monitor for potential genetic issues."
+        },
+
+        {
+            "name": "Ragamuffin",
+            "average_weight_kg": [4.5, 9.1],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on weight management and overall well-being."
+            },
+            "special_considerations": "Affectionate and sociable; enjoys being around people and other pets.",
+            "activity_level": "Moderate",
+            "exercise_recommendations": "Daily playtime and mental stimulation are essential.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for potential genetic health issues."
+        },      
+        
+        {
+            "name": "Ragdoll",
+            "average_weight_kg": [4.5, 9.1],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their large build.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on weight management and overall well-being."
+            },
+            "special_considerations": "Gentle and affectionate; enjoys being held and cuddled.",
+            "activity_level": "Moderate",
+            "exercise_recommendations": "Interactive play and climbing opportunities are essential.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for hypertrophic cardiomyopathy (HCM)."
+        },
+        
+        {
+            "name": "Russian Blue",
+            "average_weight_kg": [3.6, 5.4],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on weight management and overall well-being."
+            },
+            "special_considerations": "Known for their gentle demeanor; may be reserved with strangers.",
+            "activity_level": "Moderate",
+            "exercise_recommendations": "Daily playtime and mental stimulation are essential.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Generally healthy but monitor for potential dental issues."
+        },
+        
+        {
+            "name": "Savannah",
+            "average_weight_kg": [4.5, 11.3],
+            "average_height_cm": [30, 40],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on overall well-being."
+            },
+            "special_considerations": "Very social and intelligent; enjoys interactive play.",
+            "activity_level": "High",
+            "exercise_recommendations": "Requires plenty of playtime and mental stimulation.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for potential health issues associated with their genetics."
+        },
+        
+        {
+            "name": "Scottish Fold",
+            "average_weight_kg": [3.2, 6.8],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on weight management and overall well-being."
+            },
+            "special_considerations": "Known for their unique folded ears; requires regular vet check-ups.",
+            "activity_level": "Moderate",
+            "exercise_recommendations": "Encourage interactive play.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for ear and joint health issues."
+        },
+        
+        {
+            "name": "Selkirk Rex",
+            "average_weight_kg": [3.6, 6.8],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on weight management and overall well-being."
+            },
+            "special_considerations": "Requires regular grooming to maintain their curly coat.",
+            "activity_level": "Moderate to high",
+            "exercise_recommendations": "Interactive play and mental stimulation are essential.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for potential genetic health issues."
+        },
+        
+        {
+            "name": "Siamese",
+            "average_weight_kg": [3.6, 5.4],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their energetic lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on overall well-being."
+            },
+            "special_considerations": "Very vocal and social; enjoys companionship.",
+            "activity_level": "High",
+            "exercise_recommendations": "Requires plenty of playtime and mental stimulation.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for genetic health issues."
+        },
+        
+        {
+            "name": "Siberian",
+            "average_weight_kg": [3.6, 8.2],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on weight management and overall well-being."
+            },
+            "special_considerations": "Requires regular grooming due to their dense coat.",
+            "activity_level": "Moderate to high",
+            "exercise_recommendations": "Encourage interactive play.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for potential genetic health issues."
+        },
+        
+        {
+            "name": "Singapura",
+            "average_weight_kg": [2.7, 4.5],
+            "average_height_cm": [20, 25],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on overall well-being."
+            },
+            "special_considerations": "Small size and playful nature; requires mental stimulation.",
+            "activity_level": "High",
+            "exercise_recommendations": "Daily interactive play and mental stimulation are essential.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Generally healthy, but monitor for dental issues."
+        },
+
+        {
+            "name": "Snowshoe",
+            "average_weight_kg": [3.6, 6.8],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on weight management and overall well-being."
+            },
+            "special_considerations": "Requires regular interaction and companionship.",
+            "activity_level": "Moderate to high",
+            "exercise_recommendations": "Interactive play and mental stimulation are essential.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for potential health issues."
+        },
+
+        {
+            "name": "Somali",
+            "average_weight_kg": [3.6, 5.4],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their energetic lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on overall well-being."
+            },
+            "special_considerations": "Very active and playful; needs plenty of stimulation.",
+            "activity_level": "High",
+            "exercise_recommendations": "Requires interactive playtime and climbing opportunities.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for dental issues."
+        },
+
+        {
+            "name": "Sphynx",
+            "average_weight_kg": [3.6, 7.7],
+            "average_height_cm": [20, 25],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on overall well-being."
+            },
+            "special_considerations": "Friendly and affectionate; loves attention.",
+            "activity_level": "High",
+            "exercise_recommendations": "Daily interactive playtime and mental stimulation are essential.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "At risk for Hypertrophic Cardiomyopathy; regular vet check-ups recommended."
+        },
+        
+        {
+            "name": "Tonkinese",
+            "average_weight_kg": [3.6, 5.4],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on weight management and overall well-being."
+            },
+            "special_considerations": "Social and affectionate; enjoys attention and companionship.",
+            "activity_level": "Moderate to high",
+            "exercise_recommendations": "Interactive play and mental stimulation are essential.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Generally healthy, but monitor for potential genetic issues."
+        },
+        
+        {
+            "name": "Toyger",
+            "average_weight_kg": [3.6, 5.4],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their energetic lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on overall well-being."
+            },
+            "special_considerations": "Known for their striking tiger-like appearance; friendly and intelligent.",
+            "activity_level": "Moderate to high",
+            "exercise_recommendations": "Interactive play and mental stimulation are essential.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Generally healthy, but monitor for heart murmurs and other conditions."
+        },
+        
+        {
+            "name": "Turkish Angora",
+            "average_weight_kg": [3.6, 6.8],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on overall well-being."
+            },
+            "special_considerations": "Very intelligent and playful; enjoys being involved with family activities.",
+            "activity_level": "High",
+            "exercise_recommendations": "Interactive play and mental stimulation are essential.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Generally healthy, but monitor for genetic health issues."
+        },
+        
+        {
+            "name": "Turkish Van",
+            "average_weight_kg": [3.5, 7.3],
+            "average_height_cm": [25, 30],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on weight management and overall well-being."
+            },
+            "special_considerations": "Known as 'the swimming cat'; enjoys water play.",
+            "activity_level": "High",
+            "exercise_recommendations": "Daily playtime and mental stimulation are essential.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Monitor for any common health issues, particularly related to their genetics."
+        },
+        
+        {
+            "name": "York Chocolate",
+            "average_weight_kg": [4.5, 7.3],
+            "average_height_cm": [20, 25],
+            "dietary_recommendations": "High-quality diet rich in protein to support their active lifestyle.",
+            "age_related_recommendations": {
+                "kitten": "Nutritious food designed for growth.",
+                "adult": "Balanced diet to maintain energy and health.",
+                "senior": "Diet focusing on weight management and overall well-being."
+            },
+            "special_considerations": "Affectionate and social; enjoys companionship.",
+            "activity_level": "Moderate to high",
+            "exercise_recommendations": "Interactive play and mental stimulation are essential.",
+            "age_related_exercise": {
+                "kitten": "Encourage active play to develop skills.",
+                "adult": "Regular activities to maintain fitness.",
+                "senior": "Gentle exercises to support mobility."
+            },
+            "special_health_considerations": "Generally healthy with no known breed-specific issues."
+        }
+        
+
+    ]
+}

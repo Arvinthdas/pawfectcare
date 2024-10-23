@@ -1,0 +1,197 @@
+Dog Breeds:
+
+
+Affenpinscher 1
+Afghan Hound 1
+African Hunting Dog 1
+Airedale Terrier 1
+Akbash Dog 1
+Akita 1
+Alapaha Blue Blood Bulldog 1
+Alaskan Husky 1
+Alaskan Malamute 1
+American Bulldog 1
+American Bully 1
+American Eskimo Dog 1
+American Eskimo Dog (Miniature) 1
+American Foxhound 1
+American Pit Bull Terrier 1
+American Staffordshire Terrier 1
+American Water Spaniel 1
+Anatolian Shepherd Dog 1
+Appenzeller Sennenhund 1
+Australian Cattle Dog 1
+Australian Kelpie 1
+Australian Shepherd 1
+Australian Terrier 1
+Azawakh 1
+
+Barbet 1
+Basenji 1
+Basset Bleu de Gascogne 1
+Basset Hound 1
+Beagle 1
+Bearded Collie 1
+Beauceron 1
+Bedlington Terrier 1
+Belgian Malinois 1
+Belgian Tervuren 1
+Bernese Mountain Dog 1
+Bichon Frise 1
+Black and Tan Coonhound 1
+Bloodhound 1
+Bluetick Coonhound 1
+Boerboel 1
+Border Collie 1
+Border Terrier 1
+Boston Terrier 1
+Bouvier des Flandres 1
+Boxer 1
+Boykin Spaniel 1
+Bracco Italiano 1
+Briard 1
+Brittany 1
+Bull Terrier 1
+Bull Terrier (Miniature) 1
+Bullmastiff 1
+
+Cairn Terrier 1
+Cane Corso 1
+Cardigan Welsh Corgi 1
+Catahoula Leopard Dog 1
+Caucasian Shepherd (Ovcharka) 1
+Cavalier King Charles Spaniel 1
+Chesapeake Bay Retriever 1
+Chinese Crested 1
+Chinese Shar-Pei 1
+Chinook 1
+Chow Chow 1
+Clumber Spaniel 1
+Cocker Spaniel 1
+Cocker Spaniel (American) 1
+Coton de Tulear 1
+
+Dalmatian 1
+Doberman Pinscher 1
+Dogo Argentino 
+Dutch Shepherd 1
+
+English Setter 1
+English Shepherd 1
+English Springer Spaniel 1
+English Toy Spaniel 1
+English Toy Terrier 1
+Eurasier 1
+
+Field Spaniel 1
+Finnish Lapphund 1
+Finnish Spitz 1
+French Bulldog 1
+
+German Pinscher 1
+German Shepherd Dog 1
+German Shorthaired Pointer 1
+Giant Schnauzer 1
+Glen of Imaal Terrier 1
+Golden Retriever 1
+Gordon Setter 1
+Great Dane 1
+Great Pyrenees 1
+Greyhound 1
+Griffon Bruxellois1
+
+Harrier 1
+Havanese 1
+
+Irish Setter 1
+Irish Terrier 1
+Irish Wolfhound 1
+Italian Greyhound 1
+
+Japanese Chin 1
+Japanese Spitz 1
+
+Keeshond 1
+Komondor 1
+Kooikerhondje1
+Kuvasz 1
+
+Labrador Retriever 1
+Lagotto Romagnolo 1
+Lancashire Heeler 1
+Leonberger 1
+Lhasa Apso 1
+
+Maltese 1
+Miniature American Shepherd 1
+Miniature Pinscher 1
+Miniature Schnauzer 1
+
+Newfoundland 1
+Norfolk Terrier 1
+Norwich Terrier 1
+Nova Scotia Duck Tolling Retriever 1
+
+Old English Sheepdog 1
+Olde English Bulldogge 1
+
+Papillon 1
+Pekingese 1
+Pembroke Welsh Corgi 1
+Perro de Presa Canario 1
+Pharaoh Hound 1
+Plott 1
+Pomeranian 1
+Poodle (Miniature) 1
+Poodle (Toy) 1
+Pug 1
+Puli 1
+Pumi 1
+
+Rat Terrier 1
+Redbone Coonhound 1
+Rhodesian Ridgeback 1
+Rottweiler 1
+Russian Toy 1
+
+Saint Bernard 1
+Saluki 1
+Samoyed 1
+Schipperke 1
+Scottish Deerhound 1
+Scottish Terrier 1
+Shetland Sheepdog 1
+Shiba Inu 1
+Shih Tzu 1
+Shiloh Shepherd 1
+Siberian Husky 1
+Silky Terrier 1
+Smooth Fox Terrier 1
+Soft Coated Wheaten Terrier 1
+Spanish Water Dog 1
+Spinone Italiano 1
+Staffordshire Bull Terrier 1
+Standard Schnauzer 1
+Swedish Vallhund 1
+
+Thai Ridgeback 1
+Tibetan Mastiff 1
+Tibetan Spaniel 1
+Tibetan Terrier 1
+Toy Fox Terrier 1
+Treeing Walker Coonhound 1
+
+Vizsla 1
+
+Weimaraner 1
+Welsh Springer Spaniel 1
+West Highland White Terrier 1
+Whippet 1
+White Shepherd 1
+Wire Fox Terrier 1
+Wirehaired Pointing Griffon 1
+Wirehaired Vizsla 1
+
+Xoloitzcuintli 1
+
+Yorkshire Terrier 1

@@ -1,0 +1,86 @@
+Cat Breeds:
+
+
+Abyssinian 1
+Aegean 1
+American Bobtail 1
+American Curl 1
+American Shorthair 1
+American Wirehair 1
+Arabian Mau 1
+Australian Mist 1
+
+Balinese 1
+Bambino 1
+Bengal 1
+Birman 1
+Bombay 1
+British Longhair 1
+British Shorthair 1
+Burmese 1
+Burmilla 1
+
+California Spangled 1
+Chantilly-Tiffany 1
+Chartreux 1
+Chausie 1
+Cheetoh 1
+Colorpoint Shorthair 1
+Cornish Rex1
+Cymric 1
+Cyprus 1
+
+Devon Rex 1
+Donskoy 1
+Dragon Li 1
+
+Egyptian Mau 1
+European Burmese 1
+Exotic Shorthair 1
+
+Havana Brown 1
+Himalayan 1
+
+Japanese Bobtail 1
+Javanese 1
+
+Khao Manee 1
+Korat 1
+Kurilian 1
+
+LaPerm 1
+
+Maine Coon 1
+Malayan 1
+Manx 1
+Munchkin 1
+
+Nebelung 1
+Norwegian Forest Cat 1
+
+Ocicat 1
+Oriental 1
+
+Persian 1
+Pixie-bob 1
+
+Ragamuffin 1
+Ragdoll 1
+Russian Blue 1
+
+Savannah 1
+Scottish Fold 1
+Selkirk Rex 1
+Siamese 1
+Siberian 1
+Singapura 1
+Snowshoe 1
+Somali 1
+Sphynx 1
+
+Tonkinese 1
+Toyger 1
+Turkish Angora 1
+Turkish Van 1
+
+York Chocolate 1

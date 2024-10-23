@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'addgrooming_screen.dart'; // Assume this is the screen to add grooming tasks
 import 'groomingdetails_screen.dart'; // Screen to show details of grooming tasks
 
 class GroomingPage extends StatefulWidget {
   final String petId;
   final String userId;
+  final String petBreed; // Added breed information
 
-  GroomingPage({required this.petId, required this.userId});
+  GroomingPage({required this.petId, required this.userId, required this.petBreed});
 
   @override
   _GroomingPageState createState() => _GroomingPageState();
@@ -17,6 +21,10 @@ class GroomingPage extends StatefulWidget {
 class _GroomingPageState extends State<GroomingPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String _searchQuery = '';
+  String _skinIssue = '';
+  List<dynamic> _videos = [];
+  final String youtubeApiKey = 'AIzaSyBlSI4WvUAcAdrJ07JMbqhNBRd7LzPai1U'; // Replace with your actual YouTube API key
+  YoutubePlayerController? _youtubePlayerController;
 
   @override
   void initState() {
@@ -27,7 +35,26 @@ class _GroomingPageState extends State<GroomingPage> with SingleTickerProviderSt
   @override
   void dispose() {
     _tabController.dispose();
+    _youtubePlayerController?.dispose();
     super.dispose();
+  }
+
+  // Fetch YouTube videos based on breed and skin issue
+  Future<void> _fetchVideos(String breed, String issue) async {
+    final String query = '$breed $issue';
+    final String url =
+        'https://www.googleapis.com/youtube/v3/search?key=$youtubeApiKey&part=snippet&type=video&q=$query';
+
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      setState(() {
+        _videos = data['items'] ?? [];
+      });
+    } else {
+      print('Failed to fetch videos: ${response.statusCode}');
+    }
   }
 
   @override
@@ -128,7 +155,7 @@ class _GroomingPageState extends State<GroomingPage> with SingleTickerProviderSt
             final task = tasks[index];
             return _buildGroomingCard(
               task['taskName'] ?? 'No Task Name',
-              task['date'] ?? Timestamp.now(), // Handle date properly
+              task['date'] ?? Timestamp.now(),
               task['productsUsed'] ?? 'No Products Used',
               task['notes'] ?? 'No Notes',
               task,
@@ -175,7 +202,7 @@ class _GroomingPageState extends State<GroomingPage> with SingleTickerProviderSt
                 final task = upcomingTasks[index];
                 return _buildGroomingCard(
                   task['taskName'] ?? 'No Task Name',
-                  task['date'] ?? Timestamp.now(), // Handle date properly
+                  task['date'] ?? Timestamp.now(),
                   task['productsUsed'] ?? 'No Products Used',
                   task['notes'] ?? 'No Notes',
                   task,
@@ -194,25 +221,21 @@ class _GroomingPageState extends State<GroomingPage> with SingleTickerProviderSt
     if (date is Timestamp) {
       formattedDate = DateFormat('dd/MM/yyyy HH:mm').format(date.toDate());
     } else {
-      formattedDate = date.toString(); // Fallback in case of any issue
+      formattedDate = date.toString();
     }
 
     return InkWell(
       onTap: () {
-        // Navigate to grooming details screen with valid petId and userId
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => GroomingDetailScreen(
               groomingRecord: taskRecord,
-              petId: widget.petId, // Ensure you're passing the petId
-              userId: widget.userId, // Ensure you're passing the userId
+              petId: widget.petId,
+              userId: widget.userId,
             ),
           ),
         );
-      },
-      onLongPress: () {
-        _showDeleteDialog(taskRecord);
       },
       child: Card(
         color: Colors.white,
@@ -233,53 +256,6 @@ class _GroomingPageState extends State<GroomingPage> with SingleTickerProviderSt
           ),
         ),
       ),
-    );
-  }
-
-
-  Future<void> _showDeleteDialog(DocumentSnapshot taskRecord) async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Delete Grooming Task'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('Are you sure you want to delete this grooming task?'),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Cancel'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Delete'),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Colors.red,
-              ),
-              onPressed: () async {
-                await taskRecord.reference.delete();
-                Navigator.of(context).pop();
-                _showMessage('Grooming task deleted successfully.');
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Skin & Coat Health Tab
-  Widget _buildSkinCoatHealthTab() {
-    return Center(
-      child: Text('Skin and Coat Health Tracker Content'),
     );
   }
 
@@ -308,9 +284,145 @@ class _GroomingPageState extends State<GroomingPage> with SingleTickerProviderSt
     );
   }
 
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
+  // Skin & Coat Health Tab
+  Widget _buildSkinCoatHealthTab() {
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSkinIssueForm(),
+          SizedBox(height: 20),
+          _buildVideosSection(),
+          SizedBox(height: 20),
+          _buildTipsSection(),
+        ],
+      ),
+    );
+  }
+
+  // 1st Compartment: Form to Add Pet's Skin Issue
+  Widget _buildSkinIssueForm() {
+    return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Add Skin Issue',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            TextField(
+              onChanged: (value) {
+                _skinIssue = value;
+              },
+              decoration: InputDecoration(
+                labelText: 'Enter skin issue',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () {
+                if (_skinIssue.isNotEmpty) {
+                  _fetchVideos(widget.petBreed, _skinIssue);
+                }
+              },
+              child: Text('Search Videos'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 2nd Compartment: Display YouTube Videos with Embedded Player
+  Widget _buildVideosSection() {
+    return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'YouTube Videos',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            _videos.isEmpty
+                ? Text('No videos found. Please add a skin issue and search.')
+                : ListView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: _videos.length,
+              itemBuilder: (context, index) {
+                final video = _videos[index];
+                final videoId = video['id']['videoId'];
+                final title = video['snippet']['title'];
+                return _buildYoutubePlayer(videoId, title);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildYoutubePlayer(String videoId, String title) {
+    _youtubePlayerController = YoutubePlayerController(
+      initialVideoId: videoId,
+      flags: YoutubePlayerFlags(
+        autoPlay: false,
+        mute: false,
+      ),
+    );
+
+    return Column(
+      children: [
+        Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        SizedBox(height: 8),
+        YoutubePlayer(
+          controller: _youtubePlayerController!,
+          showVideoProgressIndicator: true,
+          progressIndicatorColor: Colors.blueAccent,
+        ),
+        SizedBox(height: 16),
+      ],
+    );
+  }
+
+  // 3rd Compartment: Hardcoded Tips for Pet Skin Care
+  Widget _buildTipsSection() {
+    return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Pet Skin Care Tips',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            Text(
+              '1. Regularly check your pet’s skin for signs of irritation, redness, or dryness.\n'
+                  '2. Use hypoallergenic shampoos that are gentle on the skin.\n'
+                  '3. Keep your pet’s skin moisturized, especially during dry seasons.\n'
+                  '4. Ensure a balanced diet with omega-3 fatty acids for healthy skin.\n'
+                  '5. Consult a vet if any unusual symptoms persist.',
+              style: TextStyle(fontSize: 16),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
