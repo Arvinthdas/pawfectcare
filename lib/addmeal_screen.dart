@@ -150,6 +150,12 @@ class _AddMealScreenState extends State<AddMealScreen> {
     });
   }
 
+  void _removeImage() {
+    setState(() {
+      _selectedImage = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -189,9 +195,28 @@ class _AddMealScreenState extends State<AddMealScreen> {
               color: Colors.grey[200],
               child: _selectedImage == null
                   ? Center(child: Text('Image Preview'))
-                  : Image.file(
-                _selectedImage!,
-                fit: BoxFit.cover,
+                  : Stack(
+                children: [
+                  Image.file(
+                    _selectedImage!,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                  ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: GestureDetector(
+                      onTap: _removeImage,
+                      child: Container(
+                        color: Colors.black54,
+                        child: Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Icon(Icons.close, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
             SizedBox(height: 10),
@@ -223,11 +248,11 @@ class _AddMealScreenState extends State<AddMealScreen> {
 
   Future<void> _selectDateTime() async {
     DateTime? pickedDate = await showDatePicker(
-        context: context,
-        initialDate: DateTime.now(),
-        firstDate: DateTime.now(),
-        lastDate: DateTime(2101,
-        ));
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2101),
+    );
 
     if (pickedDate != null) {
       TimeOfDay? pickedTime = await showTimePicker(

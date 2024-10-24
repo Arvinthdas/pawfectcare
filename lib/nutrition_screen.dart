@@ -1,10 +1,15 @@
-import 'package:flutter/material.dart';
+import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-
+import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'addfood_screen.dart';
 import 'addmeal_screen.dart';
+import 'fooddetails_screen.dart';
 import 'mealdetail_screen.dart';
 
 class NutritionPage extends StatefulWidget {
@@ -19,47 +24,119 @@ class NutritionPage extends StatefulWidget {
 
 class _NutritionPageState extends State<NutritionPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  bool _isLoading = true; // Loading state
   String _dietPlan = "Loading personalized diet plan...";
+  String? _currentPetId; // Store the current pet ID
+  late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+  DateTime _selectedDate = DateTime.now(); // Store the selected date
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _loadDietPlan(); // Load the diet plan when the widget is initialized
+    _tabController.addListener(_handleTabChange);
+    _loadDietPlan();
+
+    // Initialize local notifications
+    flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    _initializeNotifications();
+    _scheduleDailyNotification();
   }
 
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
+  void _initializeNotifications() {
+    const AndroidInitializationSettings initializationSettingsAndroid =
+    AndroidInitializationSettings('app_icon'); // Make sure you have an app icon
+
+    final InitializationSettings initializationSettings =
+    InitializationSettings(android: initializationSettingsAndroid);
+
+    flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse: (NotificationResponse response) async {
+        if (response.payload != null) {
+          print('Notification payload: ${response.payload}');
+        }
+      },
+    );
+  }
+
+  void _scheduleDailyNotification() {
+    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
+    final tz.TZDateTime scheduledTime = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      22, // Schedule for 10 PM
+      00,
+    );
+
+    // If the scheduled time has already passed, schedule for the next day
+    final tz.TZDateTime notificationTime = scheduledTime.isBefore(now)
+        ? scheduledTime.add(Duration(days: 1))
+        : scheduledTime;
+
+    print('Scheduling notification for: $notificationTime'); // Debug log
+
+    flutterLocalNotificationsPlugin.zonedSchedule(
+      0, // Notification ID
+      'Daily Nutrition Summary',
+      'The daily nutrition summary is ready. You can view it now.',
+      notificationTime,
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'daily_nutrition_channel',
+          'Daily Nutrition',
+          channelDescription: 'Notification for daily nutrition summary',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+      ),
+      androidAllowWhileIdle: true,
+      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: DateTimeComponents.time,
+    );
+  }
+
+  void _handleTabChange() {
+    if (_tabController.index == 2) {
+      _loadDietPlan();
+    }
   }
 
   Future<void> _loadDietPlan() async {
+    if (_currentPetId == widget.petId) {
+      // If the pet ID hasn't changed, don't reload the diet plan
+      return;
+    }
+
+    setState(() {
+      _currentPetId = widget.petId; // Update the current pet ID
+      _isLoading = true; // Start loading
+    });
+
     try {
-      // Fetch pet details from Firestore
       Map<String, dynamic> petDetails = await fetchPetDetails(widget.petId);
 
-      // Check if required fields are available
       if (petDetails['type'] == null || petDetails['breed'] == null || petDetails['age'] == null || petDetails['weight'] == null) {
         throw Exception("Missing required pet details");
       }
 
-      // Load breed-specific data from the local JSON file
       Map<String, dynamic> breedData = await loadBreedSpecificData(petDetails['type']);
 
-      // Generate the personalized diet plan using decision tree logic
       Map<String, dynamic> dietInfo = generateDietPlanWithDecisionTree(petDetails, breedData);
       setState(() {
         _dietPlan = dietInfo['dietPlan'];
+        _isLoading = false; // Stop loading
       });
     } catch (e) {
       setState(() {
         _dietPlan = "Error loading diet plan: $e";
+        _isLoading = false; // Stop loading on error
       });
     }
   }
 
-  // Fetch pet details from Firestore
   Future<Map<String, dynamic>> fetchPetDetails(String petId) async {
     DocumentSnapshot snapshot = await FirebaseFirestore.instance
         .collection('users')
@@ -75,7 +152,6 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
     }
   }
 
-  // Load breed-specific data
   Future<Map<String, dynamic>> loadBreedSpecificData(String petType) async {
     String jsonString;
     if (petType.toLowerCase() == 'dog') {
@@ -88,7 +164,6 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
     return jsonDecode(jsonString) as Map<String, dynamic>;
   }
 
-  // Decision tree logic to generate the diet plan
   Map<String, dynamic> generateDietPlanWithDecisionTree(
       Map<String, dynamic> petDetails, Map<String, dynamic> breedData) {
     String breed = petDetails['breed'] ?? '';
@@ -96,7 +171,6 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
     double weight = petDetails['weight']?.toDouble() ?? 0.0;
     String petType = petDetails['type']?.toLowerCase() ?? '';
 
-    // Find breed-specific data
     List<dynamic> breeds = breedData[petType == 'dog' ? 'Dog Breeds' : 'Cat Breeds'];
     Map<String, dynamic>? breedSpecificInfo = breeds.firstWhere(
             (breedInfo) => breedInfo['name'].toString().toLowerCase() == breed.toLowerCase(),
@@ -106,16 +180,12 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
       return {'dietPlan': 'No specific diet plan found for this breed.'};
     }
 
-    // Initialize the diet plan with general recommendations
     String dietPlan = "Diet recommendations for $breed:\n";
     dietPlan += "${breedSpecificInfo['dietary_recommendations'] ?? 'No specific dietary recommendations.'}\n";
 
-    // Decision Tree Logic
-    // Step 1: Age-based decisions
     String ageCategory = age < 2 ? 'puppy' : (age >= 7 ? 'senior' : 'adult');
     dietPlan += "Age-specific advice: ${breedSpecificInfo['age_related_recommendations'][ageCategory] ?? 'No age-specific advice.'}\n";
 
-    // Step 2: Weight-based decisions
     if (weight < (breedSpecificInfo['average_weight_kg'][0] ?? 0.0)) {
       dietPlan += "Weight advice: The pet is below the typical weight range. Consider a higher calorie diet.\n";
     } else if (weight > (breedSpecificInfo['average_weight_kg'][1] ?? 0.0)) {
@@ -124,7 +194,6 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
       dietPlan += "Weight advice: The pet's weight is within the typical range.\n";
     }
 
-    // Step 3: Activity level and health considerations
     if (breedSpecificInfo.containsKey('special_considerations')) {
       dietPlan += "Special considerations: ${breedSpecificInfo['special_considerations']}\n";
     }
@@ -135,7 +204,7 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3, // Number of tabs
+      length: 3,
       child: Scaffold(
         backgroundColor: Color(0xFFF7EFF1),
         appBar: AppBar(
@@ -146,10 +215,11 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
           ),
           bottom: TabBar(
             controller: _tabController,
+            isScrollable: true,
             indicatorColor: Colors.white,
             tabs: [
               Tab(text: 'Meal Reminder'),
-              Tab(text: 'Food and Water Intake Tracker'),
+              Tab(text: 'Food Intake Tracker'),
               Tab(text: 'Personalized Diet Plans'),
             ],
           ),
@@ -158,7 +228,7 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
           controller: _tabController,
           children: [
             _buildMealReminderTab(),
-            _buildFoodWaterIntakeTrackerTab(),
+            _buildFoodIntakeTrackerTab(),
             _buildPersonalizedDietPlansTab(),
           ],
         ),
@@ -166,53 +236,417 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
     );
   }
 
-// Tab 1: Meal Reminder
   Widget _buildMealReminderTab() {
+    return SingleChildScrollView(
+        padding: EdgeInsets.all(16.0),
+    child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+    _buildSectionHeader('Meal History', onAddPressed: () {
+    Navigator.push(
+    context,
+    MaterialPageRoute(
+    builder: (context) => AddMealScreen(userId: widget.userId, petId: widget.petId),
+    ),
+    );
+    }),
+    SizedBox(height: 10),
+    _buildMealHistory(),
+    SizedBox(height: 20),
+      _buildSectionHeader('Upcoming Meals', onAddPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => AddMealScreen(userId: widget.userId, petId: widget.petId),
+          ),
+        );
+      }),
+      SizedBox(height: 10),
+      _buildUpcomingMeals(),
+    ],
+    ),
+    );
+  }
+
+  Widget _buildFoodIntakeTrackerTab() {
     return SingleChildScrollView(
       padding: EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionHeader('Meal History', onAddPressed: () {
+          _buildSectionHeader('Food Intake', onAddPressed: () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => AddMealScreen(userId: widget.userId, petId: widget.petId),
+                builder: (context) => AddFoodScreen(userId: widget.userId, petId: widget.petId),
               ),
             );
           }),
           SizedBox(height: 10),
-          _buildMealHistory(),
+          _buildDateFilterButton(),
+          SizedBox(height: 10),
+          _buildFoodDetails(),
           SizedBox(height: 20),
-          _buildSectionHeader('Upcoming Meals', onAddPressed: () {
-            // Navigate to AddMealScreen when +Add is pressed
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => AddMealScreen(userId: widget.userId, petId: widget.petId),
-              ),
-            );
-          }),
-          SizedBox(height: 10),
-          _buildUpcomingMeals(),
+          _buildDailyNutritionChart(),
         ],
       ),
     );
   }
 
+  Widget _buildDateFilterButton() {
+    return ElevatedButton(
+      onPressed: () async {
+        DateTime? pickedDate = await showDatePicker(
+          context: context,
+          initialDate: _selectedDate,
+          firstDate: DateTime(2000),
+          lastDate: DateTime(2101),
+        );
 
+        if (pickedDate != null) {
+          setState(() {
+            _selectedDate = pickedDate; // Update selected date
+          });
+        }
+      },
+      child: Text('Filter by Date: ${DateFormat('dd/MM/yyyy').format(_selectedDate)}'),
+    );
+  }
 
-  // Tab 2: Food and Water Intake Tracker
-  Widget _buildFoodWaterIntakeTrackerTab() {
-    return Center(
-      child: Text(
-        'Food and Water Intake Tracker content goes here.',
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+  Widget _buildFoodDetails() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.userId)
+          .collection('pets')
+          .doc(widget.petId)
+          .collection('foods')
+          .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(DateTime(
+        _selectedDate.year,
+        _selectedDate.month,
+        _selectedDate.day,
+        0,
+        0,
+      )))
+          .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(DateTime(
+        _selectedDate.year,
+        _selectedDate.month,
+        _selectedDate.day,
+        23,
+        59,
+      )))
+          .orderBy('timestamp', descending: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error fetching food details'));
+        }
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return Center(child: Text('No food details available for this date.'));
+        }
+
+        final foodItems = snapshot.data!.docs;
+
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          itemCount: foodItems.length,
+          itemBuilder: (context, index) {
+            final food = foodItems[index];
+            return _buildFoodCard(food);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildFoodCard(DocumentSnapshot food) {
+    String formattedDate = DateFormat('dd/MM/yyyy HH:mm').format((food['timestamp'] as Timestamp).toDate());
+
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => FoodDetailScreen(
+              foodId: food.id,
+              userId: widget.userId,
+              petId: widget.petId,
+            ),
+          ),
+        );
+      },
+      onLongPress: () {
+        _showDeleteFoodDialog(food.id);
+      },
+      child: Card(
+        color: Colors.white,
+        elevation: 3,
+        margin: EdgeInsets.symmetric(vertical: 8.0),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(food['foodName'] ?? 'No Food Name', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text('Type: ${food['foodType'] ?? 'Unknown'}', style: TextStyle(fontSize: 16, color: Colors.grey[700])),
+              Text('Date: $formattedDate', style: TextStyle(fontSize: 16)),
+            ],
+          ),
+        ),
       ),
     );
   }
 
-// Meal History
+  void _showDeleteFoodDialog(String foodId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Delete Food Item'),
+          content: Text('Are you sure you want to delete this food item?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                await _deleteFood(foodId); // Delete food item
+                Navigator.of(context).pop();
+              },
+              child: Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _deleteFood(String foodId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.userId)
+          .collection('pets')
+          .doc(widget.petId)
+          .collection('foods')
+          .doc(foodId)
+          .delete();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Food item deleted successfully!')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error deleting food item: $e')),
+      );
+    }
+  }
+
+  Widget _buildDailyNutritionChart() {
+    DateTime now = DateTime.now();
+    DateTime tenPM = DateTime(now.year, now.month, now.day, 22, 0); // 10 PM today
+
+    if (_selectedDate.isAfter(now)) {
+      return const Center(
+        child: Text(
+          'Nutrition data for future dates is not available yet.',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      );
+    } else if (_selectedDate.isAtSameMomentAs(now) && now.isBefore(tenPM)) {
+      return const Center(
+        child: Text(
+          'The daily nutrition summary will be available at 10 PM today.',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+      );
+    } else {
+      return StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(widget.userId)
+            .collection('pets')
+            .doc(widget.petId)
+            .collection('foods')
+            .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(DateTime(
+          _selectedDate.year,
+          _selectedDate.month,
+          _selectedDate.day,
+          0,
+          0,
+        )))
+            .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(DateTime(
+          _selectedDate.year,
+          _selectedDate.month,
+          _selectedDate.day,
+          23,
+          59,
+        )))
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Error fetching nutrition data'));
+          }
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return Center(child: Text('No nutrition data available for this date.'));
+          }
+
+          final foodItems = snapshot.data!.docs;
+          final nutritionData = _calculateDailyNutrition(foodItems);
+
+          return Column(
+            children: [
+              Text(
+                'Daily Intake Chart',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 20), // Add some space between the title and the chart
+              _buildPieChart(nutritionData, chartSize: 80), // Pass a larger size if needed
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  Map<String, double> _calculateDailyNutrition(List<QueryDocumentSnapshot> foodItems) {
+    double totalCarbs = 0;
+    double totalProtein = 0;
+    double totalFat = 0;
+    double totalCalcium = 0;
+    double totalVitamins = 0;
+
+    for (var food in foodItems) {
+      totalCarbs += (food['carbs'] ?? 0).toDouble();
+      totalProtein += (food['protein'] ?? 0).toDouble();
+      totalFat += (food['fat'] ?? 0).toDouble();
+      totalCalcium += (food['calcium'] ?? 0).toDouble();
+      totalVitamins += (food['vitamins'] ?? 0).toDouble();
+    }
+
+    return {
+      'Carbs': totalCarbs,
+      'Protein': totalProtein,
+      'Fat': totalFat,
+      'Calcium': totalCalcium,
+      'Vitamins': totalVitamins,
+    };
+  }
+
+  Widget _buildPieChart(Map<String, double> nutritionData, {double chartSize = 50}) {
+    List<PieChartSectionData> sections = nutritionData.entries
+        .map((entry) {
+      Color color;
+      switch (entry.key) {
+        case 'Carbs':
+          color = Colors.blue;
+          break;
+        case 'Protein':
+          color = Colors.green;
+          break;
+        case 'Fat':
+          color = Colors.red;
+          break;
+        case 'Calcium':
+          color = Colors.orange;
+          break;
+        case 'Vitamins':
+          color = Colors.purple;
+          break;
+        default:
+          color = Colors.grey;
+      }
+
+      return PieChartSectionData(
+        value: entry.value,
+        title: '${entry.key}: ${entry.value.toStringAsFixed(1)}g',
+        radius: chartSize, // Use the passed size
+        titleStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
+        color: color,
+      );
+    }).toList();
+
+    return SizedBox(
+      height: 300, // You can adjust this height for better visibility
+      child: PieChart(
+        PieChartData(
+          sections: sections,
+          sectionsSpace: 2,
+          centerSpaceRadius: 40,
+          borderData: FlBorderData(show: false),
+          pieTouchData: PieTouchData(
+            touchCallback: (FlTouchEvent event, pieTouchResponse) {
+              setState(() {});
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPersonalizedDietPlansTab() {
+    if (_isLoading) {
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    } else {
+      List<String> dietPlanSections = _dietPlan.split('\n');
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildDietCard('Diet Recommendations Based on your pet\'s breed, age, and weight', dietPlanSections[1]),
+              _buildDietCard('Age-Specific Advice', dietPlanSections[2]),
+              _buildDietCard('Weight Advice', dietPlanSections[3]),
+              if (dietPlanSections.length > 4)
+                _buildDietCard('Special Considerations', dietPlanSections[4]),
+            ],
+          ),
+        ),
+      );
+    }
+  }
+
+  Widget _buildDietCard(String title, String content) {
+    return Card(
+      color: Colors.white,
+      elevation: 3,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      margin: EdgeInsets.symmetric(vertical: 8.0),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            Text(
+              content,
+              style: TextStyle(fontSize: 16),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildMealHistory() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
@@ -250,33 +684,6 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
     );
   }
 
-  Widget _buildSectionHeader(String title, {required VoidCallback onAddPressed}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-        TextButton(
-          onPressed: onAddPressed,
-          child: Row(
-            children: [
-              Icon(Icons.add, color: Colors.black),
-              Text('Add', style: TextStyle(color: Colors.black)),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-
-// Upcoming Meals
   Widget _buildUpcomingMeals() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
@@ -301,20 +708,14 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
 
         final upcomingMeals = snapshot.data!.docs;
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Upcoming Meals', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            ListView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: upcomingMeals.length,
-              itemBuilder: (context, index) {
-                final meal = upcomingMeals[index];
-                return _buildMealCard(meal, false);
-              },
-            ),
-          ],
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          itemCount: upcomingMeals.length,
+          itemBuilder: (context, index) {
+            final meal = upcomingMeals[index];
+            return _buildMealCard(meal, false);
+          },
         );
       },
     );
@@ -368,14 +769,14 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop();
               },
               child: Text('Cancel'),
             ),
             TextButton(
               onPressed: () async {
-                await _deleteMeal(mealId);
-                Navigator.of(context).pop(); // Close the dialog
+                await _deleteMeal(mealId); // Delete meal
+                Navigator.of(context).pop();
               },
               child: Text('Delete'),
             ),
@@ -385,77 +786,50 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
     );
   }
 
-  Future<void> _deleteMeal(String mealId) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.userId)
-          .collection('pets')
-          .doc(widget.petId)
-          .collection('meals')
-          .doc(mealId)
-          .delete();
+Future<void> _deleteMeal(String mealId) async {
+  try {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .collection('pets')
+        .doc(widget.petId)
+        .collection('meals')
+        .doc(mealId)
+        .delete();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Meal deleted successfully!')),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error deleting meal: $e')),
-      );
-    }
-  }
-
-
-
-
-  // Tab 3: Personalized Diet Plans
-  Widget _buildPersonalizedDietPlansTab() {
-    List<String> dietPlanSections = _dietPlan.split('\n');
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildDietCard('Diet Recommendations Based on you pet`s breed, age and weight', dietPlanSections[1]),
-            _buildDietCard('Age-Specific Advice', dietPlanSections[2]),
-            _buildDietCard('Weight Advice', dietPlanSections[3]),
-            if (dietPlanSections.length > 4)
-              _buildDietCard('Special Considerations', dietPlanSections[4]),
-          ],
-        ),
-      ),
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Meal deleted successfully!')),
     );
-  }
-
-  // Helper method to create a card for each section
-  Widget _buildDietCard(String title, String content) {
-    return Card(
-      color: Colors.white,
-      elevation: 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      margin: EdgeInsets.symmetric(vertical: 8.0),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 10),
-            Text(
-              content,
-              style: TextStyle(fontSize: 16),
-            ),
-          ],
-        ),
-      ),
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error deleting meal: $e')),
     );
   }
 }
+
+Widget _buildSectionHeader(String title, {required VoidCallback onAddPressed}) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Text(
+        title,
+        style: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: Colors.black87,
+        ),
+      ),
+      TextButton(
+        onPressed: onAddPressed,
+        child: Row(
+          children: [
+            Icon(Icons.add, color: Colors.black),
+            Text('Add', style: TextStyle(color: Colors.black)),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+}
+
