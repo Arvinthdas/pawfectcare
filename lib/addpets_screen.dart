@@ -24,11 +24,11 @@ class _AddPetsScreenState extends State<AddPetsScreen> {
   bool _isUploading = false;
   String? _selectedPetType;
   String? _selectedBreed;
-  String? _ageType = 'Years';
+  String? _ageType = 'Years'; // Default age type is "Years"
   String? _gender = 'Male';
-  final List<String> _petTypes = ['Dog', 'Cat', 'Others'];
+  final List<String> _petTypes = ['Dog', 'Cat'];
   final List<String> _genderTypes = ['Male', 'Female'];
-  final List<String> _ageTypes = ['Years', 'Months'];
+  //final List<String> _ageTypes = ['Years']; // Only "Years" is available
 
   List<String> _breeds = [];
 
@@ -38,8 +38,9 @@ class _AddPetsScreenState extends State<AddPetsScreen> {
         ? 'live_gdeVpBmEWPcIzSXTmRv6SFnANFY4xhJx4hmBLsQJEPUSSgA6bKtd1CBB9bpYzDiS' // Replace with your actual Dog API key
         : 'live_YyuWaIhIU2TypI76GHDS9dno1j7wga3Iqhv0uCXaftZDKpLnuJpwtgQBvdDrDkAF'; // Replace with your actual Cat API key
 
-    final url = Uri.parse(
-        type == 'Dog' ? 'https://api.thedogapi.com/v1/breeds' : 'https://api.thecatapi.com/v1/breeds');
+    final url = Uri.parse(type == 'Dog'
+        ? 'https://api.thedogapi.com/v1/breeds'
+        : 'https://api.thecatapi.com/v1/breeds');
 
     try {
       final response = await http.get(url, headers: {'x-api-key': apiKey});
@@ -59,8 +60,11 @@ class _AddPetsScreenState extends State<AddPetsScreen> {
   // Function to add pet details to Firestore
   Future<void> _addPet() async {
     User? user = _auth.currentUser;
-    if (user != null && _selectedImage != null && _nameController.text.isNotEmpty &&
-        _ageController.text.isNotEmpty && _weightController.text.isNotEmpty &&
+    if (user != null &&
+        _selectedImage != null &&
+        _nameController.text.isNotEmpty &&
+        _ageController.text.isNotEmpty &&
+        _weightController.text.isNotEmpty &&
         _selectedBreed != null) {
       setState(() {
         _isUploading = true;
@@ -69,11 +73,7 @@ class _AddPetsScreenState extends State<AddPetsScreen> {
       String uid = user.uid; // Get user ID
       String imageUrl = await _uploadImageToStorage(uid, _selectedImage!);
 
-      await _firestore
-          .collection('users')
-          .doc(uid)
-          .collection('pets')
-          .add({
+      await _firestore.collection('users').doc(uid).collection('pets').add({
         'name': _nameController.text,
         'age': int.parse(_ageController.text),
         'ageType': _ageType,
@@ -104,7 +104,8 @@ class _AddPetsScreenState extends State<AddPetsScreen> {
 
   // Function to upload image to Firebase Storage
   Future<String> _uploadImageToStorage(String uid, File imageFile) async {
-    String fileName = 'pets/$uid/${DateTime.now().millisecondsSinceEpoch}.jpg'; // Organize by user ID
+    String fileName =
+        'pets/$uid/${DateTime.now().millisecondsSinceEpoch}.jpg'; // Organize by user ID
     Reference storageRef = _storage.ref().child(fileName);
     UploadTask uploadTask = storageRef.putFile(imageFile);
     TaskSnapshot snapshot = await uploadTask;
@@ -116,13 +117,15 @@ class _AddPetsScreenState extends State<AddPetsScreen> {
     return Scaffold(
       backgroundColor: Color(0xFFF7EFF1),
       appBar: AppBar(
-        title: Text('Add Pet',
+        title: Text(
+          'Add Pet',
           style: TextStyle(
             fontFamily: 'Poppins',
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: Colors.black,
-          ),),
+          ),
+        ),
         backgroundColor: Color(0xFFE2BF65),
       ),
       body: SingleChildScrollView(
@@ -168,8 +171,10 @@ class _AddPetsScreenState extends State<AddPetsScreen> {
               hint: Text('Select Pet Type'),
             ),
             SizedBox(height: 15),
-            if (_selectedPetType != null && (_selectedPetType == 'Dog' || _selectedPetType == 'Cat')) ...[
-              Text('Select Breed *', style: TextStyle(fontWeight: FontWeight.bold)),
+            if (_selectedPetType != null &&
+                (_selectedPetType == 'Dog' || _selectedPetType == 'Cat')) ...[
+              Text('Select Breed *',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
               SizedBox(height: 5),
               DropdownButtonFormField<String>(
                 value: _selectedBreed,
@@ -211,36 +216,8 @@ class _AddPetsScreenState extends State<AddPetsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Age Type', style: TextStyle(fontWeight: FontWeight.bold)),
-                      SizedBox(height: 5),
-                      DropdownButtonFormField<String>(
-                        value: _ageType,
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          filled: true,
-                          fillColor: Colors.grey[200],
-                        ),
-                        items: _ageTypes.map((type) {
-                          return DropdownMenuItem<String>(
-                            value: type,
-                            child: Text(type),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _ageType = value;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Age (${_ageType!}) *', style: TextStyle(fontWeight: FontWeight.bold)),
+                      Text('Age (${_ageType!}) *',
+                          style: TextStyle(fontWeight: FontWeight.bold)),
                       SizedBox(height: 5),
                       TextField(
                         controller: _ageController,
@@ -280,7 +257,8 @@ class _AddPetsScreenState extends State<AddPetsScreen> {
               },
             ),
             SizedBox(height: 15),
-            Text('Weight (kg) *', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text('Weight (kg) *',
+                style: TextStyle(fontWeight: FontWeight.bold)),
             SizedBox(height: 5),
             TextField(
               controller: _weightController,
@@ -295,17 +273,17 @@ class _AddPetsScreenState extends State<AddPetsScreen> {
             SizedBox(height: 15),
             _selectedImage != null
                 ? Image.file(
-              _selectedImage!,
-              height: 150,
-              width: 150,
-              fit: BoxFit.cover,
-            )
+                    _selectedImage!,
+                    height: 150,
+                    width: 150,
+                    fit: BoxFit.cover,
+                  )
                 : Placeholder(
-              fallbackHeight: 150,
-              fallbackWidth: 150,
-              color: Colors.grey,
-              strokeWidth: 2,
-            ),
+                    fallbackHeight: 150,
+                    fallbackWidth: 150,
+                    color: Colors.grey,
+                    strokeWidth: 2,
+                  ),
             SizedBox(height: 15),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -334,20 +312,20 @@ class _AddPetsScreenState extends State<AddPetsScreen> {
             _isUploading
                 ? Center(child: CircularProgressIndicator())
                 : SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _selectedImage == null ? null : _addPet,
-                child: Text('Add Pet'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFE2BF65),
-                  foregroundColor: Colors.black,
-                  padding: EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _selectedImage == null ? null : _addPet,
+                      child: Text('Add Pet'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFFE2BF65),
+                        foregroundColor: Colors.black,
+                        padding: EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ),
           ],
         ),
       ),

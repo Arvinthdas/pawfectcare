@@ -20,7 +20,8 @@ class VaccinationDetailScreen extends StatefulWidget {
   });
 
   @override
-  _VaccinationDetailScreenState createState() => _VaccinationDetailScreenState();
+  _VaccinationDetailScreenState createState() =>
+      _VaccinationDetailScreenState();
 }
 
 class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
@@ -62,8 +63,8 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
   }
 
   void _initializeFields() {
-    _vaccineNameController = TextEditingController(
-        text: _latestVaccinationRecord['vaccineName']);
+    _vaccineNameController =
+        TextEditingController(text: _latestVaccinationRecord['vaccineName']);
     _clinicController =
         TextEditingController(text: _latestVaccinationRecord['clinic']);
     _notesController =
@@ -90,7 +91,8 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
   }
 
   Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final pickedFile =
+    await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _imageFile = File(pickedFile.path);
@@ -101,7 +103,8 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
   Future<String> _uploadImageToStorage(String userId) async {
     if (_imageFile != null) {
       try {
-        String fileName = 'vaccinations/${userId}/${DateTime.now().millisecondsSinceEpoch}.jpg';
+        String fileName =
+            'vaccinations/${userId}/${DateTime.now().millisecondsSinceEpoch}.jpg';
         Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
         UploadTask uploadTask = storageRef.putFile(_imageFile!);
         TaskSnapshot snapshot = await uploadTask;
@@ -123,43 +126,54 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
       return;
     }
 
-    final updatedDateTime = DateTime(
-      _selectedDate.year,
-      _selectedDate.month,
-      _selectedDate.day,
-      _selectedTime.hour,
-      _selectedTime.minute,
+    // Show confirmation dialog before saving changes
+    bool? confirmed = await _showConfirmationDialog(
+      title: 'Confirm Save',
+      content: 'Are you sure you want to save the changes?',
     );
-    final formattedDate = DateFormat('dd/MM/yyyy HH:mm').format(updatedDateTime);
 
-    String imageUrl = await _uploadImageToStorage(widget.userId);
+    if (confirmed == true) {
+      final updatedDateTime = DateTime(
+        _selectedDate.year,
+        _selectedDate.month,
+        _selectedDate.day,
+        _selectedTime.hour,
+        _selectedTime.minute,
+      );
+      final formattedDate =
+      DateFormat('dd/MM/yyyy HH:mm').format(updatedDateTime);
 
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(widget.userId)
-        .collection('pets')
-        .doc(widget.petId)
-        .collection('vaccinations')
-        .doc(widget.vaccinationRecord.id)
-        .update({
-      'vaccineName': _vaccineNameController.text,
-      'clinic': _clinicController.text,
-      'notes': _notesController.text,
-      'date': formattedDate,
-      'documentUrl': imageUrl,
-    });
+      String imageUrl = await _uploadImageToStorage(widget.userId);
 
-    _scheduleNotification(updatedDateTime);
-    _showMessage('Changes saved successfully');
-    setState(() {
-      _isEditing = false;
-    });
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.userId)
+          .collection('pets')
+          .doc(widget.petId)
+          .collection('vaccinations')
+          .doc(widget.vaccinationRecord.id)
+          .update({
+        'vaccineName': _vaccineNameController.text,
+        'clinic': _clinicController.text,
+        'notes': _notesController.text,
+        'date': formattedDate,
+        'documentUrl': imageUrl,
+      });
+
+      _scheduleNotification(updatedDateTime);
+      _showMessage('Changes saved successfully');
+      setState(() {
+        _isEditing = false;
+      });
+    }
   }
 
   Future<void> _scheduleNotification(DateTime scheduledTime) async {
-    FlutterLocalNotificationsPlugin notificationsPlugin = FlutterLocalNotificationsPlugin();
+    FlutterLocalNotificationsPlugin notificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+    const AndroidNotificationDetails androidDetails =
+    AndroidNotificationDetails(
       'vaccine_channel_id',
       'Vaccination Notifications',
       channelDescription: 'Reminder for upcoming vaccinations',
@@ -167,7 +181,8 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
       priority: Priority.high,
     );
 
-    const NotificationDetails platformDetails = NotificationDetails(android: androidDetails);
+    const NotificationDetails platformDetails =
+    NotificationDetails(android: androidDetails);
 
     tz.TZDateTime scheduledDate = tz.TZDateTime.from(scheduledTime, tz.local);
 
@@ -177,7 +192,8 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
       'Your pet has a vaccination appointment',
       scheduledDate,
       platformDetails,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      uiLocalNotificationDateInterpretation:
+      UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,
     );
   }
@@ -244,18 +260,11 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
       if (documentUrl != null && documentUrl.isNotEmpty) {
         return Column(
           children: [
-            GestureDetector(
-              onTap: () {
-                if (_isEditing) {
-                  _showRemoveImageDialog();
-                }
-              },
-              child: Image.network(
-                documentUrl,
-                height: 150,
-                width: 150,
-                fit: BoxFit.cover,
-              ),
+            Image.network(
+              documentUrl,
+              height: 150,
+              width: 150,
+              fit: BoxFit.cover,
             ),
             SizedBox(height: 10),
           ],
@@ -266,31 +275,42 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
     }
   }
 
-  void _showRemoveImageDialog() {
-    showDialog(
+  Future<bool?> _showConfirmationDialog({required String title, required String content}) {
+    return showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Remove Image'),
-          content: Text('Are you sure you want to remove this image?'),
+          title: Text(title),
+          content: Text(content),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
+                Navigator.of(context).pop(false); // Close the dialog
               },
               child: Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-                _removeImage(); // Remove image from the UI
+                Navigator.of(context).pop(true); // Confirm
               },
-              child: Text('Remove'),
+              child: Text('Confirm'),
             ),
           ],
         );
       },
     );
+  }
+
+  void _showRemoveImageDialog() async {
+    // Show confirmation dialog before removing the image
+    bool? confirmed = await _showConfirmationDialog(
+      title: 'Remove Image',
+      content: 'Are you sure you want to remove this image?',
+    );
+
+    if (confirmed == true) {
+      _removeImage(); // Remove image from the UI
+    }
   }
 
   void _removeImage() {
@@ -344,13 +364,19 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF7EFF1),
       appBar: AppBar(
-        title: Text('Vaccination Details'),
+        title: Text(
+          'Vaccination Details',
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
         backgroundColor: Color(0xFFE2BF65),
         actions: [
           if (_isEditing)
@@ -373,12 +399,12 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
         padding: EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(
-              controller: _vaccineNameController,
-              decoration: InputDecoration(labelText: 'Vaccine Name', labelStyle: TextStyle(color: Color(0xFFE2BF65))),
-              enabled: _isEditing,
+            _buildTextField(
+              _vaccineNameController,
+              'Vaccine Name',
+              _isEditing,
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 20),
             GestureDetector(
               onTap: () {
                 if (_isEditing) {
@@ -386,21 +412,18 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
                 }
               },
               child: AbsorbPointer(
-                child: TextField(
-                  controller: TextEditingController(
-                      text: _selectedDate != null
-                          ? "${_selectedDate.toLocal()}".split(' ')[0]
-                          : ''),
-                  decoration: InputDecoration(
-                    labelText: 'Vaccination Date',
-                    labelStyle: TextStyle(color: Color(0xFFE2BF65)),
-                    suffixIcon: Icon(Icons.calendar_today),
+                child: _buildTextField(
+                  TextEditingController(
+                    text: _selectedDate != null
+                        ? "${_selectedDate.toLocal()}".split(' ')[0]
+                        : '',
                   ),
-                  enabled: _isEditing,
+                  'Vaccination Date',
+                  true,
                 ),
               ),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 20),
             GestureDetector(
               onTap: () {
                 if (_isEditing) {
@@ -408,40 +431,88 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
                 }
               },
               child: AbsorbPointer(
-                child: TextField(
-                  controller: TextEditingController(
-                      text: _selectedTime.format(context)),
-                  decoration: InputDecoration(
-                    labelText: 'Vaccination Time',
-                    labelStyle: TextStyle(color: Color(0xFFE2BF65)),
-                    suffixIcon: Icon(Icons.access_time),
+                child: _buildTextField(
+                  TextEditingController(
+                    text: _selectedTime.format(context),
                   ),
-                  enabled: _isEditing,
+                  'Vaccination Time',
+                  true,
                 ),
               ),
             ),
-            SizedBox(height: 10),
-            TextField(
-              controller: _clinicController,
-              decoration: InputDecoration(labelText: 'Clinic', labelStyle: TextStyle(color: Color(0xFFE2BF65))),
-              enabled: _isEditing,
+            SizedBox(height: 20),
+            _buildTextField(
+              _clinicController,
+              'Clinic',
+              _isEditing,
             ),
-            SizedBox(height: 10),
-            TextField(
-              controller: _notesController,
-              decoration: InputDecoration(labelText: 'Notes', labelStyle: TextStyle(color: Color(0xFFE2BF65))),
-              enabled: _isEditing,
+            SizedBox(height: 20),
+            _buildTextField(
+              _notesController,
+              'Notes',
+              _isEditing,
             ),
             SizedBox(height: 20),
             _buildImageDisplay(),
-            SizedBox(height: 10),
+            SizedBox(height: 20),
             ElevatedButton(
               onPressed: _isEditing ? _pickImage : null,
-              child: Text('Upload New Image'),
+              child: Text(
+                'Upload New Image',
+                style: TextStyle(color: Colors.black),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFFE2BF65), // Background color
+              ),
             ),
+            // Show the Remove Image button only if there is an image
+            if (_imageFile != null || (_latestVaccinationRecord.data() != null && _latestVaccinationRecord['documentUrl'] != null && _latestVaccinationRecord['documentUrl'] != ''))
+              TextButton(
+                onPressed: _isEditing ? _showRemoveImageDialog : null,
+                child: Text('Remove Image'),
+                style: TextButton.styleFrom(
+                  backgroundColor: Color(0xFFE2BF65),
+                  foregroundColor: Colors.black,
+                ),
+              ),
           ],
         ),
       ),
+    );
+  }
+
+
+  // Create a reusable method for text fields
+  Widget _buildTextField(
+      TextEditingController controller, String label, bool enabled) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: Colors.black),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+              color: Colors.grey,
+              width: 2), // Color and width for enabled border
+          borderRadius: BorderRadius.circular(10), // Rounded corners
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+              color: Color(0xFFE2BF65),
+              width: 2), // Color and width for focused border
+          borderRadius: BorderRadius.circular(10), // Rounded corners
+        ),
+        errorBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.red, width: 2), // Error border
+          borderRadius: BorderRadius.circular(10), // Rounded corners
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderSide:
+          BorderSide(color: Colors.red, width: 2), // Focused error border
+          borderRadius: BorderRadius.circular(10), // Rounded corners
+        ),
+      ),
+      enabled: enabled,
     );
   }
 }

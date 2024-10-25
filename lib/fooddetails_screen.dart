@@ -10,7 +10,8 @@ class FoodDetailScreen extends StatefulWidget {
   final String userId;
   final String petId;
 
-  FoodDetailScreen({required this.foodId, required this.userId, required this.petId});
+  FoodDetailScreen(
+      {required this.foodId, required this.userId, required this.petId});
 
   @override
   _FoodDetailScreenState createState() => _FoodDetailScreenState();
@@ -73,12 +74,18 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
   }
 
   void _initializeFields() {
-    _foodNameController = TextEditingController(text: _latestFoodRecord['foodName']);
-    _calciumController = TextEditingController(text: _latestFoodRecord['calcium'].toString());
-    _carbsController = TextEditingController(text: _latestFoodRecord['carbs'].toString());
-    _fatController = TextEditingController(text: _latestFoodRecord['fat'].toString());
-    _proteinController = TextEditingController(text: _latestFoodRecord['protein'].toString());
-    _vitaminsController = TextEditingController(text: _latestFoodRecord['vitamins'].toString());
+    _foodNameController =
+        TextEditingController(text: _latestFoodRecord['foodName']);
+    _calciumController =
+        TextEditingController(text: _latestFoodRecord['calcium'].toString());
+    _carbsController =
+        TextEditingController(text: _latestFoodRecord['carbs'].toString());
+    _fatController =
+        TextEditingController(text: _latestFoodRecord['fat'].toString());
+    _proteinController =
+        TextEditingController(text: _latestFoodRecord['protein'].toString());
+    _vitaminsController =
+        TextEditingController(text: _latestFoodRecord['vitamins'].toString());
     _selectedFoodType = _latestFoodRecord['foodType'];
     Timestamp dateTimestamp = _latestFoodRecord['timestamp'];
     final dateTime = dateTimestamp.toDate();
@@ -98,7 +105,8 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
   }
 
   Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _imageFile = File(pickedFile.path);
@@ -110,7 +118,8 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
   Future<String?> _uploadImageToStorage(String userId) async {
     if (_imageFile != null) {
       try {
-        String fileName = 'food_images/${userId}/${DateTime.now().millisecondsSinceEpoch}.jpg';
+        String fileName =
+            'food_images/${userId}/${DateTime.now().millisecondsSinceEpoch}.jpg';
         Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
         UploadTask uploadTask = storageRef.putFile(_imageFile!);
         TaskSnapshot snapshot = await uploadTask;
@@ -124,7 +133,8 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
   }
 
   Future<void> _saveChanges() async {
-    if (_foodNameController?.text.isEmpty ?? true || _selectedFoodType == null) {
+    if (_foodNameController?.text.isEmpty ??
+        true || _selectedFoodType == null) {
       _showMessage('Please fill in all required fields');
       return;
     }
@@ -207,16 +217,28 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFF7EFF1),
       appBar: AppBar(
-        title: Text('Food Details'),
+        backgroundColor: Color(0xFFE2BF65),
+        title: Text(
+          'Food Details',
+          style: TextStyle(
+            color: Colors.black,
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
         actions: [
           IconButton(
             icon: Icon(_isEditing ? Icons.save : Icons.edit),
-            onPressed: _isEditing ? _saveChanges : () {
-              setState(() {
-                _isEditing = true;
-              });
-            },
+            onPressed: _isEditing
+                ? _saveChanges
+                : () {
+                    setState(() {
+                      _isEditing = true;
+                    });
+                  },
           ),
         ],
       ),
@@ -227,36 +249,47 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
             children: [
               TextField(
                 controller: _foodNameController,
-                decoration: InputDecoration(labelText: 'Food Name'),
+                decoration: InputDecoration(
+                    labelText: 'Food Name', border: OutlineInputBorder()),
                 enabled: _isEditing,
               ),
+              SizedBox(height: 10),
               TextField(
                 controller: _calciumController,
-                decoration: InputDecoration(labelText: 'Calcium'),
+                decoration: InputDecoration(
+                    labelText: 'Calcium', border: OutlineInputBorder()),
                 enabled: _isEditing,
                 keyboardType: TextInputType.number,
               ),
+              SizedBox(height: 10),
               TextField(
                 controller: _carbsController,
-                decoration: InputDecoration(labelText: 'Carbs'),
+                decoration: InputDecoration(
+                    labelText: 'Carbs', border: OutlineInputBorder()),
                 enabled: _isEditing,
                 keyboardType: TextInputType.number,
               ),
+              SizedBox(height: 10),
               TextField(
                 controller: _fatController,
-                decoration: InputDecoration(labelText: 'Fat'),
+                decoration: InputDecoration(
+                    labelText: 'Fat', border: OutlineInputBorder()),
                 enabled: _isEditing,
                 keyboardType: TextInputType.number,
               ),
+              SizedBox(height: 10),
               TextField(
                 controller: _proteinController,
-                decoration: InputDecoration(labelText: 'Protein'),
+                decoration: InputDecoration(
+                    labelText: 'Protein', border: OutlineInputBorder()),
                 enabled: _isEditing,
                 keyboardType: TextInputType.number,
               ),
+              SizedBox(height: 10),
               TextField(
                 controller: _vitaminsController,
-                decoration: InputDecoration(labelText: 'Vitamins'),
+                decoration: InputDecoration(
+                    labelText: 'Vitamins', border: OutlineInputBorder()),
                 enabled: _isEditing,
                 keyboardType: TextInputType.number,
               ),
@@ -269,12 +302,15 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                     child: Text(type),
                   );
                 }).toList(),
-                onChanged: _isEditing ? (String? newValue) {
-                  setState(() {
-                    _selectedFoodType = newValue;
-                  });
-                } : null,
-                decoration: InputDecoration(labelText: 'Food Type'),
+                onChanged: _isEditing
+                    ? (String? newValue) {
+                        setState(() {
+                          _selectedFoodType = newValue;
+                        });
+                      }
+                    : null,
+                decoration: InputDecoration(
+                    labelText: 'Food Type', border: OutlineInputBorder()),
               ),
               SizedBox(height: 10),
               GestureDetector(
@@ -289,8 +325,9 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                     decoration: InputDecoration(
                       labelText: 'Date',
                       suffixIcon: Icon(Icons.calendar_today),
+                      border: OutlineInputBorder(),
                     ),
-                    enabled: false,
+                    enabled: true, // Allow interaction in editing mode
                   ),
                 ),
               ),
@@ -307,8 +344,9 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                     decoration: InputDecoration(
                       labelText: 'Time',
                       suffixIcon: Icon(Icons.access_time),
+                      border: OutlineInputBorder(),
                     ),
-                    enabled: false,
+                    enabled: true, // Allow interaction in editing mode
                   ),
                 ),
               ),
@@ -316,7 +354,7 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
               if (_imageFile != null)
                 Column(
                   children: [
-                    Image.file(_imageFile!, height: 150, width: 220),
+                    Image.file(_imageFile!, height: 150, width: 250),
                     if (_isEditing)
                       ElevatedButton(
                         onPressed: () {
@@ -329,10 +367,12 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                       ),
                   ],
                 ),
-              if (_imageUrl != null && _imageUrl!.isNotEmpty && _imageFile == null)
+              if (_imageUrl != null &&
+                  _imageUrl!.isNotEmpty &&
+                  _imageFile == null)
                 Column(
                   children: [
-                    Image.network(_imageUrl!, height: 150, width: 220),
+                    Image.network(_imageUrl!, height: 150, width: 250),
                     if (_isEditing)
                       ElevatedButton(
                         onPressed: () {

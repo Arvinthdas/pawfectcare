@@ -34,11 +34,9 @@ class _AddMealScreenState extends State<AddMealScreen> {
   }
 
   Future<void> _initializeNotifications() async {
-    const AndroidInitializationSettings initializationSettingsAndroid =
-    AndroidInitializationSettings('@mipmap/ic_launcher');
+    const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    final InitializationSettings initializationSettings =
-    InitializationSettings(android: initializationSettingsAndroid);
+    final InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
 
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
@@ -82,7 +80,7 @@ class _AddMealScreenState extends State<AddMealScreen> {
         'mealName': _mealNameController.text,
         'date': mealDate,
         'notes': _notesController.text,
-        'imageUrl': imageUrl, // Save image URL
+        'imageUrl': imageUrl,
       });
 
       // Schedule notification
@@ -112,7 +110,7 @@ class _AddMealScreenState extends State<AddMealScreen> {
       Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
       UploadTask uploadTask = storageRef.putFile(imageFile);
       TaskSnapshot snapshot = await uploadTask;
-      return await snapshot.ref.getDownloadURL(); // Get download URL
+      return await snapshot.ref.getDownloadURL();
     } catch (e) {
       print('Error uploading image: $e');
       return null;
@@ -146,7 +144,7 @@ class _AddMealScreenState extends State<AddMealScreen> {
     _dateController.clear();
     _notesController.clear();
     setState(() {
-      _selectedImage = null; // Clear the selected image
+      _selectedImage = null;
     });
   }
 
@@ -160,7 +158,11 @@ class _AddMealScreenState extends State<AddMealScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Meal'),
+        title: Text('Add Meal',style: TextStyle(
+          fontFamily: 'Poppins',
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        )),
         backgroundColor: Color(0xFFE2BF65),
       ),
       body: SingleChildScrollView(
@@ -168,26 +170,45 @@ class _AddMealScreenState extends State<AddMealScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text('Title *', style: TextStyle(fontWeight: FontWeight.bold)),
+            SizedBox(height: 5),
             TextField(
               controller: _mealNameController,
-              decoration: InputDecoration(labelText: 'Meal Name', border: OutlineInputBorder()),
-            ),
-            SizedBox(height: 10),
-            GestureDetector(
-              onTap: _selectDateTime,
-              child: AbsorbPointer(
-                child: TextField(
-                  controller: _dateController,
-                  decoration: InputDecoration(labelText: 'Date & Time', border: OutlineInputBorder()),
-                ),
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: 'Enter Meal Name',
+                filled: true,
+                fillColor: Colors.grey[200],
               ),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 15),
+            Text('Date & Time *', style: TextStyle(fontWeight: FontWeight.bold)),
+            SizedBox(height: 5),
+            TextField(
+              controller: _dateController,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: 'Enter Date & Time',
+                filled: true,
+                fillColor: Colors.grey[200],
+              ),
+              readOnly: true,
+              onTap: _selectDateTime,
+            ),
+            SizedBox(height: 15),
+            Text('Notes', style: TextStyle(fontWeight: FontWeight.bold)),
+            SizedBox(height: 5),
             TextField(
               controller: _notesController,
-              decoration: InputDecoration(labelText: 'Notes', border: OutlineInputBorder()),
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: 'Enter Notes',
+                filled: true,
+                fillColor: Colors.grey[200],
+              ),
+              maxLines: 3,
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 15),
             Text('Upload Image (optional)', style: TextStyle(fontWeight: FontWeight.bold)),
             SizedBox(height: 5),
             Container(
@@ -225,6 +246,7 @@ class _AddMealScreenState extends State<AddMealScreen> {
               child: Text('Pick Image'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Color(0xFFE2BF65),
+                foregroundColor: Colors.black,
               ),
             ),
             SizedBox(height: 20),
@@ -234,7 +256,10 @@ class _AddMealScreenState extends State<AddMealScreen> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _addMeal,
-                child: Text('Add Meal'),
+                child: Text('Add Meal',
+                style: TextStyle(
+                  color: Colors.black,
+                ),),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Color(0xFFE2BF65),
                 ),

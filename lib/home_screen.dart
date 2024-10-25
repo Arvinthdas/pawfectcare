@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'addpets_screen.dart';
 import 'login_screen.dart';
-import 'userprofile_screen.dart';
 import 'petprofile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -25,7 +24,8 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoadingPets = true;
   bool _isLoadingNews = true;
 
-  final String apiKey = '784971b15e5c460e943f7e70adba0831'; // Replace with your actual API key
+  final String apiKey =
+      '784971b15e5c460e943f7e70adba0831'; // Replace with your actual API key
 
   @override
   void initState() {
@@ -45,7 +45,9 @@ class _HomeScreenState extends State<HomeScreen> {
             .get();
 
         setState(() {
-          _pets = snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+          _pets = snapshot.docs
+              .map((doc) => doc.data() as Map<String, dynamic>)
+              .toList();
           _petDocs = snapshot.docs;
         });
       } catch (e) {
@@ -59,7 +61,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _fetchNewsArticles() async {
-    final url = 'https://newsapi.org/v2/everything?q=pets&pageSize=20&apiKey=$apiKey';
+    final url =
+        'https://newsapi.org/v2/everything?q=pets&pageSize=20&apiKey=$apiKey';
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
@@ -167,17 +170,12 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           PopupMenuButton<String>(
             onSelected: (String value) {
-              if (value == 'My Profile') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => UserProfilePage()),
-                );
-              } else if (value == 'Log Out') {
+              if (value == 'Log Out') {
                 _logOut();
               }
             },
             itemBuilder: (BuildContext context) {
-              return {'My Profile', 'Log Out'}.map((String choice) {
+              return {'Log Out'}.map((String choice) {
                 return PopupMenuItem<String>(
                   value: choice,
                   child: Text(choice),
@@ -224,92 +222,104 @@ class _HomeScreenState extends State<HomeScreen> {
                             _isLoadingPets
                                 ? Center(child: CircularProgressIndicator())
                                 : _pets.isNotEmpty
-                                ? GridView.builder(
-                              shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
-                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                childAspectRatio: 0.8,
-                                crossAxisSpacing: 10,
-                                mainAxisSpacing: 10,
-                              ),
-                              itemCount: _pets.length,
-                              itemBuilder: (context, index) {
-                                final pet = _pets[index];
-                                final petDoc = _petDocs[index];
+                                    ? GridView.builder(
+                                        shrinkWrap: true,
+                                        physics: NeverScrollableScrollPhysics(),
+                                        gridDelegate:
+                                            SliverGridDelegateWithFixedCrossAxisCount(
+                                          crossAxisCount: 2,
+                                          childAspectRatio: 0.8,
+                                          crossAxisSpacing: 10,
+                                          mainAxisSpacing: 10,
+                                        ),
+                                        itemCount: _pets.length,
+                                        itemBuilder: (context, index) {
+                                          final pet = _pets[index];
+                                          final petDoc = _petDocs[index];
 
-                                return GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => PetProfileScreen(
-                                          petName: pet['name'],
-                                          petBreed: pet['breed'],
-                                          petImageUrl: pet['imageUrl'] ??
-                                              'assets/images/placeholder.png',
-                                          isFemale: pet['gender'] == 'Female',
-                                          petWeight: pet['weight'] ?? 0.0,
-                                          petAge: pet['age']?.toString() ?? '',
-                                          petType: pet['type'] ?? 'Unknown',
-                                          ageType: pet['ageType'] ?? 'Years',
-                                          petId: petDoc.id,
-                                          userId: _currentUser!.uid,
-                                        ),
-                                      ),
-                                    ).then((_) {
-                                      _fetchPets(); // Refresh pets after returning
-                                    });
-                                  },
-                                  onLongPress: () => _confirmDeletePet(petDoc),
-                                  child: Column(
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(10),
-                                        child: pet['imageUrl'] != null
-                                            ? Image.network(
-                                          pet['imageUrl'],
-                                          height: 100,
-                                          width: 100,
-                                          fit: BoxFit.cover,
-                                        )
-                                            : Image.asset(
-                                          'assets/images/placeholder.png',
-                                          height: 100,
-                                          width: 100,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                      SizedBox(height: 8),
-                                      Text(
-                                        pet['name'] ?? 'Unknown',
-                                        style: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                        ),
-                                      ),
-                                      Text(
-                                        pet['breed'] ?? '',
-                                        style: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 14,
-                                          color: Colors.grey[600],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            )
-                                : Text('No pets added yet.'),
+                                          return GestureDetector(
+                                            onTap: () {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      PetProfileScreen(
+                                                    petName: pet['name'],
+                                                    petBreed: pet['breed'],
+                                                    petImageUrl: pet[
+                                                            'imageUrl'] ??
+                                                        'assets/images/placeholder.png',
+                                                    isFemale: pet['gender'] ==
+                                                        'Female',
+                                                    petWeight:
+                                                        pet['weight'] ?? 0.0,
+                                                    petAge: pet['age']
+                                                            ?.toString() ??
+                                                        '',
+                                                    petType: pet['type'] ??
+                                                        'Unknown',
+                                                    ageType: pet['ageType'] ??
+                                                        'Years',
+                                                    petId: petDoc.id,
+                                                    userId: _currentUser!.uid,
+                                                  ),
+                                                ),
+                                              ).then((_) {
+                                                _fetchPets(); // Refresh pets after returning
+                                              });
+                                            },
+                                            onLongPress: () =>
+                                                _confirmDeletePet(petDoc),
+                                            child: Column(
+                                              children: [
+                                                ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(10),
+                                                  child: pet['imageUrl'] != null
+                                                      ? Image.network(
+                                                          pet['imageUrl'],
+                                                          height: 100,
+                                                          width: 100,
+                                                          fit: BoxFit.cover,
+                                                        )
+                                                      : Image.asset(
+                                                          'assets/images/placeholder.png',
+                                                          height: 100,
+                                                          width: 100,
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                ),
+                                                SizedBox(height: 8),
+                                                Text(
+                                                  pet['name'] ?? 'Unknown',
+                                                  style: TextStyle(
+                                                    fontFamily: 'Poppins',
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 16,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  pet['breed'] ?? '',
+                                                  style: TextStyle(
+                                                    fontFamily: 'Poppins',
+                                                    fontSize: 14,
+                                                    color: Colors.grey[600],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      )
+                                    : Text('No pets added yet.'),
                             SizedBox(height: 20),
                             Center(
                               child: ElevatedButton.icon(
                                 onPressed: () async {
                                   await Navigator.push(
                                     context,
-                                    MaterialPageRoute(builder: (context) => AddPetsScreen()),
+                                    MaterialPageRoute(
+                                        builder: (context) => AddPetsScreen()),
                                   );
                                   _fetchPets(); // Refresh pets after adding a new one
                                 },
@@ -353,44 +363,47 @@ class _HomeScreenState extends State<HomeScreen> {
                             _isLoadingNews
                                 ? Center(child: CircularProgressIndicator())
                                 : _articles.isNotEmpty
-                                ? ListView.builder(
-                              shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
-                              itemCount: _articles.length,
-                              itemBuilder: (context, index) {
-                                final article = _articles[index];
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    if (article['urlToImage'] != null)
-                                      Image.network(
-                                        article['urlToImage'],
-                                        height: 200,
-                                        width: double.infinity,
-                                        fit: BoxFit.cover,
-                                      ),
-                                    SizedBox(height: 10),
-                                    Text(
-                                      article['title'],
-                                      style: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    SizedBox(height: 5),
-                                    Text(
-                                      article['description'] ?? 'No description available',
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontSize: 16,
-                                      ),
-                                    ),
-                                    Divider(),
-                                  ],
-                                );
-                              },
-                            )
-                                : Text('No news articles available.'),
+                                    ? ListView.builder(
+                                        shrinkWrap: true,
+                                        physics: NeverScrollableScrollPhysics(),
+                                        itemCount: _articles.length,
+                                        itemBuilder: (context, index) {
+                                          final article = _articles[index];
+                                          return Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              if (article['urlToImage'] != null)
+                                                Image.network(
+                                                  article['urlToImage'],
+                                                  height: 200,
+                                                  width: double.infinity,
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              SizedBox(height: 10),
+                                              Text(
+                                                article['title'],
+                                                style: TextStyle(
+                                                  fontFamily: 'Poppins',
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                              SizedBox(height: 5),
+                                              Text(
+                                                article['description'] ??
+                                                    'No description available',
+                                                style: TextStyle(
+                                                  fontFamily: 'Poppins',
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+                                              Divider(),
+                                            ],
+                                          );
+                                        },
+                                      )
+                                    : Text('No news articles available.'),
                           ],
                         ),
                       ),

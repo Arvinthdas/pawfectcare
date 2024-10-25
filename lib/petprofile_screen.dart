@@ -52,7 +52,8 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _weightController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
-  final TextEditingController _customPetTypeController = TextEditingController();
+  final TextEditingController _customPetTypeController =
+      TextEditingController();
   final TextEditingController _customBreedController = TextEditingController();
   File? _selectedImage;
   String? _selectedPetType;
@@ -71,7 +72,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
   String _editWeight = '';
   bool _editIsFemale = false;
 
-  final List<String> _petTypes = ['Dog', 'Cat', 'Others'];
+  final List<String> _petTypes = ['Dog', 'Cat'];
   final List<String> _genderTypes = ['Male', 'Female'];
   final List<String> _ageTypes = ['Years', 'Months'];
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -180,7 +181,8 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
             if (_breeds.contains(widget.petBreed)) {
               _selectedBreed = widget.petBreed;
             } else {
-              _selectedBreed = _breeds.first; // Default to first breed if not found
+              _selectedBreed =
+                  _breeds.first; // Default to first breed if not found
             }
           }
         });
@@ -209,12 +211,14 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
       return false;
     }
 
-    if (_ageController.text.isEmpty || int.tryParse(_ageController.text) == null) {
+    if (_ageController.text.isEmpty ||
+        int.tryParse(_ageController.text) == null) {
       _showValidationMessage('Please enter a valid age');
       return false;
     }
 
-    if (_weightController.text.isEmpty || double.tryParse(_weightController.text) == null) {
+    if (_weightController.text.isEmpty ||
+        double.tryParse(_weightController.text) == null) {
       _showValidationMessage('Please enter a valid weight');
       return false;
     }
@@ -229,34 +233,36 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
 
   // Show validation message using a SnackBar
   void _showValidationMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   // Show a confirmation dialog before saving
   Future<bool> _showConfirmationDialog() async {
     return await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text("Confirm Save"),
-          content: Text("Are you sure you want to save these changes?"),
-          actions: [
-            TextButton(
-              child: Text("Cancel"),
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-            ),
-            TextButton(
-              child: Text("Save"),
-              onPressed: () {
-                Navigator.of(context).pop(true);
-              },
-            ),
-          ],
-        );
-      },
-    ) ?? false;
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text("Confirm Save"),
+              content: Text("Are you sure you want to save these changes?"),
+              actions: [
+                TextButton(
+                  child: Text("Cancel"),
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                  },
+                ),
+                TextButton(
+                  child: Text("Save"),
+                  onPressed: () {
+                    Navigator.of(context).pop(true);
+                  },
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
   }
 
   // Save changes to Firestore
@@ -274,7 +280,8 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
         _editWeight = _weightController.text; // Update from the controller
         _editAge = _ageController.text; // Update from the controller
         _selectedPetType = _editPetType;
-        _selectedBreed = _editBreed == 'Others' ? _customBreedController.text : _editBreed;
+        _selectedBreed =
+            _editBreed == 'Others' ? _customBreedController.text : _editBreed;
         _isFemale = _editIsFemale;
         _ageType = _editAgeType;
 
@@ -297,7 +304,9 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
       final updatedData = {
         'name': _petName,
         'breed': _selectedBreed ?? widget.petBreed,
-        'type': _editPetType == 'Others' ? _customPetTypeController.text : _editPetType,
+        'type': _editPetType == 'Others'
+            ? _customPetTypeController.text
+            : _editPetType,
         'age': int.tryParse(_petAge) ?? widget.petAge, // Ensure integer age
         'ageType': _editAgeType,
         'gender': _editIsFemale ? 'Female' : 'Male',
@@ -319,11 +328,11 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
         _isEditing = false;
       });
 
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Pet details updated successfully')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Pet details updated successfully')));
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Failed to update pet details: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update pet details: $e')));
     }
   }
 
@@ -350,37 +359,39 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
       // Only show AppBar for Profile tab
       appBar: _selectedIndex == 0
           ? AppBar(
-        backgroundColor: Color(0xFFE2BF65),
-        elevation: 0,
-        title: Text('Pet Profile',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-        actions: [
-          IconButton(
-            icon: Icon(_isEditing ? Icons.check : Icons.edit),
-            onPressed: _isEditing
-                ? _saveChangesWithConfirmation
-                : () {
-              setState(() {
-                _isEditing = true;
-                _editPetName = _nameController.text;
-                _editWeight = _weightController.text;
-                _editAge = _ageController.text;
-                _editPetType = _selectedPetType!;
-                _editIsFemale = _isFemale;
-                _editBreed = _selectedBreed!;
-                _editAgeType = _ageType!;
-              });
-            },
-          ),
-        ],
-      )
+              backgroundColor: Color(0xFFE2BF65),
+              elevation: 0,
+              title: Text('Pet Profile',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+              actions: [
+                IconButton(
+                  icon: Icon(_isEditing ? Icons.check : Icons.edit),
+                  onPressed: _isEditing
+                      ? _saveChangesWithConfirmation
+                      : () {
+                          setState(() {
+                            _isEditing = true;
+                            _editPetName = _nameController.text;
+                            _editWeight = _weightController.text;
+                            _editAge = _ageController.text;
+                            _editPetType = _selectedPetType!;
+                            _editIsFemale = _isFemale;
+                            _editBreed = _selectedBreed!;
+                            _editAgeType = _ageType!;
+                          });
+                        },
+                ),
+              ],
+            )
           : null, // No AppBar for other screens
       // IndexedStack to switch between different pages
       body: IndexedStack(
         index: _selectedIndex,
         children: [
           _buildProfileView(), // PetProfileView
-          PetHealthScreen(petId: widget.petId, userId: widget.userId), // Pass petId and userId
+          PetHealthScreen(
+              petId: widget.petId,
+              userId: widget.userId), // Pass petId and userId
           NutritionPage(petId: widget.petId, userId: widget.userId),
           ExerciseMonitoringPage(
             petId: widget.petId,
@@ -389,7 +400,11 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
             breed: widget.petBreed,
             age: int.tryParse(widget.petAge) ?? 0, // Convert age to integer
           ),
-          GroomingPage(petId: widget.petId, userId: widget.userId, petBreed: widget.petBreed,),
+          GroomingPage(
+            petId: widget.petId,
+            userId: widget.userId,
+            petBreed: widget.petBreed,
+          ),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -434,7 +449,6 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
           ),
         ],
       ),
-
     );
   }
 
@@ -448,66 +462,74 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
           Center(
             child: _isEditing
                 ? GestureDetector(
-              onTap: () => _showImageSourceDialog(),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(75),
-                child: _selectedImage != null
-                    ? Image.file(_selectedImage!, height: 150, width: 150, fit: BoxFit.cover)
-                    : Image.network(widget.petImageUrl,
-                    height: 150, width: 150, fit: BoxFit.cover),
-              ),
-            )
+                    onTap: () => _showImageSourceDialog(),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(75),
+                      child: _selectedImage != null
+                          ? Image.file(_selectedImage!,
+                              height: 150, width: 150, fit: BoxFit.cover)
+                          : Image.network(widget.petImageUrl,
+                              height: 150, width: 150, fit: BoxFit.cover),
+                    ),
+                  )
                 : ClipRRect(
-              borderRadius: BorderRadius.circular(75),
-              child: Image.network(
-                widget.petImageUrl,
-                height: 150,
-                width: 150,
-                fit: BoxFit.cover,
-              ),
-            ),
+                    borderRadius: BorderRadius.circular(75),
+                    child: Image.network(
+                      widget.petImageUrl,
+                      height: 150,
+                      width: 150,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
           ),
-          SizedBox(height: 10),
+          SizedBox(height: 20),
 
           // Gender field
           _isEditing
               ? _buildGenderField()
-              : _buildTextFieldWithIcon('Gender', widget.isFemale ? 'Female' : 'Male'),
+              : _buildTextFieldWithIcon(
+                  'Gender', widget.isFemale ? 'Female' : 'Male'),
 
-          SizedBox(height: 10),
+          SizedBox(height: 20),
 
           // Pet Name field
           _isEditing
-              ? _buildEditableField('Pet Name', _nameController, hintText: 'Enter pet name')
+              ? _buildEditableField('Pet Name', _nameController,
+                  hintText: 'Enter pet name')
               : _buildTextField('Pet Name', _petName),
 
-          SizedBox(height: 10),
+          SizedBox(height: 20),
 
           // Pet Type field
-          _isEditing ? _buildPetTypeField() : _buildTextField('Pet Type', _selectedPetType),
+          _isEditing
+              ? _buildPetTypeField()
+              : _buildTextField('Pet Type', _selectedPetType),
 
-          SizedBox(height: 10),
+          SizedBox(height: 20),
 
           // Breed field
-          _isEditing ? _buildBreedField() : _buildTextField('Breed', _selectedBreed),
+          _isEditing
+              ? _buildBreedField()
+              : _buildTextField('Breed', _selectedBreed),
 
-          SizedBox(height: 10),
+          SizedBox(height: 20),
 
           // Age field
           _buildAgeField(),
 
-          SizedBox(height: 10),
+          SizedBox(height: 20),
 
           // Weight field
           _isEditing
-              ? _buildEditableField('Weight (kg)', _weightController, hintText: 'Enter weight')
+              ? _buildEditableField('Weight (kg)', _weightController,
+                  hintText: 'Enter weight')
               : _buildTextField('Weight (kg)', _petWeight.toString()),
         ],
       ),
     );
   }
 
-  // Gender dropdown field
+// Gender dropdown field
   Widget _buildGenderField() {
     return DropdownButtonFormField<String>(
       value: _editIsFemale ? 'Female' : 'Male',
@@ -524,9 +546,13 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
       },
       decoration: InputDecoration(
         labelText: 'Gender',
+        labelStyle: TextStyle(fontSize: 18), // Maintain label font size
         filled: true,
         fillColor: Colors.grey[200],
-        border: OutlineInputBorder(),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 12), // Increase height here
       ),
     );
   }
@@ -536,7 +562,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
     return Container(
       padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.grey[200],
+        color: Color(0xFFF7EFF1),
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
@@ -545,13 +571,14 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
           Icon(value == 'Female' ? Icons.female : Icons.male,
               color: value == 'Female' ? Colors.pink : Colors.blue, size: 30),
           SizedBox(width: 8),
-          Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          Text(value,
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         ],
       ),
     );
   }
 
-  // Pet type dropdown field with "Others" option
+// Pet type dropdown field
   Widget _buildPetTypeField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -572,26 +599,20 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
           },
           decoration: InputDecoration(
             labelText: 'Pet Type',
+            labelStyle: TextStyle(fontSize: 18), // Maintain label font size
             filled: true,
             fillColor: Colors.grey[200],
-            border: OutlineInputBorder(),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 12), // Increase height here
           ),
         ),
-        if (_editPetType == 'Others')
-          TextField(
-            controller: _customPetTypeController,
-            decoration: InputDecoration(
-              labelText: 'Enter Custom Pet Type',
-              filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(),
-            ),
-          ),
       ],
     );
   }
 
-  // Breed field with dropdown and custom breed input for "Others"
+// Breed field with dropdown
   Widget _buildBreedField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -603,11 +624,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
               value: breed,
               child: Text(breed),
             );
-          }).toList()
-            ..add(DropdownMenuItem<String>(
-              value: 'Others',
-              child: Text('Others'),
-            )),
+          }).toList(),
           onChanged: (value) {
             setState(() {
               _editBreed = value!;
@@ -615,145 +632,130 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
           },
           decoration: InputDecoration(
             labelText: 'Breed',
+            labelStyle: TextStyle(fontSize: 18), // Increase label font size
             filled: true,
             fillColor: Colors.grey[200],
-            border: OutlineInputBorder(),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 12), // Increase height here
           ),
         ),
-        if (_editBreed == 'Others')
-          TextField(
-            controller: _customBreedController,
-            decoration: InputDecoration(
-              labelText: 'Enter Custom Breed',
-              filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(),
-            ),
-          ),
       ],
     );
   }
 
-  // Helper for read-only text fields when not editing
+// Helper for read-only text fields when not editing
   Widget _buildTextField(String label, String? value) {
-    return Container(
-      padding: EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey.shade400), // Matching border color
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          SizedBox(height: 5),
-          Text(value ?? '', style: TextStyle(fontSize: 16)),
-        ],
-      ),
-    );
-  }
-
-  // Editable field for user input
-  Widget _buildEditableField(String label, TextEditingController controller, {String? hintText}) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 5),
-      padding: EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.grey.shade400), // Matching border color
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          SizedBox(height: 5),
-          TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              hintText: hintText,
-              filled: true,
-              fillColor: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAgeField() {
-    return _isEditing
-        ? Row(
-      children: [
-        Expanded(
-          flex: 2,
-          child: TextField(
-            controller: _ageController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              labelText: 'Age',
-              border: OutlineInputBorder(),
-              filled: true,
-              fillColor: Colors.white,
-            ),
-          ),
-        ),
-        SizedBox(width: 10),
-        Expanded(
-          flex: 1,
-          child: DropdownButtonFormField<String>(
-            value: _editAgeType,
-            items: _ageTypes.map((type) {
-              return DropdownMenuItem<String>(
-                value: type,
-                child: Text(type),
-              );
-            }).toList(),
-            onChanged: (value) {
-              setState(() {
-                _editAgeType = value!;
-              });
-            },
-            decoration: InputDecoration(
-              labelText: 'Type',
-              border: OutlineInputBorder(),
-              filled: true,
-              fillColor: Colors.white,
-            ),
-          ),
-        ),
-      ],
-    )
-        : Card(
-      color: Colors.grey[200],
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Padding(
+    return Center(
+      child: Container(
+        width: MediaQuery.of(context).size.width *
+            0.9, // Set width to 80% of the screen
         padding: EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.grey[200],
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.grey.shade400),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Age',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
+            Text(label,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             SizedBox(height: 5),
-            Text(
-              '${_ageController.text} ${widget.ageType}',
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.black,
-              ),
-            ),
+            Text(value ?? '', style: TextStyle(fontSize: 16)),
           ],
+        ),
+      ),
+    );
+  }
+
+// Editable field for user input with label aligned with the border
+  Widget _buildEditableField(String label, TextEditingController controller, {String? hintText}) {
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 5),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TextStyle(
+            color: Colors.grey[700], // Label color
+            fontSize: 18, // Maintain label font size
+          ),
+          floatingLabelBehavior: FloatingLabelBehavior.always, // Always show the label
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(
+              color: Colors.grey.shade400,
+            ),
+          ),
+          filled: true,
+          fillColor: Colors.grey[200],
+          contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 12), // Increase height here
+        ),
+        style: TextStyle(fontSize: 17), // Maintain text field font size
+      ),
+    );
+  }
+
+
+
+// Age field for view mode and edit mode
+  Widget _buildAgeField() {
+    return _isEditing
+        ? TextField(
+      controller: _ageController,
+      keyboardType: TextInputType.number,
+      decoration: InputDecoration(
+        labelText: 'Age (Years)',
+        labelStyle: TextStyle(fontSize: 18), // Maintain label font size
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        filled: true,
+        fillColor: Colors.grey[200],
+        contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 12), // Increase height here
+      ),
+      style: TextStyle(fontSize: 18), // Maintain text field font size
+    )
+        : Center(
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9, // Set width to 90% of the screen
+        decoration: BoxDecoration(
+          color: Colors.grey[200],
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.grey.shade400), // Add border
+        ),
+        child: Card(
+          color: Colors.grey[200],
+          elevation: 0, // Set elevation to 0 to avoid double shadow
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Padding(
+            padding: EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Age',
+                  style: TextStyle(
+                    fontSize: 18, // Increase font size for the label
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                SizedBox(height: 5),
+                Text(
+                  '${_ageController.text} ${widget.ageType}',
+                  style: TextStyle(
+                    fontSize: 18, // Increase font size for the value
+                    color: Colors.black,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

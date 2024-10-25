@@ -62,9 +62,12 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
   }
 
   void _initializeFields() {
-    _taskNameController = TextEditingController(text: _latestGroomingRecord['taskName']);
-    _productsUsedController = TextEditingController(text: _latestGroomingRecord['productsUsed']);
-    _notesController = TextEditingController(text: _latestGroomingRecord['notes']);
+    _taskNameController =
+        TextEditingController(text: _latestGroomingRecord['taskName']);
+    _productsUsedController =
+        TextEditingController(text: _latestGroomingRecord['productsUsed']);
+    _notesController =
+        TextEditingController(text: _latestGroomingRecord['notes']);
 
     Timestamp dateTimestamp = _latestGroomingRecord['date'];
     final dateTime = dateTimestamp.toDate();
@@ -81,7 +84,8 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
   }
 
   Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _imageFile = File(pickedFile.path);
@@ -92,7 +96,8 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
   Future<String?> _uploadImageToStorage(String userId) async {
     if (_imageFile != null) {
       try {
-        String fileName = 'grooming_tasks/${userId}/${DateTime.now().millisecondsSinceEpoch}.jpg';
+        String fileName =
+            'grooming_tasks/${userId}/${DateTime.now().millisecondsSinceEpoch}.jpg';
         Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
         UploadTask uploadTask = storageRef.putFile(_imageFile!);
         TaskSnapshot snapshot = await uploadTask;
@@ -117,7 +122,9 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
     print('Grooming Record ID: ${widget.groomingRecord.id}');
 
     // Null checks for the IDs
-    if (widget.userId.isEmpty || widget.petId.isEmpty || widget.groomingRecord.id.isEmpty) {
+    if (widget.userId.isEmpty ||
+        widget.petId.isEmpty ||
+        widget.groomingRecord.id.isEmpty) {
       _showMessage('Invalid user, pet, or grooming record ID.');
       return;
     }
@@ -159,13 +166,12 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
     }
   }
 
-
-
-
   Future<void> _scheduleNotification(DateTime scheduledTime) async {
-    FlutterLocalNotificationsPlugin notificationsPlugin = FlutterLocalNotificationsPlugin();
+    FlutterLocalNotificationsPlugin notificationsPlugin =
+        FlutterLocalNotificationsPlugin();
 
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
       'grooming_channel_id',
       'Grooming Notifications',
       channelDescription: 'Reminder for upcoming grooming tasks',
@@ -173,7 +179,8 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
       priority: Priority.high,
     );
 
-    const NotificationDetails platformDetails = NotificationDetails(android: androidDetails);
+    const NotificationDetails platformDetails =
+        NotificationDetails(android: androidDetails);
 
     tz.TZDateTime scheduledDate = tz.TZDateTime.from(scheduledTime, tz.local);
 
@@ -183,7 +190,8 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
       'Your pet has a grooming appointment',
       scheduledDate,
       platformDetails,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,
     );
   }
@@ -226,7 +234,8 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
       _imageFile = null; // Clear the local image file
 
       if (_latestGroomingRecord.data() != null) {
-        Map<String, dynamic> updatedData = Map<String, dynamic>.from(_latestGroomingRecord.data() as Map<String, dynamic>);
+        Map<String, dynamic> updatedData = Map<String, dynamic>.from(
+            _latestGroomingRecord.data() as Map<String, dynamic>);
         updatedData['imageUrl'] = ''; // Clear the image URL
         _latestGroomingRecord = _latestGroomingRecord;
       }
@@ -287,7 +296,8 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
         ],
       );
     } else {
-      String? imageUrl = (_latestGroomingRecord.data() as Map<String, dynamic>)['imageUrl'];
+      String? imageUrl =
+          (_latestGroomingRecord.data() as Map<String, dynamic>)['imageUrl'];
 
       if (imageUrl != null && imageUrl.isNotEmpty) {
         return Column(
@@ -370,7 +380,9 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
           children: [
             TextField(
               controller: _taskNameController,
-              decoration: InputDecoration(labelText: 'Task Name', labelStyle: TextStyle(color: Color(0xFFE2BF65))),
+              decoration: InputDecoration(
+                  labelText: 'Task Name',
+                  labelStyle: TextStyle(color: Color(0xFFE2BF65))),
               enabled: _isEditing,
             ),
             SizedBox(height: 10),
@@ -382,7 +394,8 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
               },
               child: AbsorbPointer(
                 child: TextField(
-                  controller: TextEditingController(text: DateFormat('dd/MM/yyyy').format(_selectedDate)),
+                  controller: TextEditingController(
+                      text: DateFormat('dd/MM/yyyy').format(_selectedDate)),
                   decoration: InputDecoration(
                     labelText: 'Date',
                     labelStyle: TextStyle(color: Color(0xFFE2BF65)),
@@ -401,7 +414,8 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
               },
               child: AbsorbPointer(
                 child: TextField(
-                  controller: TextEditingController(text: _selectedTime.format(context)),
+                  controller: TextEditingController(
+                      text: _selectedTime.format(context)),
                   decoration: InputDecoration(
                     labelText: 'Time',
                     labelStyle: TextStyle(color: Color(0xFFE2BF65)),
@@ -414,13 +428,17 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
             SizedBox(height: 10),
             TextField(
               controller: _productsUsedController,
-              decoration: InputDecoration(labelText: 'Products Used', labelStyle: TextStyle(color: Color(0xFFE2BF65))),
+              decoration: InputDecoration(
+                  labelText: 'Products Used',
+                  labelStyle: TextStyle(color: Color(0xFFE2BF65))),
               enabled: _isEditing,
             ),
             SizedBox(height: 10),
             TextField(
               controller: _notesController,
-              decoration: InputDecoration(labelText: 'Notes', labelStyle: TextStyle(color: Color(0xFFE2BF65))),
+              decoration: InputDecoration(
+                  labelText: 'Notes',
+                  labelStyle: TextStyle(color: Color(0xFFE2BF65))),
               enabled: _isEditing,
             ),
             SizedBox(height: 20),

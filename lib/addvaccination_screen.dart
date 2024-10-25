@@ -250,29 +250,85 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
     });
   }
 
+  Future<void> _removeImage() async {
+    bool? confirmed = await _showConfirmationDialog(
+      title: 'Confirm Removal',
+      content: 'Are you sure you want to remove the image?',
+    );
+
+    if (confirmed == true) {
+      setState(() {
+        _selectedDocument = null; // Clear the selected document
+      });
+    }
+  }
+
+  Future<bool?> _showConfirmationDialog({required String title, required String content}) {
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(content),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFE2BF65)),
+              child: Text('Remove'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildImagePreview() {
     if (_selectedDocument != null) {
-      return Image.file(
-        _selectedDocument!,
-        height: 150,
-        width: 150,
-        fit: BoxFit.cover,
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            margin: const EdgeInsets.only(bottom: 10),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8.0),
+              child: Image.file(
+                _selectedDocument!,
+                height: 150,
+                width: double.infinity,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+        ],
       );
     } else {
-      return Placeholder(
-        fallbackHeight: 150,
-        fallbackWidth: 150,
-        color: Colors.grey,
-        strokeWidth: 2,
+      return Container(
+        height: 150,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.grey[200],
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: Center(child: Text('No Image Selected')),
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Vaccination Details'),
+        title: Text('Add Vaccination Details',
+        style: TextStyle(
+          fontFamily: 'Poppins',
+          fontWeight: FontWeight.bold,
+          fontSize: 20,
+        ),),
         backgroundColor: Color(0xFFE2BF65),
       ),
       body: SingleChildScrollView(
@@ -345,15 +401,29 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
             SizedBox(height: 15),
             Text('Upload Image', style: TextStyle(fontWeight: FontWeight.bold)),
             SizedBox(height: 5),
-            _buildImagePreview(),
+            _buildImagePreview(), // Update to only show the image without the button
             SizedBox(height: 15),
-            ElevatedButton(
-              onPressed: _pickDocument,
-              child: Text('Pick Document/Image'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFE2BF65),
-                foregroundColor: Colors.black,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  onPressed: _pickDocument,
+                  child: Text('Pick Image'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFFE2BF65),
+                    foregroundColor: Colors.black,
+                  ),
+                ),
+                if (_selectedDocument != null) // Only show this button if there is an image selected
+                  TextButton(
+                    onPressed: _removeImage,
+                    child: Text('Remove Image'),
+                    style: TextButton.styleFrom(
+                      backgroundColor: Color(0xFFE2BF65),
+                      foregroundColor: Colors.black,
+                    ),
+                  ),
+              ],
             ),
             SizedBox(height: 20),
             _isUploading
@@ -375,4 +445,5 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
       ),
     );
   }
+
 }

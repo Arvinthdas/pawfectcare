@@ -56,32 +56,18 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
         ),
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(45), // Set the preferred height for the TabBar
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return TabBar(
-                controller: _tabController,
-                indicatorColor: Color(0xFF037171),
-                labelColor: Colors.white,
-                unselectedLabelColor: Colors.black,
-                labelStyle: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                isScrollable: false, // Make the TabBar not scrollable to fit the width
-                tabs: [
-                  // Set the tab width to equally divide the screen width
-                  Container(
-                    width: constraints.maxWidth / 3, // Divide by number of tabs (3 in this case)
-                    child: Center(child: Text('Medical Records')),
-                  ),
-                  Container(
-                    width: constraints.maxWidth / 3,
-                    child: Center(child: Text('Vaccinations & Reminders')),
-                  ),
-                  Container(
-                    width: constraints.maxWidth / 3,
-                    child: Center(child: Text('Emotional Support')),
-                  ),
-                ],
-              );
-            },
+          child: TabBar(
+            controller: _tabController,
+            indicatorColor: Color(0xFF037171),
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.black,
+            labelStyle: TextStyle(fontSize: 15,fontStyle: FontStyle.italic ,fontWeight: FontWeight.bold),
+            isScrollable: true, // Allow horizontal scrolling
+            tabs: [
+              Tab(child: Text('Medical Records')),
+              Tab(child: Text('Vaccinations & Reminders')),
+              Tab(child: Text('Emotional Support')),
+            ],
           ),
         ),
       ),
@@ -95,7 +81,6 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
       ),
     );
   }
-
 
   // Medical Records Tab
   Widget _buildMedicalRecordsTab() {
@@ -154,10 +139,13 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
           final doctor = record['doctor']?.toLowerCase() ?? '';
           final clinic = record['clinic']?.toLowerCase() ?? '';
           final treatment = record['treatment']?.toLowerCase() ?? '';
+          final date = record['date']?.toLowerCase() ?? '';
+
           return title.contains(_searchQueryMedicalRecords.toLowerCase()) ||
               doctor.contains(_searchQueryMedicalRecords.toLowerCase()) ||
               clinic.contains(_searchQueryMedicalRecords.toLowerCase()) ||
-              treatment.contains(_searchQueryMedicalRecords.toLowerCase());
+              treatment.contains(_searchQueryMedicalRecords.toLowerCase()) ||
+              date.contains(_searchQueryMedicalRecords.toLowerCase());
         }).toList();
 
         return ListView.builder(
@@ -181,13 +169,14 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
     );
   }
 
+
   Widget _buildRecordCard(String title, String date, String doctor, String clinic, String treatment, String notes, DocumentSnapshot logRecord) {
     return InkWell(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => HealthLogDetailScreen(logRecord: logRecord),
+            builder: (context) => HealthLogDetailScreen(logRecord: logRecord, userId: widget.userId),
           ),
         );
       },
@@ -338,9 +327,12 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
           final vaccineName = record['vaccineName']?.toLowerCase() ?? '';
           final clinic = record['clinic']?.toLowerCase() ?? '';
           final notes = record['notes']?.toLowerCase() ?? '';
+          final date = record['date']?.toLowerCase() ?? '';
+
           return vaccineName.contains(_searchQueryVaccinations.toLowerCase()) ||
               clinic.contains(_searchQueryVaccinations.toLowerCase()) ||
-              notes.contains(_searchQueryVaccinations.toLowerCase());
+              notes.contains(_searchQueryVaccinations.toLowerCase()) ||
+              date.contains(_searchQueryVaccinations.toLowerCase());
         }).toList();
 
         return ListView.builder(
@@ -472,13 +464,20 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
           }
         }).toList();
 
+        if (upcomingRecords.isEmpty) {
+          return Center(child: Text('No upcoming vaccinations available'));
+        }
+
         final filteredUpcomingRecords = upcomingRecords.where((record) {
           final vaccineName = record['vaccineName']?.toLowerCase() ?? '';
           final clinic = record['clinic']?.toLowerCase() ?? '';
           final notes = record['notes']?.toLowerCase() ?? '';
+          final date = record['date']?.toLowerCase() ?? '';
+
           return vaccineName.contains(_searchQueryVaccinations.toLowerCase()) ||
               clinic.contains(_searchQueryVaccinations.toLowerCase()) ||
-              notes.contains(_searchQueryVaccinations.toLowerCase());
+              notes.contains(_searchQueryVaccinations.toLowerCase()) ||
+              date.contains(_searchQueryVaccinations.toLowerCase());
         }).toList();
 
         return ListView.builder(
@@ -499,6 +498,7 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
       },
     );
   }
+
 
   Widget _buildVaccinationGuidelines() {
     return Column(
@@ -600,6 +600,7 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          backgroundColor: Color(0xFFF7EFF1),
           title: Text('Log Mood'),
           content: SingleChildScrollView(
             child: Column(
@@ -668,8 +669,12 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
         .collection('moodTracker')
         .add(moodLog);
 
-    _showMessage('Mood log added successfully.');
+    // Refresh the UI immediately after adding the mood log
+    setState(() {
+      _showMessage('Mood log added successfully.');
+    });
   }
+
 
   Widget _buildMoodHistory() {
     return StreamBuilder<QuerySnapshot>(
@@ -901,11 +906,11 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
             value: entry.value.toDouble(),
             title: '${entry.key} (${entry.value})',
             color: _getMoodColor(entry.key),
-            radius: 50, // Adjusted radius for a better appearance
+            radius: 70, // Adjusted radius for a better appearance
             titleStyle: TextStyle(
-              fontSize: 14,
+              fontSize: 15,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: Colors.black,
             ),
           );
         }).toList();

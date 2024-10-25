@@ -41,11 +41,9 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
   }
 
   Future<void> _initializeNotifications() async {
-    const AndroidInitializationSettings initializationSettingsAndroid =
-    AndroidInitializationSettings('@mipmap/ic_launcher');
+    const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
 
-    final InitializationSettings initializationSettings =
-    InitializationSettings(android: initializationSettingsAndroid);
+    final InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
 
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
@@ -61,15 +59,10 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
   }
 
   Future<void> _removeImage() async {
-    if (_selectedImage != null) {
-      setState(() {
-        _selectedImage = null; // Clear the newly selected image
-      });
-    } else {
-      setState(() {
-        _imageRemoved = true; // Mark that the previously uploaded image was removed
-      });
-    }
+    setState(() {
+      _selectedImage = null; // Clear the newly selected image
+      _imageRemoved = true; // Mark that the previously uploaded image was removed
+    });
   }
 
   Future<void> _saveChanges() async {
@@ -222,8 +215,12 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFF7EFF1),
       appBar: AppBar(
-        title: Text('Meal Details'),
+        title: Text(
+          'Meal Details',
+          style: TextStyle(color: Colors.black, fontFamily: 'Poppins', fontSize: 20, fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Color(0xFFE2BF65),
         actions: [
           if (_isEditing)
@@ -249,9 +246,17 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              SizedBox(height: 20),
               TextFormField(
                 controller: _mealNameController,
-                decoration: InputDecoration(labelText: 'Meal Name', border: OutlineInputBorder()),
+                decoration: InputDecoration(
+                    labelText: 'Meal Name',
+                    labelStyle: TextStyle(
+                      color: Colors.black,
+                      fontSize: 19,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    border: OutlineInputBorder()),
                 enabled: _isEditing,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -260,36 +265,42 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 10),
-              GestureDetector(
-                onTap: () {
-                  if (_isEditing) {
-                    _selectDateTime();
+              SizedBox(height: 20),
+              TextFormField(
+                controller: _dateController,
+                decoration: InputDecoration(
+                    labelText: 'Date & Time',
+                    labelStyle: TextStyle(
+                      color: Colors.black,
+                      fontSize: 19,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    border: OutlineInputBorder()),
+                enabled: _isEditing,
+                onTap: _isEditing ? _selectDateTime : null,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please select the date and time';
                   }
+                  return null;
                 },
-                child: AbsorbPointer(
-                  child: TextFormField(
-                    controller: _dateController,
-                    decoration: InputDecoration(labelText: 'Date & Time', border: OutlineInputBorder()),
-                    enabled: false, // Disable user input directly
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please select the date and time';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 20),
               TextFormField(
                 controller: _notesController,
-                decoration: InputDecoration(labelText: 'Notes', border: OutlineInputBorder()),
+                decoration: InputDecoration(
+                    labelText: 'Notes',
+                    labelStyle: TextStyle(
+                      color: Colors.black,
+                      fontSize: 19,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    border: OutlineInputBorder()),
                 enabled: _isEditing,
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 20),
               Text('Upload New Image (optional)', style: TextStyle(fontWeight: FontWeight.bold)),
-              SizedBox(height: 5),
+              SizedBox(height: 10),
               Container(
                 height: 150,
                 color: Colors.grey[200],
@@ -297,20 +308,6 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
                     ? Stack(
                   children: [
                     Image.file(_selectedImage!, fit: BoxFit.cover, width: double.infinity),
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: GestureDetector(
-                        onTap: _removeImage,
-                        child: Container(
-                          color: Colors.black54,
-                          child: Padding(
-                            padding: const EdgeInsets.all(4.0),
-                            child: Icon(Icons.close, color: Colors.white),
-                          ),
-                        ),
-                      ),
-                    ),
                   ],
                 )
                     : (_imageRemoved || widget.mealRecord['imageUrl'] == null)
@@ -318,31 +315,25 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
                     : Stack(
                   children: [
                     Image.network(widget.mealRecord['imageUrl'], fit: BoxFit.cover, width: double.infinity),
-                    if (_isEditing)
-                      Positioned(
-                        top: 8,
-                        right: 8,
-                        child: GestureDetector(
-                          onTap: _removeImage,
-                          child: Container(
-                            color: Colors.black54,
-                            child: Padding(
-                              padding: const EdgeInsets.all(4.0),
-                              child: Icon(Icons.close, color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
                   ],
                 ),
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 20),
               if (_isEditing)
                 ElevatedButton(
                   onPressed: _pickImage,
-                  child: Text('Pick New Image'),
+                  child: Text('Pick New Image', style: TextStyle(color: Colors.black)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFFE2BF65),
+                  ),
+                ),
+              if (_isEditing && widget.mealRecord['imageUrl'] != null) // Show remove button only if an image exists
+                ElevatedButton(
+                  onPressed: _removeImage,
+                  child: Text('Remove Image', style: TextStyle(color: Colors.black)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFFE2BF65), // Red color for remove button
+                    //foregroundColor: Colors.black,
                   ),
                 ),
             ],
