@@ -12,11 +12,13 @@ class VaccinationDetailScreen extends StatefulWidget {
   final DocumentSnapshot vaccinationRecord;
   final String petId;
   final String userId;
+  final String petName;
 
   VaccinationDetailScreen({
     required this.vaccinationRecord,
     required this.petId,
     required this.userId,
+    required this.petName
   });
 
   @override
@@ -160,7 +162,7 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
         'documentUrl': imageUrl,
       });
 
-      _scheduleNotification(updatedDateTime);
+      _scheduleNotification(updatedDateTime,_vaccineNameController.text, widget.petName);
       _showMessage('Changes saved successfully');
       setState(() {
         _isEditing = false;
@@ -168,7 +170,7 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
     }
   }
 
-  Future<void> _scheduleNotification(DateTime scheduledTime) async {
+  Future<void> _scheduleNotification(DateTime scheduledTime,String title, String petName) async {
     FlutterLocalNotificationsPlugin notificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
@@ -189,7 +191,7 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
     await notificationsPlugin.zonedSchedule(
       widget.vaccinationRecord.hashCode,
       'Vaccination Reminder',
-      'Your pet has a vaccination appointment',
+      '$petName `s $title vaccination appointment',
       scheduledDate,
       platformDetails,
       uiLocalNotificationDateInterpretation:

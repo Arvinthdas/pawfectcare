@@ -96,7 +96,7 @@ class _HealthLogDetailScreenState extends State<HealthLogDetailScreen> {
     await flutterLocalNotificationsPlugin.zonedSchedule(
       0, // Notification ID
       'Medical Appointment Reminder',
-      'Appointment for ${widget.petName}`s ${_titleController.text} appointment', // Use petName and title
+      '${widget.petName}`s ${_titleController.text} appointment', // Use petName and title
       tzScheduledDateTime,
       const NotificationDetails(
         android: AndroidNotificationDetails(

@@ -11,8 +11,9 @@ class GroomingPage extends StatefulWidget {
   final String petId;
   final String userId;
   final String petBreed; // Added breed information
+  final String petName;
 
-  GroomingPage({required this.petId, required this.userId, required this.petBreed});
+  GroomingPage({required this.petId, required this.userId, required this.petBreed, required this.petName});
 
   @override
   _GroomingPageState createState() => _GroomingPageState();
@@ -104,7 +105,7 @@ class _GroomingPageState extends State<GroomingPage> with SingleTickerProviderSt
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => AddGroomingScreen(petId: widget.petId, userId: widget.userId),
+                builder: (context) => AddGroomingScreen(petId: widget.petId, userId: widget.userId, petName: widget.petName),
               ),
             );
           }),
@@ -205,6 +206,7 @@ class _GroomingPageState extends State<GroomingPage> with SingleTickerProviderSt
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Upcoming Grooming Tasks', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            SizedBox(height: 15),
             ListView.builder(
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
@@ -244,6 +246,7 @@ class _GroomingPageState extends State<GroomingPage> with SingleTickerProviderSt
               groomingRecord: taskRecord,
               petId: widget.petId,
               userId: widget.userId,
+              petName: widget.petName,
             ),
           ),
         );

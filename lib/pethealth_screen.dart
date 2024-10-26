@@ -334,7 +334,7 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => AddVaccinationScreen(petId: widget.petId, userId: widget.userId),
+                builder: (context) => AddVaccinationScreen(petId: widget.petId, userId: widget.userId, petName: widget.petName),
               ),
             );
           }, showAddButton: false), // Set showAddButton to false
@@ -353,7 +353,7 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => AddVaccinationScreen(petId: widget.petId, userId: widget.userId),
+                builder: (context) => AddVaccinationScreen(petId: widget.petId, userId: widget.userId, petName: widget.petName),
               ),
             );
           }),
@@ -441,6 +441,7 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
               vaccinationRecord: logRecord,
               petId: widget.petId,
               userId: widget.userId,
+              petName: widget.petName,
             ),
           ),
         );
@@ -649,25 +650,33 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
 
 
 
-  // Emotional Support Tab with Mood Tracker
+// Emotional Support Tab with Mood Tracker and Date Filter
   Widget _buildEmotionalSupportTab() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: ListView(
         children: [
-          _buildSectionHeader('Mood Tracker', onAddPressed: () {
-            _showMoodTrackerDialog();
-          }),
+          _buildSectionHeader(
+            'Mood Tracker',
+            onAddPressed: () {
+              _showMoodTrackerDialog();
+            },
+            showFilterButton: true, // Show filter button in Mood Tracker
+          ),
           SizedBox(height: 16), // Space between the header and the mood history
           _buildMoodHistory(),
           SizedBox(height: 20), // Space between mood history and mood trends
-          _buildSectionHeader('Mood Trends', showAddButton: false, onAddPressed: () {  }), // Hide "+ Add" button for Mood Trends
+          _buildSectionHeader(
+            'Mood Trends',
+            showAddButton: false, // Hide "+ Add" button for Mood Trends
+          ), // No filter button here
           SizedBox(height: 16), // Space between the header and the chart
           _buildMoodTrends(),
         ],
       ),
     );
   }
+
 
   void _showMoodTrackerDialog() {
     final _moodController = TextEditingController();
@@ -753,7 +762,11 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
   }
 
 
+// Mood History showing today's data by default with date filter
   Widget _buildMoodHistory() {
+    final filterDate = selectedDate ?? DateTime.now();
+    final formattedDate = DateFormat('dd/MM/yyyy').format(filterDate);
+
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('users')
@@ -774,7 +787,16 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
           return Center(child: Text('No mood history available'));
         }
 
-        final moodLogs = snapshot.data!.docs;
+        // Filter mood logs to show only entries for selected date
+        final moodLogs = snapshot.data!.docs.where((doc) {
+          final dateString = doc['date'];
+          final logDate = dateString.split(' ')[0]; // Extract date part only
+          return logDate == formattedDate;
+        }).toList();
+
+        if (moodLogs.isEmpty) {
+          return Center(child: Text('No mood history available for selected date'));
+        }
 
         return ListView.builder(
           shrinkWrap: true,
@@ -928,7 +950,11 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
     }
   }
 
+// Mood Trends Pie Chart showing today's data by default with date filter
   Widget _buildMoodTrends() {
+    final filterDate = selectedDate ?? DateTime.now();
+    final formattedDate = DateFormat('dd/MM/yyyy').format(filterDate);
+
     return FutureBuilder<QuerySnapshot>(
       future: FirebaseFirestore.instance
           .collection('users')
@@ -942,48 +968,33 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
           return Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError || !snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(child: Text('No mood trends available'));
+          return Center(child: Text('No mood data available for selected date'));
         }
 
-        final moodData = snapshot.data!.docs;
-        Map<String, int> weeklyMoodCount = {};
+        // Filter mood logs to show only entries for selected date
+        final moodData = snapshot.data!.docs.where((doc) {
+          final dateString = doc['date'];
+          final logDate = dateString.split(' ')[0]; // Extract date part only
+          return logDate == formattedDate;
+        }).toList();
 
-        // Get the current date
-        final now = DateTime.now();
-        // Calculate the start of the week (Monday)
-        final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-        // Calculate the end of the week (Sunday)
-        final endOfWeek = startOfWeek.add(Duration(days: 6));
+        if (moodData.isEmpty) {
+          return Center(child: Text('No mood trends available for selected date'));
+        }
 
-        // Filter and aggregate mood logs for the current week
+        Map<String, int> moodCount = {};
         for (var log in moodData) {
-          final dateString = log['date'];
-          final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
-          try {
-            final logDate = dateFormat.parse(dateString);
-            if (logDate.isAfter(startOfWeek.subtract(Duration(seconds: 1))) &&
-                logDate.isBefore(endOfWeek.add(Duration(days: 1)))) {
-              final mood = log['mood'] ?? 'Unknown';
-              weeklyMoodCount[mood] = (weeklyMoodCount[mood] ?? 0) + 1;
-            }
-          } catch (e) {
-            // Skip any log with a parsing error
-            continue;
-          }
+          final mood = log['mood'] ?? 'Unknown';
+          moodCount[mood] = (moodCount[mood] ?? 0) + 1;
         }
 
-        // If no mood data is found for the current week, show a message
-        if (weeklyMoodCount.isEmpty) {
-          return Center(child: Text('No mood data available for the current week'));
-        }
-
-        // Create pie chart sections based on weekly mood counts
-        final chartData = weeklyMoodCount.entries.map((entry) {
+        // Create pie chart sections based on mood counts
+        final chartData = moodCount.entries.map((entry) {
           return PieChartSectionData(
             value: entry.value.toDouble(),
             title: '${entry.key} (${entry.value})',
             color: _getMoodColor(entry.key),
-            radius: 70, // Adjusted radius for a better appearance
+            radius: 70,
             titleStyle: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
@@ -992,14 +1003,13 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
           );
         }).toList();
 
-        // Wrap the PieChart in a SizedBox to constrain its size
         return SizedBox(
-          height: 250, // Set the height to a fixed value
+          height: 250,
           child: PieChart(
             PieChartData(
               sections: chartData,
-              centerSpaceRadius: 40, // Increase the center space radius for better appearance
-              sectionsSpace: 2, // Space between sections
+              centerSpaceRadius: 40,
+              sectionsSpace: 2,
               borderData: FlBorderData(show: false),
             ),
           ),
@@ -1026,31 +1036,48 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
     }
   }
 
-  Widget _buildSectionHeader(String title, {required VoidCallback onAddPressed, bool showAddButton = true}) {
+// Section Header with optional Date Filter Button
+  DateTime? selectedDate; // Variable to store the selected date
+
+  Widget _buildSectionHeader(String title, {bool showAddButton = true, bool showFilterButton = false, VoidCallback? onAddPressed}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           title,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        if (showAddButton)
-          TextButton(
-            onPressed: onAddPressed,
-            child: Row(
-              children: [
-                Icon(Icons.add, color: Colors.black),
-                Text('Add', style: TextStyle(color: Colors.black)),
-              ],
-            ),
-          ),
+        Row(
+          children: [
+            if (showAddButton)
+              TextButton.icon(
+                icon: Icon(Icons.add, color: Colors.black),
+                label: Text('Add', style: TextStyle(color: Colors.black)),
+                onPressed: onAddPressed,
+              ),
+            if (showFilterButton) // Only show the filter button if specified
+              IconButton(
+                icon: Icon(Icons.filter_list, color: Colors.black), // Filter icon for date selection
+                onPressed: () async {
+                  final pickedDate = await showDatePicker(
+                    context: context,
+                    initialDate: selectedDate ?? DateTime.now(),
+                    firstDate: DateTime(2000),
+                    lastDate: DateTime.now(),
+                  );
+                  if (pickedDate != null) {
+                    setState(() {
+                      selectedDate = pickedDate;
+                    });
+                  }
+                },
+              ),
+          ],
+        ),
       ],
     );
   }
+
 
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(

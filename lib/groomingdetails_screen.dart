@@ -12,11 +12,13 @@ class GroomingDetailScreen extends StatefulWidget {
   final DocumentSnapshot groomingRecord;
   final String petId;
   final String userId;
+  final String petName;
 
   GroomingDetailScreen({
     required this.groomingRecord,
     required this.petId,
     required this.userId,
+    required this.petName
   });
 
   @override
@@ -140,7 +142,7 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
         if (imageUrl != null) 'imageUrl': imageUrl, // Update with the new image URL
       });
 
-      _scheduleNotification(updatedDateTime);
+      _scheduleNotification(updatedDateTime, _taskNameController.text, widget.petName);
       _showMessage('Changes saved successfully');
 
       // Refresh latest grooming record to show the new image
@@ -156,7 +158,7 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
     }
   }
 
-  Future<void> _scheduleNotification(DateTime scheduledTime) async {
+  Future<void> _scheduleNotification(DateTime scheduledTime,String title, String petName) async {
     FlutterLocalNotificationsPlugin notificationsPlugin = FlutterLocalNotificationsPlugin();
 
     const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
@@ -174,7 +176,7 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
     await notificationsPlugin.zonedSchedule(
       widget.groomingRecord.hashCode,
       'Grooming Reminder',
-      'Your pet has a grooming appointment',
+      '${widget.petName} got a $title grooming appointment',
       scheduledDate,
       platformDetails,
       uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,

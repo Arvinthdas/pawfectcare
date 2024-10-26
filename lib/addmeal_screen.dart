@@ -11,8 +11,9 @@ import 'package:timezone/timezone.dart' as tz;
 class AddMealScreen extends StatefulWidget {
   final String petId;
   final String userId;
+  final String petName;
 
-  AddMealScreen({required this.petId, required this.userId});
+  AddMealScreen({required this.petId, required this.userId, required this.petName});
 
   @override
   _AddMealScreenState createState() => _AddMealScreenState();
@@ -132,7 +133,7 @@ class _AddMealScreenState extends State<AddMealScreen> {
     await flutterLocalNotificationsPlugin.zonedSchedule(
       0,
       'Meal Reminder',
-      'Your pet has a meal scheduled!',
+      'Do not forget to prepare meal for ${widget.petName}',
       tz.TZDateTime.from(mealDate, tz.local),
       platformChannelSpecifics,
       uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,

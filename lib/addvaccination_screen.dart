@@ -12,8 +12,9 @@ import 'package:timezone/timezone.dart' as tz;
 class AddVaccinationScreen extends StatefulWidget {
   final String petId;
   final String userId;
+  final String petName;
 
-  AddVaccinationScreen({required this.petId, required this.userId});
+  AddVaccinationScreen({required this.petId, required this.userId, required this.petName});
 
   @override
   _AddVaccinationScreenState createState() => _AddVaccinationScreenState();
@@ -139,7 +140,7 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
           'documentUrl': documentUrl,
         });
 
-        await _scheduleNotification(vaccinationDate);
+        await _scheduleNotification(vaccinationDate, _vaccineNameController.text, widget.petName);
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Vaccination added successfully!')),
@@ -173,7 +174,7 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
     }
   }
 
-  Future<void> _scheduleNotification(DateTime vaccinationDate) async {
+  Future<void> _scheduleNotification(DateTime vaccinationDate,String title, String petName) async {
     tz.TZDateTime scheduledDate =
     tz.TZDateTime.from(vaccinationDate, tz.local);
 
@@ -194,7 +195,7 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
       await flutterLocalNotificationsPlugin.zonedSchedule(
         0,
         'Vaccination Reminder',
-        'Your pet is due for a vaccination!',
+          '$petName `s $title vaccination appointment',
         scheduledDate,
         platformChannelSpecifics,
         uiLocalNotificationDateInterpretation:

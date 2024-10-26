@@ -12,8 +12,9 @@ class MealDetailScreen extends StatefulWidget {
   final DocumentSnapshot mealRecord;
   final String petId;
   final String userId;
+  final String petName;
 
-  MealDetailScreen({required this.mealRecord, required this.petId, required this.userId});
+  MealDetailScreen({required this.mealRecord, required this.petId, required this.userId, required this.petName});
 
   @override
   _MealDetailScreenState createState() => _MealDetailScreenState();
@@ -173,7 +174,7 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
     await flutterLocalNotificationsPlugin.zonedSchedule(
       0,
       'Meal Reminder',
-      'Your pet has a meal scheduled!',
+      'Do not forget to prepare meal for ${widget.petName}',
       tz.TZDateTime.from(mealDate, tz.local),
       platformChannelSpecifics,
       uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,

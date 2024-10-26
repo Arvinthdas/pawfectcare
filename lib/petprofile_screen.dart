@@ -392,8 +392,8 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
           PetHealthScreen(
               petId: widget.petId,
               userId: widget.userId,
-              petName: widget.petName,), // Pass petId and userId
-          NutritionPage(petId: widget.petId, userId: widget.userId),
+              petName: widget.petName), // Pass petId and userId
+          NutritionPage(petId: widget.petId, userId: widget.userId, petName: widget.petName),
           ExerciseMonitoringPage(
             petId: widget.petId,
             userId: widget.userId,
@@ -404,7 +404,7 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
           GroomingPage(
             petId: widget.petId,
             userId: widget.userId,
-            petBreed: widget.petBreed,
+            petBreed: widget.petBreed, petName: widget.petName
           ),
         ],
       ),

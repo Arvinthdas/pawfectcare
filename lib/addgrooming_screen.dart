@@ -11,8 +11,9 @@ import 'dart:io';
 class AddGroomingScreen extends StatefulWidget {
   final String petId;
   final String userId;
+  final String petName;
 
-  AddGroomingScreen({required this.petId, required this.userId});
+  AddGroomingScreen({required this.petId, required this.userId, required this.petName});
 
   @override
   _AddGroomingScreenState createState() => _AddGroomingScreenState();
@@ -249,7 +250,7 @@ class _AddGroomingScreenState extends State<AddGroomingScreen> {
       });
 
       // Schedule notification
-      await _scheduleNotification(groomingDate);
+      await _scheduleNotification(groomingDate, _taskNameController.text, widget.petName);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Grooming task added successfully!')),
@@ -282,7 +283,7 @@ class _AddGroomingScreenState extends State<AddGroomingScreen> {
     }
   }
 
-  Future<void> _scheduleNotification(DateTime groomingDate) async {
+  Future<void> _scheduleNotification(DateTime groomingDate,String title, String petName) async {
     tz.TZDateTime scheduledDate = tz.TZDateTime.from(groomingDate, tz.local);
 
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
@@ -302,7 +303,7 @@ class _AddGroomingScreenState extends State<AddGroomingScreen> {
       await flutterLocalNotificationsPlugin.zonedSchedule(
         0,
         'Grooming Reminder',
-        'Your pet is scheduled for grooming!',
+        '${widget.petName} got a $title grooming appointment',
         scheduledDate,
         platformChannelSpecifics,
         uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,

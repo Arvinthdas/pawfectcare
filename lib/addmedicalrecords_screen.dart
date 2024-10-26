@@ -91,7 +91,7 @@ class _AddMedicalRecordScreenState extends State<AddMedicalRecordScreen> {
     await flutterLocalNotificationsPlugin.zonedSchedule(
       0, // Notification ID
       'Medical Appointment Reminder',
-      'Appointment for $petName `s $title appointment', // Updated message
+      '$petName `s $title appointment', // Updated message
       tzScheduledDateTime, // Now in TZDateTime format
       const NotificationDetails(
         android: AndroidNotificationDetails(

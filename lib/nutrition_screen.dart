@@ -15,8 +15,10 @@ import 'mealdetail_screen.dart';
 class NutritionPage extends StatefulWidget {
   final String petId;
   final String userId;
+  final String petName;
 
-  NutritionPage({required this.petId, required this.userId});
+
+  NutritionPage({required this.petId, required this.userId, required this.petName});
 
   @override
   _NutritionPageState createState() => _NutritionPageState();
@@ -253,7 +255,7 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
     Navigator.push(
     context,
     MaterialPageRoute(
-    builder: (context) => AddMealScreen(userId: widget.userId, petId: widget.petId),
+    builder: (context) => AddMealScreen(userId: widget.userId, petId: widget.petId, petName: widget.petName),
     ),
     );
     }),
@@ -264,7 +266,7 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => AddMealScreen(userId: widget.userId, petId: widget.petId),
+            builder: (context) => AddMealScreen(userId: widget.userId, petId: widget.petId, petName: widget.petName),
           ),
         );
       }),
@@ -749,6 +751,7 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
               mealRecord: meal,
               userId: widget.userId,
               petId: widget.petId,
+              petName: widget.petName,
             ),
           ),
         );

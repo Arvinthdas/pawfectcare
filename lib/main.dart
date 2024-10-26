@@ -14,35 +14,29 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  // Initialize timezone and set the local timezone
   tz.initializeTimeZones();
-  tz.setLocalLocation(tz.getLocation('Asia/Kuala_Lumpur')); // Set to your local timezone
+  tz.setLocalLocation(tz.getLocation('Asia/Kuala_Lumpur'));
 
-  await _initializeNotifications(); // Initialize notifications
+  await _initializeNotifications();
   runApp(MyApp());
 }
 
 Future<void> _initializeNotifications() async {
   const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
-
   final InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
-
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-
-  // Create the notification channel here
   _createNotificationChannel();
 }
 
 Future<void> _createNotificationChannel() async {
   const AndroidNotificationChannel channel = AndroidNotificationChannel(
-    'vaccination_channel', // Channel ID
-    'Vaccination Notifications', // Channel name
+    'vaccination_channel',
+    'Vaccination Notifications',
     description: 'This channel is for vaccination notifications',
-    importance: Importance.max, // Importance level
+    importance: Importance.max,
   );
 
-  final AndroidFlutterLocalNotificationsPlugin? androidPlugin = flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
-
+  final androidPlugin = flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
   if (androidPlugin != null) {
     await androidPlugin.createNotificationChannel(channel);
   }
@@ -53,11 +47,77 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'PetCare App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: AuthChecker(),
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: SplashScreen(), // Start with SplashScreen
       debugShowCheckedModeBanner: false,
+    );
+  }
+}
+
+class SplashScreen extends StatefulWidget {
+  @override
+  _SplashScreenState createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _fadeAnimation;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Initialize AnimationController
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(seconds: 2),
+    );
+
+    // Initialize fade and scale animations
+    _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
+    );
+
+    _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+    );
+
+    // Start the animation
+    _controller.forward();
+
+    // Navigate to AuthChecker after 3 seconds
+    Future.delayed(Duration(seconds: 3), () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => AuthChecker()),
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: ScaleTransition(
+            scale: _scaleAnimation,
+            child: Image.asset(
+              'assets/images/splash.png', // Path to your logo image
+              width: 500, // Adjust the size as needed
+              height: 500,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
@@ -83,13 +143,11 @@ class AuthChecker extends StatelessWidget {
   }
 
   void _requestPermissions() async {
-    // Request storage permission
     var storageStatus = await Permission.storage.status;
     if (!storageStatus.isGranted) {
       await Permission.storage.request();
     }
 
-    // Request notification permission (Android 13+)
     var notificationStatus = await Permission.notification.status;
     if (!notificationStatus.isGranted) {
       await Permission.notification.request();

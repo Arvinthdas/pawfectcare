@@ -37,12 +37,13 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
-  flutter_launcher_icons: ^0.11.0 # Add flutter_launcher_icons
+  flutter_launcher_icons: ^0.14.1
 
 flutter_icons:
   android: true
   ios: true
   image_path: "assets/images/Pawfectcare.png" # App icon path
+
 
 flutter:
   uses-material-design: true
@@ -62,6 +63,7 @@ flutter:
     - assets/icons/grooming.png
     - assets/dog_breeds.json
     - assets/cat_breeds.json
+    - assets/images/splash.png
 
   fonts:
     - family: Poppins
