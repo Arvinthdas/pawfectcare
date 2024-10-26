@@ -68,6 +68,11 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
       return;
     }
 
+    bool confirmSave = await _showConfirmationDialog();
+    if (!confirmSave) {
+      return; // If the user cancels, don't proceed with saving.
+    }
+
     try {
       await FirebaseFirestore.instance
           .collection('users')
@@ -87,13 +92,39 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
         SnackBar(content: Text('Activity updated successfully!')),
       );
       setState(() {
-        _isEditing = false;
+        _isEditing = false; // Toggle back to view mode after saving
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error updating activity: $e')),
       );
     }
+  }
+
+  Future<bool> _showConfirmationDialog() async {
+    return (await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirm Save'),
+          content: Text('Are you sure you want to save the changes?'),
+          actions: [
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            TextButton(
+              child: Text('Save'),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+            ),
+          ],
+        );
+      },
+    )) ?? false;
   }
 
   bool _validateFields() {
@@ -170,18 +201,30 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
     String formattedDate = DateFormat('dd/MM/yyyy HH:mm').format(_selectedDate!.toDate());
 
     return Scaffold(
+      backgroundColor: Color(0xFFF7EFF1),
       appBar: AppBar(
-        title: Text('Activity Details'),
+        title: Text('Activity Details',
+          style: TextStyle(
+              color: Colors.black,
+              fontFamily: 'Poppins',
+              fontSize: 20,
+              fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Color(0xFFE2BF65),
         actions: [
-          if (!_isEditing)
-            IconButton(
-              icon: Icon(Icons.edit),
-              onPressed: () {
-                setState(() {
-                  _isEditing = true;
-                });
-              },
-            ),
+          _isEditing
+              ? IconButton(
+            icon: Icon(Icons.save),
+            onPressed: _updateActivity,
+          )
+              : IconButton(
+            icon: Icon(Icons.edit),
+            onPressed: () {
+              setState(() {
+                _isEditing = true;
+              });
+            },
+          ),
         ],
       ),
       body: SingleChildScrollView(
@@ -189,40 +232,28 @@ class _ActivityDetailsScreenState extends State<ActivityDetailsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildDropdown('Activity Type', _activityTypes, _selectedActivityType, (value) {
+            _buildDropdown('Activity Type*', _activityTypes, _selectedActivityType, (value) {
               setState(() {
                 _selectedActivityType = value;
               });
             }),
             SizedBox(height: 15),
-            _buildDropdown('Intensity', _intensityLevels, _selectedIntensity, (value) {
+            _buildDropdown('Intensity *', _intensityLevels, _selectedIntensity, (value) {
               setState(() {
                 _selectedIntensity = value;
               });
             }),
             SizedBox(height: 15),
-            _buildTextField('Duration (minutes)', _durationController, inputType: TextInputType.number),
+            _buildTextField('Duration (minutes) *', _durationController, inputType: TextInputType.number),
             SizedBox(height: 15),
             GestureDetector(
               onTap: _isEditing ? _selectDateTime : null,
               child: AbsorbPointer(
-                child: _buildTextField('Date & Time', TextEditingController(text: formattedDate)),
+                child: _buildTextField('Date & Time *', TextEditingController(text: formattedDate)),
               ),
             ),
             SizedBox(height: 15),
             _buildTextField('Notes', _notesController, maxLines: 3),
-            SizedBox(height: 20),
-            if (_isEditing)
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _updateActivity,
-                  child: Text('Save Changes'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                  ),
-                ),
-              ),
           ],
         ),
       ),

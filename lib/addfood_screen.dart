@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
-
 import 'package:intl/intl.dart';
 
 class AddFoodScreen extends StatefulWidget {
@@ -39,18 +38,19 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
       });
 
       try {
-        // Upload image if selected
         if (_selectedImage != null) {
-          final storageRef = FirebaseStorage.instance
-              .ref()
-              .child('user_uploads/${widget.userId}/pets/${widget.petId}/foods/${DateTime.now().millisecondsSinceEpoch}.jpg');
-
-          final uploadTask = storageRef.putFile(_selectedImage!);
-          final snapshot = await uploadTask;
-          _imageUrl = await snapshot.ref.getDownloadURL();
+          try {
+            String fileName = 'food_images/${widget.userId}/${DateTime.now().millisecondsSinceEpoch}.jpg';
+            Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
+            UploadTask uploadTask = storageRef.putFile(_selectedImage!);
+            TaskSnapshot snapshot = await uploadTask;
+            _imageUrl = await snapshot.ref.getDownloadURL();
+          } catch (e) {
+            print('Error uploading image: $e');
+          }
         }
 
-        // Save food details to Firestore
+
         await FirebaseFirestore.instance
             .collection('users')
             .doc(widget.userId)
@@ -66,7 +66,7 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
           'calcium': _calcium,
           'vitamins': _vitamins,
           'imageUrl': _imageUrl ?? '',
-          'timestamp': _selectedDateTime, // Store selected date and time
+          'timestamp': _selectedDateTime,
         });
 
         ScaffoldMessenger.of(context).showSnackBar(
@@ -96,16 +96,14 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
   }
 
   Future<void> _selectDateAndTime(BuildContext context) async {
-    // Show date picker
     DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: _selectedDateTime,
       firstDate: DateTime(2000),
-      lastDate: DateTime.now(), // Prevent future dates
+      lastDate: DateTime.now(),
     );
 
     if (pickedDate != null) {
-      // Show time picker
       TimeOfDay? pickedTime = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.fromDateTime(_selectedDateTime),
@@ -128,81 +126,128 @@ class _AddFoodScreenState extends State<AddFoodScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFF7EFF1),
       appBar: AppBar(
-        title: Text('Add Food Details'),
+        backgroundColor: Color(0xFFE2BF65), // Change to a warm amber color
+        title: Text('Add Food Details',
+          style: TextStyle(
+            color: Colors.black,
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+        elevation: 0,
       ),
+      //backgroundColor: Colors.grey[100], // Light grey background color
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: SingleChildScrollView(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Food Name'),
-                  onSaved: (value) => _foodName = value ?? '',
-                  validator: (value) => value!.isEmpty ? 'Please enter a food name' : null,
-                ),
-                DropdownButtonFormField<String>(
-                  value: _foodType,
-                  items: ['Dry', 'Wet'].map((type) {
-                    return DropdownMenuItem(value: type, child: Text(type));
-                  }).toList(),
-                  onChanged: (value) => setState(() => _foodType = value!),
-                  decoration: InputDecoration(labelText: 'Type of Food'),
-                ),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Carbs (g)'),
-                  keyboardType: TextInputType.number,
-                  onSaved: (value) => _carbs = double.tryParse(value ?? '0') ?? 0,
-                ),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Protein (g)'),
-                  keyboardType: TextInputType.number,
-                  onSaved: (value) => _protein = double.tryParse(value ?? '0') ?? 0,
-                ),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Fat (g)'),
-                  keyboardType: TextInputType.number,
-                  onSaved: (value) => _fat = double.tryParse(value ?? '0') ?? 0,
-                ),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Calcium (mg)'),
-                  keyboardType: TextInputType.number,
-                  onSaved: (value) => _calcium = double.tryParse(value ?? '0') ?? 0,
-                ),
-                TextFormField(
-                  decoration: InputDecoration(labelText: 'Vitamins (IU)'),
-                  keyboardType: TextInputType.number,
-                  onSaved: (value) => _vitamins = double.tryParse(value ?? '0') ?? 0,
-                ),
-                SizedBox(height: 10),
-                GestureDetector(
-                  onTap: _pickImage,
-                  child: _selectedImage != null
-                      ? Image.file(_selectedImage!, height: 200)
-                      : Container(
-                    height: 200,
-                    color: Colors.grey[200],
-                    child: Center(child: Text('Tap to select an image')),
-                  ),
-                ),
-                SizedBox(height: 10),
-                TextButton(
-                  onPressed: () => _selectDateAndTime(context),
-                  child: Text('Select Date & Time: ${DateFormat('dd/MM/yyyy HH:mm').format(_selectedDateTime)}'),
-                ),
+                _buildCustomTextField('Food Name', (value) => _foodName = value ?? ''),
+                SizedBox(height: 20),
+                _buildFoodTypeDropdown(),
+                SizedBox(height: 20),
+                _buildCustomTextField('Carbohydrate (g)', (value) => _carbs = double.tryParse(value ?? '0') ?? 0, isNumeric: true),
+                SizedBox(height: 20),
+                _buildCustomTextField('Protein (g)', (value) => _protein = double.tryParse(value ?? '0') ?? 0, isNumeric: true),
+                SizedBox(height: 20),
+                _buildCustomTextField('Fat (g)', (value) => _fat = double.tryParse(value ?? '0') ?? 0, isNumeric: true),
+                SizedBox(height: 20),
+                _buildCustomTextField('Calcium (g)', (value) => _calcium = double.tryParse(value ?? '0') ?? 0, isNumeric: true),
+                SizedBox(height: 20),
+                _buildCustomTextField('Vitamins (g)', (value) => _vitamins = double.tryParse(value ?? '0') ?? 0, isNumeric: true),
+                SizedBox(height: 20),
+                _buildImagePicker(),
                 SizedBox(height: 20),
                 _isUploading
-                    ? CircularProgressIndicator()
-                    : ElevatedButton(
-                  onPressed: _saveFoodDetails,
-                  child: Text('Add Food'),
+                    ? Center(child: CircularProgressIndicator())
+                    : SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFFE2BF65),
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    onPressed: _saveFoodDetails,
+                    child: Text('Add Food',
+                      style: TextStyle(color: Colors.black),
+                    ),
+                  ),
                 ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildCustomTextField(String label, Function(String?) onSaved, {bool isNumeric = false}) {
+    return TextFormField(
+      keyboardType: isNumeric ? TextInputType.number : TextInputType.text, // Set numeric or text keyboard based on isNumeric
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: Colors.black87),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      ),
+      onSaved: onSaved,
+      validator: (value) => value!.isEmpty ? 'Please enter $label' : null,
+    );
+  }
+
+  Widget _buildFoodTypeDropdown() {
+    return DropdownButtonFormField<String>(
+      value: _foodType,
+      items: ['Dry', 'Wet'].map((type) {
+        return DropdownMenuItem(value: type, child: Text(type));
+      }).toList(),
+      onChanged: (value) => setState(() => _foodType = value!),
+      decoration: InputDecoration(
+        labelText: 'Type of Food',
+        labelStyle: TextStyle(color: Colors.black87),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      ),
+    );
+  }
+
+  Widget _buildImagePicker() {
+    return GestureDetector(
+      onTap: _pickImage,
+      child: Container(
+        height: 150,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.grey),
+        ),
+        child: _selectedImage != null
+            ? ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Image.file(
+            _selectedImage!,
+            fit: BoxFit.cover,
+            width: double.infinity,
+          ),
+        )
+            : Center(child: Text('Upload Image (optional)', style: TextStyle(color: Colors.black54))),
       ),
     );
   }

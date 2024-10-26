@@ -303,7 +303,7 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
   Widget _buildDateFilterButton() {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-          backgroundColor: Color(0xFFF7EFF1),
+          backgroundColor: Color(0xFFE2BF65),
       ),
       onPressed: () async {
         DateTime? pickedDate = await showDatePicker(
@@ -322,7 +322,7 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
       child: Text(
           'Filter by Date: ${DateFormat('dd/MM/yyyy').format(_selectedDate)}',
               style: TextStyle(
-                backgroundColor:Color(0xFFF7EFF1),
+                backgroundColor:Color(0xFFE2BF65),
                 color: Colors.black,
               ),
       ),

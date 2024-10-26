@@ -29,7 +29,7 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
   late TextEditingController _notesController;
   late DateTime _selectedDate;
   late TimeOfDay _selectedTime;
-  File? _imageFile;
+  File? _imageFile; // Holds the newly uploaded image
   bool _isEditing = false;
   late DocumentSnapshot _latestGroomingRecord;
 
@@ -84,8 +84,7 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
   }
 
   Future<void> _pickImage() async {
-    final pickedFile =
-        await ImagePicker().pickImage(source: ImageSource.gallery);
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _imageFile = File(pickedFile.path);
@@ -96,8 +95,7 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
   Future<String?> _uploadImageToStorage(String userId) async {
     if (_imageFile != null) {
       try {
-        String fileName =
-            'grooming_tasks/${userId}/${DateTime.now().millisecondsSinceEpoch}.jpg';
+        String fileName = 'grooming_tasks/${userId}/${DateTime.now().millisecondsSinceEpoch}.jpg';
         Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
         UploadTask uploadTask = storageRef.putFile(_imageFile!);
         TaskSnapshot snapshot = await uploadTask;
@@ -113,19 +111,6 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
   Future<void> _saveChanges() async {
     if (_taskNameController.text.isEmpty) {
       _showMessage('Please fill in all required fields');
-      return;
-    }
-
-    // Debugging print statements
-    print('User ID: ${widget.userId}');
-    print('Pet ID: ${widget.petId}');
-    print('Grooming Record ID: ${widget.groomingRecord.id}');
-
-    // Null checks for the IDs
-    if (widget.userId.isEmpty ||
-        widget.petId.isEmpty ||
-        widget.groomingRecord.id.isEmpty) {
-      _showMessage('Invalid user, pet, or grooming record ID.');
       return;
     }
 
@@ -146,19 +131,24 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
           .collection('pets')
           .doc(widget.petId)
           .collection('groomingTasks')
-          .doc(widget.groomingRecord.id) // Ensure this is not null or empty
+          .doc(widget.groomingRecord.id)
           .update({
         'taskName': _taskNameController.text,
         'productsUsed': _productsUsedController.text,
         'notes': _notesController.text,
         'date': updatedDateTime,
-        if (imageUrl != null) 'imageUrl': imageUrl,
+        if (imageUrl != null) 'imageUrl': imageUrl, // Update with the new image URL
       });
 
       _scheduleNotification(updatedDateTime);
       _showMessage('Changes saved successfully');
+
+      // Refresh latest grooming record to show the new image
+      await _fetchLatestGroomingRecord();
+
       setState(() {
         _isEditing = false;
+        _imageFile = null; // Clear the uploaded image after saving
       });
     } catch (e) {
       print('Error updating grooming task: $e');
@@ -167,11 +157,9 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
   }
 
   Future<void> _scheduleNotification(DateTime scheduledTime) async {
-    FlutterLocalNotificationsPlugin notificationsPlugin =
-        FlutterLocalNotificationsPlugin();
+    FlutterLocalNotificationsPlugin notificationsPlugin = FlutterLocalNotificationsPlugin();
 
-    const AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
+    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
       'grooming_channel_id',
       'Grooming Notifications',
       channelDescription: 'Reminder for upcoming grooming tasks',
@@ -179,8 +167,7 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
       priority: Priority.high,
     );
 
-    const NotificationDetails platformDetails =
-        NotificationDetails(android: androidDetails);
+    const NotificationDetails platformDetails = NotificationDetails(android: androidDetails);
 
     tz.TZDateTime scheduledDate = tz.TZDateTime.from(scheduledTime, tz.local);
 
@@ -190,8 +177,7 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
       'Your pet has a grooming appointment',
       scheduledDate,
       platformDetails,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
+      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,
     );
   }
@@ -232,13 +218,6 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
   void _removeImage() {
     setState(() {
       _imageFile = null; // Clear the local image file
-
-      if (_latestGroomingRecord.data() != null) {
-        Map<String, dynamic> updatedData = Map<String, dynamic>.from(
-            _latestGroomingRecord.data() as Map<String, dynamic>);
-        updatedData['imageUrl'] = ''; // Clear the image URL
-        _latestGroomingRecord = _latestGroomingRecord;
-      }
     });
 
     _removeImageFromFirestore();
@@ -253,8 +232,9 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
           .doc(widget.petId)
           .collection('groomingTasks')
           .doc(widget.groomingRecord.id)
-          .update({'imageUrl': ''});
+          .update({'imageUrl': ''}); // Clear image URL
 
+      // Fetch the updated record
       DocumentSnapshot updatedRecord = await FirebaseFirestore.instance
           .collection('users')
           .doc(widget.userId)
@@ -265,7 +245,7 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
           .get();
 
       setState(() {
-        _latestGroomingRecord = updatedRecord;
+        _latestGroomingRecord = updatedRecord; // Update the state
       });
 
       _showMessage('Image removed successfully.');
@@ -276,52 +256,34 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
   }
 
   Widget _buildImageDisplay() {
-    if (_imageFile != null) {
-      return Column(
-        children: [
-          GestureDetector(
-            onTap: () {
-              if (_isEditing) {
-                _showRemoveImageDialog();
-              }
-            },
-            child: Image.file(
-              _imageFile!,
-              height: 150,
-              width: 150,
-              fit: BoxFit.cover,
-            ),
-          ),
-          SizedBox(height: 10),
-        ],
-      );
-    } else {
-      String? imageUrl =
-          (_latestGroomingRecord.data() as Map<String, dynamic>)['imageUrl'];
-
-      if (imageUrl != null && imageUrl.isNotEmpty) {
-        return Column(
-          children: [
-            GestureDetector(
-              onTap: () {
-                if (_isEditing) {
-                  _showRemoveImageDialog();
-                }
-              },
-              child: Image.network(
-                imageUrl,
-                height: 150,
-                width: 150,
-                fit: BoxFit.cover,
-              ),
-            ),
-            SizedBox(height: 10),
-          ],
-        );
-      } else {
-        return Text('No image uploaded');
-      }
-    }
+    return Container(
+      height: 200,
+      width: 380,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.grey[300]!, width: 1),
+        color: Colors.grey[200],
+      ),
+      child: _imageFile != null
+          ? ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Image.file(
+          _imageFile!,
+          fit: BoxFit.cover,
+        ),
+      )
+          : (_latestGroomingRecord.data() != null &&
+          (_latestGroomingRecord.data() as Map<String, dynamic>)['imageUrl'] != null &&
+          (_latestGroomingRecord.data() as Map<String, dynamic>)['imageUrl'] != '')
+          ? ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Image.network(
+          (_latestGroomingRecord.data() as Map<String, dynamic>)['imageUrl'],
+          fit: BoxFit.cover,
+        ),
+      )
+          : Center(child: Text('No image uploaded')),
+    );
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -350,12 +312,68 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
     }
   }
 
+  Widget _buildStyledTextField({
+    required TextEditingController controller,
+    required String label,
+    bool enabled = true,
+    int maxLines = 1,
+    Widget? suffixIcon,
+  }) {
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      enabled: enabled,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(
+          color: Colors.black,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+        fillColor: Colors.grey[200],
+        filled: true,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(
+            color: Colors.black,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(
+            color: Colors.black,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(
+            color: Color(0xFFDAA520),
+            width: 2,
+          ),
+        ),
+        contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        hintText: 'Enter $label',
+        hintStyle: TextStyle(
+          color: Colors.grey[500],
+        ),
+        suffixIcon: suffixIcon,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF7EFF1),
       appBar: AppBar(
-        title: Text('Grooming Details'),
+        title: Text(
+          'Grooming Details',
+          style: TextStyle(
+              color: Colors.black,
+              fontFamily: 'Poppins',
+              fontSize: 20,
+              fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Color(0xFFE2BF65),
         actions: [
           if (_isEditing)
@@ -378,14 +396,12 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
         padding: EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(
+            _buildStyledTextField(
               controller: _taskNameController,
-              decoration: InputDecoration(
-                  labelText: 'Task Name',
-                  labelStyle: TextStyle(color: Color(0xFFE2BF65))),
+              label: 'Task Name',
               enabled: _isEditing,
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 20),
             GestureDetector(
               onTap: () {
                 if (_isEditing) {
@@ -393,19 +409,16 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
                 }
               },
               child: AbsorbPointer(
-                child: TextField(
+                child: _buildStyledTextField(
                   controller: TextEditingController(
                       text: DateFormat('dd/MM/yyyy').format(_selectedDate)),
-                  decoration: InputDecoration(
-                    labelText: 'Date',
-                    labelStyle: TextStyle(color: Color(0xFFE2BF65)),
-                    suffixIcon: Icon(Icons.calendar_today),
-                  ),
+                  label: 'Date',
                   enabled: _isEditing,
+                  suffixIcon: Icon(Icons.calendar_today),
                 ),
               ),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 20),
             GestureDetector(
               onTap: () {
                 if (_isEditing) {
@@ -413,41 +426,50 @@ class _GroomingDetailScreenState extends State<GroomingDetailScreen> {
                 }
               },
               child: AbsorbPointer(
-                child: TextField(
+                child: _buildStyledTextField(
                   controller: TextEditingController(
                       text: _selectedTime.format(context)),
-                  decoration: InputDecoration(
-                    labelText: 'Time',
-                    labelStyle: TextStyle(color: Color(0xFFE2BF65)),
-                    suffixIcon: Icon(Icons.access_time),
-                  ),
+                  label: 'Time',
                   enabled: _isEditing,
+                  suffixIcon: Icon(Icons.access_time),
                 ),
               ),
             ),
-            SizedBox(height: 10),
-            TextField(
+            SizedBox(height: 20),
+            _buildStyledTextField(
               controller: _productsUsedController,
-              decoration: InputDecoration(
-                  labelText: 'Products Used',
-                  labelStyle: TextStyle(color: Color(0xFFE2BF65))),
-              enabled: _isEditing,
-            ),
-            SizedBox(height: 10),
-            TextField(
-              controller: _notesController,
-              decoration: InputDecoration(
-                  labelText: 'Notes',
-                  labelStyle: TextStyle(color: Color(0xFFE2BF65))),
+              label: 'Products Used',
               enabled: _isEditing,
             ),
             SizedBox(height: 20),
+            _buildStyledTextField(
+              controller: _notesController,
+              label: 'Notes',
+              enabled: _isEditing,
+              maxLines: 3,
+            ),
+            SizedBox(height: 20),
             _buildImageDisplay(),
-            SizedBox(height: 10),
+            SizedBox(height: 20),
             if (_isEditing)
               ElevatedButton(
                 onPressed: _pickImage,
                 child: Text('Upload New Image'),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.black,
+                  backgroundColor: Color(0xFFE2BF65),
+                ),
+              ),
+            if (_isEditing &&
+                (_latestGroomingRecord['imageUrl'] != null &&
+                    _latestGroomingRecord['imageUrl'] != '' || _imageFile != null))
+              ElevatedButton(
+                onPressed: _showRemoveImageDialog,
+                child: Text('Remove Image'),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.black,
+                  backgroundColor: Color(0xFFE2BF65),
+                ),
               ),
           ],
         ),

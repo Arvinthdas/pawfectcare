@@ -10,8 +10,9 @@ import 'healthdocsdetails_screen.dart'; // Assuming this screen shows details of
 class PetHealthScreen extends StatefulWidget {
   final String petId;
   final String userId;
+  final String petName;
 
-  PetHealthScreen({required this.petId, required this.userId});
+  PetHealthScreen({required this.petId, required this.userId, required this.petName});
 
   @override
   _PetHealthScreenState createState() => _PetHealthScreenState();
@@ -82,7 +83,7 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
     );
   }
 
-  // Medical Records Tab
+// Medical Records Tab
   Widget _buildMedicalRecordsTab() {
     return SingleChildScrollView(
       padding: EdgeInsets.all(16.0),
@@ -93,7 +94,7 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => AddMedicalRecordScreen(petId: widget.petId, userId: widget.userId),
+                builder: (context) => AddMedicalRecordScreen(petId: widget.petId, userId: widget.userId, petName: widget.petName),
               ),
             );
           }),
@@ -106,12 +107,15 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
             ),
           ),
           SizedBox(height: 10),
-          _buildMedicalRecords(),
+          _buildMedicalRecords(),  // Display past records
+          SizedBox(height: 20),
+          _buildUpcomingMedicalAppointments(),  // Display future appointments
         ],
       ),
     );
   }
 
+// Display only past medical records in _buildMedicalRecords
   Widget _buildMedicalRecords() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
@@ -134,7 +138,16 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
         }
 
         final records = snapshot.data!.docs;
-        final filteredRecords = records.where((record) {
+        final pastRecords = records.where((record) {
+          final timestamp = (record['timestamp'] as Timestamp).toDate();
+          return timestamp.isBefore(DateTime.now()); // Filter past records only
+        }).toList();
+
+        if (pastRecords.isEmpty) {
+          return Center(child: Text('No past medical records available'));
+        }
+
+        final filteredRecords = pastRecords.where((record) {
           final title = record['title']?.toLowerCase() ?? '';
           final doctor = record['doctor']?.toLowerCase() ?? '';
           final clinic = record['clinic']?.toLowerCase() ?? '';
@@ -169,6 +182,70 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
     );
   }
 
+// Display only future medical appointments in _buildUpcomingMedicalAppointments
+  Widget _buildUpcomingMedicalAppointments() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildSectionHeader(
+          'Upcoming Medical Appointments',
+          onAddPressed: () {},
+          showAddButton: false,
+        ),
+        SizedBox(height: 20),
+        StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('users')
+              .doc(widget.userId)
+              .collection('pets')
+              .doc(widget.petId)
+              .collection('medicalRecords')
+              .orderBy('timestamp', descending: true)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return Center(child: Text('Error fetching upcoming appointments'));
+            }
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return Center(child: Text('No upcoming medical appointments'));
+            }
+
+            final records = snapshot.data!.docs;
+            final upcomingRecords = records.where((record) {
+              final timestamp = (record['timestamp'] as Timestamp).toDate();
+              return timestamp.isAfter(DateTime.now()); // Filter future appointments only
+            }).toList();
+
+            if (upcomingRecords.isEmpty) {
+              return Center(child: Text('No upcoming medical appointments available'));
+            }
+
+            return ListView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: upcomingRecords.length,
+              itemBuilder: (context, index) {
+                final record = upcomingRecords[index];
+                return _buildRecordCard(
+                  record['title'] ?? 'No Title',
+                  record['date'] ?? 'No Date',
+                  record['doctor'] ?? 'Unknown Doctor',
+                  record['clinic'] ?? 'No Clinic',
+                  record['treatment'] ?? 'No Treatment',
+                  record['notes'] ?? 'No Notes',
+                  record,
+                );
+              },
+            );
+          },
+        ),
+      ],
+    );
+  }
+
 
   Widget _buildRecordCard(String title, String date, String doctor, String clinic, String treatment, String notes, DocumentSnapshot logRecord) {
     return InkWell(
@@ -176,7 +253,7 @@ class _PetHealthScreenState extends State<PetHealthScreen> with SingleTickerProv
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => HealthLogDetailScreen(logRecord: logRecord, userId: widget.userId),
+            builder: (context) => HealthLogDetailScreen(logRecord: logRecord, userId: widget.userId, petName: widget.petName),
           ),
         );
       },

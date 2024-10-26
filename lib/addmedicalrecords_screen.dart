@@ -3,13 +3,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'dart:io';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 class AddMedicalRecordScreen extends StatefulWidget {
   final String petId;
   final String userId;
+  final String petName;
 
-  AddMedicalRecordScreen({required this.petId, required this.userId});
+  AddMedicalRecordScreen({
+    required this.petId,
+    required this.userId,
+    required this.petName,
+  });
 
   @override
   _AddMedicalRecordScreenState createState() => _AddMedicalRecordScreenState();
@@ -28,8 +36,27 @@ class _AddMedicalRecordScreenState extends State<AddMedicalRecordScreen> {
   bool _isSaving = false;
   File? _selectedImage;
 
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  FlutterLocalNotificationsPlugin();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeNotifications();
+  }
+
+  void _initializeNotifications() {
+    const AndroidInitializationSettings initializationSettingsAndroid =
+    AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    const InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+    );
+
+    flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  }
+
   Future<void> _selectDateTime(BuildContext context) async {
-    // Show Date Picker
     final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: _selectedDateTime ?? DateTime.now(),
@@ -37,14 +64,12 @@ class _AddMedicalRecordScreenState extends State<AddMedicalRecordScreen> {
       lastDate: DateTime(2101),
     );
 
-    // If a date is selected, show Time Picker
     if (pickedDate != null) {
       final TimeOfDay? pickedTime = await showTimePicker(
         context: context,
         initialTime: TimeOfDay.fromDateTime(_selectedDateTime ?? DateTime.now()),
       );
 
-      // Combine the selected date and time
       if (pickedTime != null) {
         setState(() {
           _selectedDateTime = DateTime(
@@ -58,6 +83,30 @@ class _AddMedicalRecordScreenState extends State<AddMedicalRecordScreen> {
         });
       }
     }
+  }
+
+  Future<void> _scheduleNotification(DateTime scheduledDateTime, String title, String petName) async {
+    final tz.TZDateTime tzScheduledDateTime = tz.TZDateTime.from(scheduledDateTime, tz.local);
+
+    await flutterLocalNotificationsPlugin.zonedSchedule(
+      0, // Notification ID
+      'Medical Appointment Reminder',
+      'Appointment for $petName `s $title appointment', // Updated message
+      tzScheduledDateTime, // Now in TZDateTime format
+      const NotificationDetails(
+        android: AndroidNotificationDetails(
+          'medical_channel_id',
+          'Medical Reminders',
+          channelDescription: 'Notifications for scheduled medical reminders',
+          importance: Importance.max,
+          priority: Priority.high,
+        ),
+      ),
+      androidAllowWhileIdle: true,
+      uiLocalNotificationDateInterpretation:
+      UILocalNotificationDateInterpretation.absoluteTime,
+      matchDateTimeComponents: DateTimeComponents.time,
+    );
   }
 
   Future<void> _saveMedicalRecord() async {
@@ -74,13 +123,13 @@ class _AddMedicalRecordScreenState extends State<AddMedicalRecordScreen> {
 
         final medicalRecordData = {
           'title': _titleController.text,
-          'date': _selectedDateTime!.toLocal().toString().split(' ')[0],
+          'date': DateFormat('dd/MM/yyyy HH:mm').format(_selectedDateTime!),
           'doctor': _doctorController.text,
           'clinic': _clinicController.text,
           'treatment': _treatmentController.text,
           'notes': _notesController.text,
           'imageUrl': imageUrl,
-          'timestamp': FieldValue.serverTimestamp(),
+          'timestamp': Timestamp.fromDate(_selectedDateTime!),
         };
 
         await FirebaseFirestore.instance
@@ -90,6 +139,8 @@ class _AddMedicalRecordScreenState extends State<AddMedicalRecordScreen> {
             .doc(widget.petId)
             .collection('medicalRecords')
             .add(medicalRecordData);
+
+        await _scheduleNotification(_selectedDateTime!, _titleController.text, widget.petName);
 
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Medical record added successfully')));
         Navigator.pop(context);
@@ -111,7 +162,7 @@ class _AddMedicalRecordScreenState extends State<AddMedicalRecordScreen> {
       Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
       UploadTask uploadTask = storageRef.putFile(imageFile);
       TaskSnapshot snapshot = await uploadTask;
-      return await snapshot.ref.getDownloadURL(); // Get download URL
+      return await snapshot.ref.getDownloadURL();
     } catch (e) {
       print('Error uploading image: $e');
       return null;
@@ -140,11 +191,12 @@ class _AddMedicalRecordScreenState extends State<AddMedicalRecordScreen> {
       backgroundColor: Color(0xFFF7EFF1),
       appBar: AppBar(
         title: Text('Add Medical Record',
-        style: TextStyle(
-          fontFamily: 'Poppins',
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),),
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         backgroundColor: Color(0xFFE2BF65),
       ),
       body: Padding(
@@ -219,7 +271,6 @@ class _AddMedicalRecordScreenState extends State<AddMedicalRecordScreen> {
     );
   }
 
-
   Widget _buildDateTimeField() {
     return GestureDetector(
       onTap: () => _selectDateTime(context),
@@ -236,7 +287,8 @@ class _AddMedicalRecordScreenState extends State<AddMedicalRecordScreen> {
         Text('Upload Image (optional)', style: TextStyle(fontWeight: FontWeight.bold)),
         SizedBox(height: 5),
         Container(
-          height: 150,
+          height: 200,
+          width: 380,
           color: Colors.grey[200],
           child: _selectedImage == null
               ? Center(child: Text('Image Preview'))

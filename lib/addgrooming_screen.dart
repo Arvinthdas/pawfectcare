@@ -49,8 +49,15 @@ class _AddGroomingScreenState extends State<AddGroomingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFF7EFF1),
       appBar: AppBar(
-        title: Text('Add Grooming Details'),
+        title: Text('Add Grooming Details',
+          style: TextStyle(
+              color: Colors.black,
+              fontFamily: 'Poppins',
+              fontSize: 20,
+              fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Color(0xFFE2BF65),
       ),
       body: SingleChildScrollView(
@@ -164,13 +171,28 @@ class _AddGroomingScreenState extends State<AddGroomingScreen> {
           ),
         ),
         SizedBox(height: 10),
-        ElevatedButton(
-          onPressed: _pickImage,
-          child: Text('Pick Document/Image'),
-          style: ElevatedButton.styleFrom(
-            foregroundColor: Colors.black,
-            backgroundColor: Color(0xFFE2BF65),
-          ),
+        Row(
+          children: [
+            ElevatedButton(
+              onPressed: _pickImage,
+              child: Text('Pick Document/Image'),
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.black,
+                backgroundColor: Color(0xFFE2BF65),
+              ),
+            ),
+            if (_selectedImage != null) // Show remove button only if an image is selected
+              SizedBox(width: 10),
+            if (_selectedImage != null)
+              ElevatedButton(
+                onPressed: _removeImage,
+                child: Text('Remove Image'),
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.black,
+                  backgroundColor: Color(0xFFE2BF65), // Red color for remove button
+                ),
+              ),
+          ],
         ),
       ],
     );
@@ -184,6 +206,12 @@ class _AddGroomingScreenState extends State<AddGroomingScreen> {
         _selectedImage = File(pickedFile.path);
       });
     }
+  }
+
+  void _removeImage() {
+    setState(() {
+      _selectedImage = null;
+    });
   }
 
   Future<void> _addGroomingTask() async {
@@ -241,7 +269,6 @@ class _AddGroomingScreenState extends State<AddGroomingScreen> {
     }
   }
 
-
   Future<String?> _uploadImageToFirebase(File imageFile) async {
     try {
       String fileName = 'grooming_tasks/${widget.userId}/${DateTime.now().millisecondsSinceEpoch}.jpg';
@@ -278,8 +305,8 @@ class _AddGroomingScreenState extends State<AddGroomingScreen> {
         'Your pet is scheduled for grooming!',
         scheduledDate,
         platformChannelSpecifics,
-        uiLocalNotificationDateInterpretation:
-        UILocalNotificationDateInterpretation.absoluteTime,
+        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+        androidAllowWhileIdle: true,
       );
     } catch (e) {
       print("Error scheduling notification: $e");
@@ -294,6 +321,15 @@ class _AddGroomingScreenState extends State<AddGroomingScreen> {
     setState(() {
       _selectedImage = null; // Clear the selected image
     });
+  }
+
+  @override
+  void dispose() {
+    _taskNameController.dispose();
+    _dateController.dispose();
+    _productsUsedController.dispose();
+    _notesController.dispose();
+    super.dispose();
   }
 }
 

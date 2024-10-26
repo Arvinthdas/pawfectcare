@@ -65,16 +65,21 @@ class _GroomingPageState extends State<GroomingPage> with SingleTickerProviderSt
         backgroundColor: Color(0xFFE2BF65),
         title: Text(
           'Grooming',
-          style: TextStyle(color: Colors.black, fontSize: 24, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              color: Colors.black,
+              fontFamily: 'Poppins',
+              fontSize: 20,
+              fontWeight: FontWeight.bold),
         ),
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: Colors.white,
+          indicatorColor: Color(0xFF037171),
           labelColor: Colors.white,
           unselectedLabelColor: Colors.black,
+          labelStyle: TextStyle(fontSize: 15,fontStyle: FontStyle.italic ,fontWeight: FontWeight.bold),
           tabs: [
             Tab(text: 'Grooming Task History'),
-            Tab(text: 'Skin & Coat Health'),
+            Tab(text: 'Skin Issues Tips & Guides'),
           ],
         ),
       ),
@@ -144,7 +149,12 @@ class _GroomingPageState extends State<GroomingPage> with SingleTickerProviderSt
 
         final tasks = snapshot.data!.docs.where((task) {
           final taskName = task['taskName']?.toLowerCase() ?? '';
-          return taskName.contains(_searchQuery.toLowerCase());
+          final taskDate = (task['date'] as Timestamp).toDate();
+          final formattedDate = DateFormat('dd/MM/yyyy').format(taskDate);
+
+          // Check if the search query is either in task name or matches the date
+          return taskName.contains(_searchQuery.toLowerCase()) ||
+              formattedDate == _searchQuery; // Compare formatted date with the search query
         }).toList();
 
         return ListView.builder(
@@ -165,6 +175,7 @@ class _GroomingPageState extends State<GroomingPage> with SingleTickerProviderSt
       },
     );
   }
+
 
   Widget _buildUpcomingGroomingTasks() {
     return StreamBuilder<QuerySnapshot>(

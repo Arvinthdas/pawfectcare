@@ -10,8 +10,11 @@ class FoodDetailScreen extends StatefulWidget {
   final String userId;
   final String petId;
 
-  FoodDetailScreen(
-      {required this.foodId, required this.userId, required this.petId});
+  FoodDetailScreen({
+    required this.foodId,
+    required this.userId,
+    required this.petId,
+  });
 
   @override
   _FoodDetailScreenState createState() => _FoodDetailScreenState();
@@ -70,25 +73,28 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
       }
     } catch (e) {
       print('Error fetching food details: $e');
+      _showMessage('Error fetching food details: $e');
     }
   }
 
   void _initializeFields() {
     _foodNameController =
-        TextEditingController(text: _latestFoodRecord['foodName']);
-    _calciumController =
-        TextEditingController(text: _latestFoodRecord['calcium'].toString());
-    _carbsController =
-        TextEditingController(text: _latestFoodRecord['carbs'].toString());
+        TextEditingController(text: _latestFoodRecord['foodName'] ?? '');
+    _calciumController = TextEditingController(
+        text: (_latestFoodRecord['calcium'] ?? 0).toString());
+    _carbsController = TextEditingController(
+        text: (_latestFoodRecord['carbs'] ?? 0).toString());
     _fatController =
-        TextEditingController(text: _latestFoodRecord['fat'].toString());
-    _proteinController =
-        TextEditingController(text: _latestFoodRecord['protein'].toString());
-    _vitaminsController =
-        TextEditingController(text: _latestFoodRecord['vitamins'].toString());
-    _selectedFoodType = _latestFoodRecord['foodType'];
-    Timestamp dateTimestamp = _latestFoodRecord['timestamp'];
-    final dateTime = dateTimestamp.toDate();
+        TextEditingController(text: (_latestFoodRecord['fat'] ?? 0).toString());
+    _proteinController = TextEditingController(
+        text: (_latestFoodRecord['protein'] ?? 0).toString());
+    _vitaminsController = TextEditingController(
+        text: (_latestFoodRecord['vitamins'] ?? 0).toString());
+    _selectedFoodType = _latestFoodRecord['foodType'] ?? 'Dry';
+
+    Timestamp? dateTimestamp = _latestFoodRecord['timestamp'];
+    final dateTime =
+        dateTimestamp != null ? dateTimestamp.toDate() : DateTime.now();
     _selectedDate = dateTime;
     _selectedTime = TimeOfDay.fromDateTime(dateTime);
   }
@@ -132,9 +138,34 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
     return null;
   }
 
+  Future<void> _confirmSaveChanges() async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Confirm Save'),
+          content: Text('Are you sure you want to save the changes?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result == true) {
+      _saveChanges();
+    }
+  }
+
   Future<void> _saveChanges() async {
-    if (_foodNameController?.text.isEmpty ??
-        true || _selectedFoodType == null) {
+    if (_foodNameController?.text.isEmpty ?? true || _selectedFoodType == null) {
       _showMessage('Please fill in all required fields');
       return;
     }
@@ -179,6 +210,36 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
     } catch (e) {
       print('Error updating food item: $e');
       _showMessage('Failed to save changes: $e');
+    }
+  }
+
+
+  Future<void> _confirmRemoveImage() async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Remove Image'),
+          content: Text('Are you sure you want to remove this image?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text('Remove'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result == true) {
+      setState(() {
+        _imageFile = null;
+        _imageUrl = null;
+      });
     }
   }
 
@@ -233,14 +294,15 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
           IconButton(
             icon: Icon(_isEditing ? Icons.save : Icons.edit),
             onPressed: _isEditing
-                ? _saveChanges
+                ? _confirmSaveChanges // Call the confirm save function
                 : () {
-                    setState(() {
-                      _isEditing = true;
-                    });
-                  },
+              setState(() {
+                _isEditing = true;
+              });
+            },
           ),
         ],
+
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -250,50 +312,68 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
               TextField(
                 controller: _foodNameController,
                 decoration: InputDecoration(
-                    labelText: 'Food Name', border: OutlineInputBorder()),
+                  labelText: 'Food Name',
+                  labelStyle: TextStyle(fontSize: 20),
+                  border: OutlineInputBorder(),
+                ),
                 enabled: _isEditing,
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 20),
               TextField(
                 controller: _calciumController,
                 decoration: InputDecoration(
-                    labelText: 'Calcium', border: OutlineInputBorder()),
+                  labelText: 'Calcium (g)',
+                  labelStyle: TextStyle(fontSize: 20),
+                  border: OutlineInputBorder(),
+                ),
                 enabled: _isEditing,
                 keyboardType: TextInputType.number,
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 20),
               TextField(
                 controller: _carbsController,
                 decoration: InputDecoration(
-                    labelText: 'Carbs', border: OutlineInputBorder()),
+                  labelText: 'Carbohydrate (g)',
+                  labelStyle: TextStyle(fontSize: 20),
+                  border: OutlineInputBorder(),
+                ),
                 enabled: _isEditing,
                 keyboardType: TextInputType.number,
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 20),
               TextField(
                 controller: _fatController,
                 decoration: InputDecoration(
-                    labelText: 'Fat', border: OutlineInputBorder()),
+                  labelText: 'Fat (g)',
+                  labelStyle: TextStyle(fontSize: 20),
+                  border: OutlineInputBorder(),
+                ),
                 enabled: _isEditing,
                 keyboardType: TextInputType.number,
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 20),
               TextField(
                 controller: _proteinController,
                 decoration: InputDecoration(
-                    labelText: 'Protein', border: OutlineInputBorder()),
+                  labelText: 'Protein (g)',
+                  labelStyle: TextStyle(fontSize: 20),
+                  border: OutlineInputBorder(),
+                ),
                 enabled: _isEditing,
                 keyboardType: TextInputType.number,
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 20),
               TextField(
                 controller: _vitaminsController,
                 decoration: InputDecoration(
-                    labelText: 'Vitamins', border: OutlineInputBorder()),
+                  labelText: 'Vitamins (g)',
+                  labelStyle: TextStyle(fontSize: 20),
+                  border: OutlineInputBorder(),
+                ),
                 enabled: _isEditing,
                 keyboardType: TextInputType.number,
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 20),
               DropdownButtonFormField<String>(
                 value: _selectedFoodType,
                 items: _foodTypes.map((String type) {
@@ -310,9 +390,12 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                       }
                     : null,
                 decoration: InputDecoration(
-                    labelText: 'Food Type', border: OutlineInputBorder()),
+                  labelText: 'Food Type',
+                  labelStyle: TextStyle(fontSize: 20),
+                  border: OutlineInputBorder(),
+                ),
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 20),
               GestureDetector(
                 onTap: () {
                   if (_isEditing) _selectDate(context);
@@ -324,14 +407,15 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                     ),
                     decoration: InputDecoration(
                       labelText: 'Date',
+                      labelStyle: TextStyle(fontSize: 20),
                       suffixIcon: Icon(Icons.calendar_today),
                       border: OutlineInputBorder(),
                     ),
-                    enabled: true, // Allow interaction in editing mode
+                    enabled: true,
                   ),
                 ),
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 20),
               GestureDetector(
                 onTap: () {
                   if (_isEditing) _selectTime(context);
@@ -343,52 +427,83 @@ class _FoodDetailScreenState extends State<FoodDetailScreen> {
                     ),
                     decoration: InputDecoration(
                       labelText: 'Time',
+                      labelStyle: TextStyle(fontSize: 20),
                       suffixIcon: Icon(Icons.access_time),
                       border: OutlineInputBorder(),
                     ),
-                    enabled: true, // Allow interaction in editing mode
+                    enabled: true,
                   ),
                 ),
               ),
               SizedBox(height: 20),
-              if (_imageFile != null)
+              if (_imageFile != null || _imageUrl != null)
                 Column(
                   children: [
-                    Image.file(_imageFile!, height: 150, width: 250),
-                    if (_isEditing)
+                    GestureDetector(
+                      onTap: _pickImage, // Allow users to tap and pick a new image
+                      child: Container(
+                        height: 150,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.white, // White background color
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.grey.shade400), // Light grey border color
+                        ),
+                        child: _imageFile != null
+                            ? ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.file(
+                            _imageFile!,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                          ),
+                        )
+                            : (_imageUrl != null && _imageFile == null
+                            ? ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.network(
+                            _imageUrl!,
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                          ),
+                        )
+                            : Center(
+                          child: Text(
+                            'Upload Image (optional)',
+                            style: TextStyle(
+                              color: Colors.grey, // Light grey text color
+                              fontSize: 16,
+                            ),
+                          ),
+                        )),
+                      ),
+                    ),
+                    if (_isEditing && (_imageFile != null || _imageUrl != null))
+                      SizedBox(height: 10), // Space between image and button
+                    if (_isEditing && (_imageFile != null || _imageUrl != null))
                       ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            _imageFile = null;
-                            _imageUrl = null;
-                          });
-                        },
-                        child: Text('Remove Image'),
+                        onPressed: _confirmRemoveImage,
+                        child: Text(
+                          'Remove Image',
+                          style: TextStyle(color: Colors.black),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFFE2BF65),
+                        ),
                       ),
                   ],
                 ),
-              if (_imageUrl != null &&
-                  _imageUrl!.isNotEmpty &&
-                  _imageFile == null)
-                Column(
-                  children: [
-                    Image.network(_imageUrl!, height: 150, width: 250),
-                    if (_isEditing)
-                      ElevatedButton(
-                        onPressed: () {
-                          setState(() {
-                            _imageFile = null;
-                            _imageUrl = null;
-                          });
-                        },
-                        child: Text('Remove Image'),
-                      ),
-                  ],
-                ),
+              SizedBox(height: 20),
               if (_isEditing)
                 ElevatedButton(
                   onPressed: _pickImage,
-                  child: Text('Pick Image'),
+                  child: Text(
+                    'Pick Image',
+                    style: TextStyle(color: Colors.black),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color(0xFFE2BF65),
+                  ),
                 ),
             ],
           ),

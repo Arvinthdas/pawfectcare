@@ -25,8 +25,15 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Color(0xFFF7EFF1),
       appBar: AppBar(
-        title: Text('Add Activity'),
+        title: Text('Add Activity',
+          style: TextStyle(
+              color: Colors.black,
+              fontFamily: 'Poppins',
+              fontSize: 20,
+              fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Color(0xFFE2BF65),
       ),
       body: SingleChildScrollView(
@@ -34,15 +41,15 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildDropdown('Activity Type', _activityTypes, _selectedActivityType, (value) {
+            _buildDropdown('Activity Type *', _activityTypes, _selectedActivityType, (value) {
               setState(() {
                 _selectedActivityType = value;
               });
             }),
             SizedBox(height: 15),
-            _buildTextField('Duration (minutes)', _durationController, inputType: TextInputType.number),
+            _buildTextField('Duration (minutes) *', _durationController, inputType: TextInputType.number),
             SizedBox(height: 15),
-            _buildDropdown('Intensity', _intensityLevels, _selectedIntensity, (value) {
+            _buildDropdown('Intensity *', _intensityLevels, _selectedIntensity, (value) {
               setState(() {
                 _selectedIntensity = value;
               });
@@ -121,7 +128,7 @@ class _AddActivityScreenState extends State<AddActivityScreen> {
     return GestureDetector(
       onTap: _selectDateTime,
       child: AbsorbPointer(
-        child: _buildTextField('Date & Time of Activity', _dateController),
+        child: _buildTextField('Date & Time of Activity *', _dateController),
       ),
     );
   }

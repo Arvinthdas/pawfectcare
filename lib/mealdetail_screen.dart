@@ -118,8 +118,10 @@ class _MealDetailScreenState extends State<MealDetailScreen> {
         SnackBar(content: Text('Changes saved successfully!')),
       );
 
-      // Go back to the previous screen
-      Navigator.pop(context);
+      // Toggle back to view mode without leaving the screen
+      setState(() {
+        _isEditing = false; // Set to view mode
+      });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error updating meal: $e')),

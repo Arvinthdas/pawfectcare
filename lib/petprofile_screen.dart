@@ -391,7 +391,8 @@ class _PetProfileScreenState extends State<PetProfileScreen> {
           _buildProfileView(), // PetProfileView
           PetHealthScreen(
               petId: widget.petId,
-              userId: widget.userId), // Pass petId and userId
+              userId: widget.userId,
+              petName: widget.petName,), // Pass petId and userId
           NutritionPage(petId: widget.petId, userId: widget.userId),
           ExerciseMonitoringPage(
             petId: widget.petId,

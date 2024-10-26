@@ -297,8 +297,8 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
               borderRadius: BorderRadius.circular(8.0),
               child: Image.file(
                 _selectedDocument!,
-                height: 150,
-                width: double.infinity,
+                height: 200,
+                width: 380,
                 fit: BoxFit.cover,
               ),
             ),
@@ -307,8 +307,8 @@ class _AddVaccinationScreenState extends State<AddVaccinationScreen> {
       );
     } else {
       return Container(
-        height: 150,
-        width: double.infinity,
+        height: 200,
+        width: 380,
         decoration: BoxDecoration(
           color: Colors.grey[200],
           borderRadius: BorderRadius.circular(8.0),

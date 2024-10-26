@@ -232,23 +232,28 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
 
   Widget _buildImageDisplay() {
     if (_imageFile != null) {
-      return Column(
-        children: [
-          GestureDetector(
-            onTap: () {
-              if (_isEditing) {
-                _showRemoveImageDialog();
-              }
-            },
+      return Container(
+        height: 200,
+        width: 380,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10), // Rounded corners
+          border: Border.all(color: Colors.grey[300]!, width: 1), // Border color
+          color: Colors.grey[200], // Background color
+        ),
+        child: GestureDetector(
+          onTap: () {
+            if (_isEditing) {
+              _showRemoveImageDialog();
+            }
+          },
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10), // Ensure image fits within rounded corners
             child: Image.file(
               _imageFile!,
-              height: 150,
-              width: 150,
               fit: BoxFit.cover,
             ),
           ),
-          SizedBox(height: 10),
-        ],
+        ),
       );
     } else {
       String? documentUrl = _latestVaccinationRecord.data() != null &&
@@ -258,22 +263,43 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
           : null;
 
       if (documentUrl != null && documentUrl.isNotEmpty) {
-        return Column(
-          children: [
-            Image.network(
+        return Container(
+          height: 200,
+          width: 380,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10), // Rounded corners
+            border: Border.all(color: Colors.grey[300]!, width: 1), // Border color
+            color: Colors.grey[200], // Background color
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10), // Ensure image fits within rounded corners
+            child: Image.network(
               documentUrl,
-              height: 150,
-              width: 150,
               fit: BoxFit.cover,
             ),
-            SizedBox(height: 10),
-          ],
+          ),
         );
       } else {
-        return Text('No image uploaded');
+        return Container(
+          height: 200,
+          width: 380,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10), // Rounded corners
+            border: Border.all(color: Colors.grey[300]!, width: 1), // Border color
+            color: Colors.grey[200], // Background color
+          ),
+          child: Center( // Center the text inside the container
+            child: Text(
+              'No image uploaded',
+              style: TextStyle(color: Colors.grey[600]), // Optional styling for the text
+            ),
+          ),
+        );
       }
     }
   }
+
+
 
   Future<bool?> _showConfirmationDialog({required String title, required String content}) {
     return showDialog<bool>(

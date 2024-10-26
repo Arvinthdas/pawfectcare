@@ -195,21 +195,23 @@ class _ExerciseMonitoringPageState extends State<ExerciseMonitoringPage> {
           backgroundColor: Color(0xFFE2BF65),
           elevation: 0,
           leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.white),
+            icon: Icon(Icons.arrow_back, color: Colors.black),
             onPressed: () => Navigator.of(context).pop(),
           ),
           title: Text(
             'Exercise Monitoring',
             style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+                color: Colors.black,
+                fontFamily: 'Poppins',
+                fontSize: 20,
+                fontWeight: FontWeight.bold),
           ),
           bottom: TabBar(
-            indicatorColor: Colors.white,
+            isScrollable: true,
+            indicatorColor: Color(0xFF037171),
             labelColor: Colors.white,
-            unselectedLabelColor: Colors.white70,
+            unselectedLabelColor: Colors.black,
+            labelStyle: TextStyle(fontSize: 15,fontStyle: FontStyle.italic ,fontWeight: FontWeight.bold),
             tabs: [
               Tab(text: 'Activity Tracker'),
               Tab(text: 'Exercise Recommendations and Tips'),
@@ -240,10 +242,18 @@ class _ExerciseMonitoringPageState extends State<ExerciseMonitoringPage> {
                   ),
                   SizedBox(height: 10),
                   ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Color(0xFFE2BF65),
+                    ),
                     onPressed: _selectDateRange,
-                    child: Text('Select Date Range'),
+                    child: Text('Select Date Range',
+                      style: TextStyle(
+                        backgroundColor:Color(0xFFE2BF65),
+                        color: Colors.black,
+                      ),
+                    ),
                   ),
-                  SizedBox(height: 10),
+                  SizedBox(height: 20),
                   _buildActivityStats(),
                 ],
               ),
@@ -415,44 +425,45 @@ class _ExerciseMonitoringPageState extends State<ExerciseMonitoringPage> {
       return Center(child: CircularProgressIndicator());
     }
 
-    int totalMinutes = _activityStats['totalMinutes'] ?? 0;
+    //int totalMinutes = _activityStats['totalMinutes'] ?? 0;
     Map<String, double> intensityDistribution = _activityStats['intensityDistribution'] ?? {};
     Map<String, int> typeBreakdown = _activityStats['typeBreakdown'] ?? {};
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: 'Total Time Spent: ',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black), // Bold text
-              ),
-              TextSpan(
-                text: '${totalMinutes} minutes',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal,color: Colors.black), // Normal text
-              ),
-            ],
-          ),
-        ),
+        // RichText(
+        //   text: TextSpan(
+        //     children: [
+        //       TextSpan(
+        //         text: 'Total Time Spent: ',
+        //         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black), // Bold text
+        //       ),
+        //       TextSpan(
+        //         text: '${totalMinutes} minutes',
+        //         style: TextStyle(fontSize: 16, fontWeight: FontWeight.normal,color: Colors.black), // Normal text
+        //       ),
+        //     ],
+        //   ),
+        // ),
         SizedBox(height: 15),
 
         // Intensity Distribution Text and Pie Chart
         Text('Intensity Distribution:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        SizedBox(height: 10),
+        SizedBox(height: 20),
         _buildIntensityPieChart(intensityDistribution),
-        SizedBox(height: 10),
+        SizedBox(height: 20),
 
         // Time Breakdown by Activity Type
         Text('Time Breakdown by Activity Type:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+        SizedBox(height: 20),
         ...typeBreakdown.entries.map((entry) {
           return Text('${entry.key}: ${entry.value} minutes', style: TextStyle(fontSize: 16));
         }).toList(),
 
         SizedBox(height: 20),
         Text('Time Breakdown Bar Chart', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        SizedBox(height: 10),
+        SizedBox(height: 20),
         _buildActivityTypeBarChart(typeBreakdown),
       ],
     );
