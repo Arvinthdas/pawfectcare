@@ -13,10 +13,9 @@ import 'fooddetails_screen.dart';
 import 'mealdetail_screen.dart';
 
 class NutritionPage extends StatefulWidget {
-  final String petId;
-  final String userId;
-  final String petName;
-
+  final String petId; // ID of the pet
+  final String userId; // ID of the user
+  final String petName; // Name of the pet
 
   NutritionPage({required this.petId, required this.userId, required this.petName});
 
@@ -25,33 +24,35 @@ class NutritionPage extends StatefulWidget {
 }
 
 class _NutritionPageState extends State<NutritionPage> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  bool _isLoading = true; // Loading state
-  String _dietPlan = "Loading personalized diet plan...";
+  late TabController _tabController; // Controller for tab navigation
+  bool _isLoading = true; // Loading state for diet plan
+  String _dietPlan = "Loading personalized diet plan..."; // Placeholder for diet plan
   String? _currentPetId; // Store the current pet ID
-  late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
-  DateTime _selectedDate = DateTime.now(); // Store the selected date
+  late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin; // Notification plugin
+  DateTime _selectedDate = DateTime.now(); // Store the selected date for filtering meals
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-    _tabController.addListener(_handleTabChange);
-    _loadDietPlan();
+    _tabController = TabController(length: 3, vsync: this); // Initialize tab controller
+    _tabController.addListener(_handleTabChange); // Listen for tab changes
+    _loadDietPlan(); // Load the diet plan for the current pet
 
     // Initialize local notifications
     flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-    _initializeNotifications();
-    _scheduleDailyNotification();
+    _initializeNotifications(); // Setup notifications
+    _scheduleDailyNotification(); // Schedule daily notifications
   }
 
+  // Method to initialize notifications
   void _initializeNotifications() {
     const AndroidInitializationSettings initializationSettingsAndroid =
-    AndroidInitializationSettings('app_icon'); // Make sure you have an app icon
+    AndroidInitializationSettings('app_icon'); // Set the app icon for notifications
 
     final InitializationSettings initializationSettings =
     InitializationSettings(android: initializationSettingsAndroid);
 
+    // Initialize the notification plugin
     flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) async {
@@ -62,6 +63,7 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
     );
   }
 
+  // Method to schedule daily notifications
   void _scheduleDailyNotification() {
     final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
     final tz.TZDateTime scheduledTime = tz.TZDateTime(
@@ -70,7 +72,7 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
       now.month,
       now.day,
       22, // Schedule for 10 PM
-      00,
+      0,
     );
 
     // If the scheduled time has already passed, schedule for the next day
@@ -80,6 +82,7 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
 
     print('Scheduling notification for: $notificationTime'); // Debug log
 
+    // Schedule the notification
     flutterLocalNotificationsPlugin.zonedSchedule(
       0, // Notification ID
       'Daily Nutrition Summary',
@@ -100,12 +103,14 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
     );
   }
 
+  // Handle tab change event
   void _handleTabChange() {
     if (_tabController.index == 2) {
-      _loadDietPlan();
+      _loadDietPlan(); // Load diet plan if the third tab is selected
     }
   }
 
+  // Load the diet plan based on pet details
   Future<void> _loadDietPlan() async {
     if (_currentPetId == widget.petId) {
       // If the pet ID hasn't changed, don't reload the diet plan
@@ -114,31 +119,33 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
 
     setState(() {
       _currentPetId = widget.petId; // Update the current pet ID
-      _isLoading = true; // Start loading
+      _isLoading = true; // Start loading state
     });
 
     try {
-      Map<String, dynamic> petDetails = await fetchPetDetails(widget.petId);
+      Map<String, dynamic> petDetails = await fetchPetDetails(widget.petId); // Fetch pet details
 
+      // Check for required pet details
       if (petDetails['type'] == null || petDetails['breed'] == null || petDetails['age'] == null || petDetails['weight'] == null) {
         throw Exception("Missing required pet details");
       }
 
-      Map<String, dynamic> breedData = await loadBreedSpecificData(petDetails['type']);
+      Map<String, dynamic> breedData = await loadBreedSpecificData(petDetails['type']); // Load breed data
 
-      Map<String, dynamic> dietInfo = generateDietPlanWithDecisionTree(petDetails, breedData);
+      Map<String, dynamic> dietInfo = generateDietPlanWithDecisionTree(petDetails, breedData); // Generate diet plan
       setState(() {
-        _dietPlan = dietInfo['dietPlan'];
-        _isLoading = false; // Stop loading
+        _dietPlan = dietInfo['dietPlan']; // Update diet plan
+        _isLoading = false; // Stop loading state
       });
     } catch (e) {
       setState(() {
-        _dietPlan = "Error loading diet plan: $e";
+        _dietPlan = "Error loading diet plan: $e"; // Error message
         _isLoading = false; // Stop loading on error
       });
     }
   }
 
+  // Fetch pet details from Firestore
   Future<Map<String, dynamic>> fetchPetDetails(String petId) async {
     DocumentSnapshot snapshot = await FirebaseFirestore.instance
         .collection('users')
@@ -148,24 +155,26 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
         .get();
 
     if (snapshot.exists) {
-      return snapshot.data() as Map<String, dynamic>;
+      return snapshot.data() as Map<String, dynamic>; // Return pet details
     } else {
-      throw Exception("Pet not found");
+      throw Exception("Pet not found"); // Throw error if pet not found
     }
   }
 
+  // Load breed-specific data based on pet type
   Future<Map<String, dynamic>> loadBreedSpecificData(String petType) async {
     String jsonString;
     if (petType.toLowerCase() == 'dog') {
-      jsonString = await rootBundle.loadString('assets/dog_breeds.json');
+      jsonString = await rootBundle.loadString('assets/dog_breeds.json'); // Load dog breeds data
     } else if (petType.toLowerCase() == 'cat') {
-      jsonString = await rootBundle.loadString('assets/cat_breeds.json');
+      jsonString = await rootBundle.loadString('assets/cat_breeds.json'); // Load cat breeds data
     } else {
-      throw Exception("Unsupported pet type");
+      throw Exception("Unsupported pet type"); // Throw error for unsupported types
     }
-    return jsonDecode(jsonString) as Map<String, dynamic>;
+    return jsonDecode(jsonString) as Map<String, dynamic>; // Return breed data
   }
 
+  // Generate diet plan using a decision tree approach
   Map<String, dynamic> generateDietPlanWithDecisionTree(
       Map<String, dynamic> petDetails, Map<String, dynamic> breedData) {
     String breed = petDetails['breed'] ?? '';
@@ -179,7 +188,7 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
         orElse: () => null);
 
     if (breedSpecificInfo == null) {
-      return {'dietPlan': 'No specific diet plan found for this breed.'};
+      return {'dietPlan': 'No specific diet plan found for this breed.'}; // No diet plan found
     }
 
     String dietPlan = "Diet recommendations for $breed:\n";
@@ -188,6 +197,7 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
     String ageCategory = age < 2 ? 'puppy' : (age >= 7 ? 'senior' : 'adult');
     dietPlan += "Age-specific advice: ${breedSpecificInfo['age_related_recommendations'][ageCategory] ?? 'No age-specific advice.'}\n";
 
+    // Weight advice based on pet's weight
     if (weight < (breedSpecificInfo['average_weight_kg'][0] ?? 0.0)) {
       dietPlan += "Weight advice: The pet is below the typical weight range. Consider a higher calorie diet.\n";
     } else if (weight > (breedSpecificInfo['average_weight_kg'][1] ?? 0.0)) {
@@ -196,11 +206,12 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
       dietPlan += "Weight advice: The pet's weight is within the typical range.\n";
     }
 
+    // Special considerations if available
     if (breedSpecificInfo.containsKey('special_considerations')) {
       dietPlan += "Special considerations: ${breedSpecificInfo['special_considerations']}\n";
     }
 
-    return {'dietPlan': dietPlan};
+    return {'dietPlan': dietPlan}; // Return generated diet plan
   }
 
   @override
@@ -227,63 +238,75 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
             unselectedLabelColor: Colors.black,
             labelStyle: TextStyle(fontSize: 15,fontStyle: FontStyle.italic ,fontWeight: FontWeight.bold),
             tabs: [
-              Tab(text: 'Meal Reminder'),
-              Tab(text: 'Food Intake Tracker'),
-              Tab(text: 'Personalized Diet Plans'),
+              Tab(text: 'Meal Reminder'), // Tab for meal reminders
+              Tab(text: 'Food Intake Tracker'), // Tab for tracking food intake
+              Tab(text: 'Personalized Diet Plans'), // Tab for personalized diet plans
             ],
           ),
         ),
         body: TabBarView(
           controller: _tabController,
           children: [
-            _buildMealReminderTab(),
-            _buildFoodIntakeTrackerTab(),
-            _buildPersonalizedDietPlansTab(),
+            _buildMealReminderTab(), // Meal reminder tab
+            _buildFoodIntakeTrackerTab(), // Food intake tracker tab
+            _buildPersonalizedDietPlansTab(), // Personalized diet plans tab
           ],
         ),
       ),
     );
   }
 
+  // Build the meal reminder tab
   Widget _buildMealReminderTab() {
     return SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
-    child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-    _buildSectionHeader('Meal History', onAddPressed: () {
-    Navigator.push(
-    context,
-    MaterialPageRoute(
-    builder: (context) => AddMealScreen(userId: widget.userId, petId: widget.petId, petName: widget.petName),
-    ),
-    );
-    }),
-    SizedBox(height: 10),
-    _buildMealHistory(),
-    SizedBox(height: 20),
-      _buildSectionHeader('Upcoming Meals', onAddPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => AddMealScreen(userId: widget.userId, petId: widget.petId, petName: widget.petName),
-          ),
-        );
-      }),
-      SizedBox(height: 10),
-      _buildUpcomingMeals(),
-    ],
-    ),
+      padding: EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader('Meal History', onAddPressed: () { // Section header for meal history
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AddMealScreen(
+                  userId: widget.userId,
+                  petId: widget.petId,
+                  petName: widget.petName,
+                ),
+              ),
+            );
+          }),
+          SizedBox(height: 10),
+          _buildDateFilterButton(),  // Date filter button here
+          SizedBox(height: 10),
+          _buildMealHistory(), // Meal history list
+          SizedBox(height: 20),
+          _buildSectionHeader('Upcoming Meals', onAddPressed: () { // Section header for upcoming meals
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => AddMealScreen(
+                  userId: widget.userId,
+                  petId: widget.petId,
+                  petName: widget.petName,
+                ),
+              ),
+            );
+          }),
+          SizedBox(height: 10),
+          _buildUpcomingMeals(), // Upcoming meals list
+        ],
+      ),
     );
   }
 
+  // Build the food intake tracker tab
   Widget _buildFoodIntakeTrackerTab() {
     return SingleChildScrollView(
       padding: EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionHeader('Food Intake', onAddPressed: () {
+          _buildSectionHeader('Food Intake', onAddPressed: () { // Section header for food intake
             Navigator.push(
               context,
               MaterialPageRoute(
@@ -292,22 +315,24 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
             );
           }),
           SizedBox(height: 10),
-          _buildDateFilterButton(),
+          _buildDateFilterButton(), // Date filter button
           SizedBox(height: 10),
-          _buildFoodDetails(),
+          _buildFoodDetails(), // Food details list
           SizedBox(height: 20),
-          _buildDailyNutritionChart(),
+          _buildDailyNutritionChart(), // Daily nutrition chart
         ],
       ),
     );
   }
 
+  // Build the date filter button
   Widget _buildDateFilterButton() {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-          backgroundColor: Color(0xFFE2BF65),
+        backgroundColor: Color(0xFFE2BF65),
       ),
       onPressed: () async {
+        // Show date picker to select a date
         DateTime? pickedDate = await showDatePicker(
           context: context,
           initialDate: _selectedDate,
@@ -322,15 +347,15 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
         }
       },
       child: Text(
-          'Filter by Date: ${DateFormat('dd/MM/yyyy').format(_selectedDate)}',
-              style: TextStyle(
-                backgroundColor:Color(0xFFE2BF65),
-                color: Colors.black,
-              ),
+        'Filter by Date: ${DateFormat('dd/MM/yyyy').format(_selectedDate)}', // Display selected date
+        style: TextStyle(
+          color: Colors.black,
+        ),
       ),
     );
   }
 
+  // Build the food details list based on selected date
   Widget _buildFoodDetails() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
@@ -357,13 +382,13 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return Center(child: CircularProgressIndicator()); // Loading indicator
         }
         if (snapshot.hasError) {
-          return Center(child: Text('Error fetching food details'));
+          return Center(child: Text('Error fetching food details')); // Error message
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(child: Text('No food details available for this date.'));
+          return Center(child: Text('No food details available for this date.')); // No data message
         }
 
         final foodItems = snapshot.data!.docs;
@@ -374,18 +399,20 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
           itemCount: foodItems.length,
           itemBuilder: (context, index) {
             final food = foodItems[index];
-            return _buildFoodCard(food);
+            return _buildFoodCard(food); // Build food card for each item
           },
         );
       },
     );
   }
 
+  // Build individual food card
   Widget _buildFoodCard(DocumentSnapshot food) {
     String formattedDate = DateFormat('dd/MM/yyyy HH:mm').format((food['timestamp'] as Timestamp).toDate());
 
     return InkWell(
       onTap: () {
+        // Navigate to food details screen
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -398,7 +425,7 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
         );
       },
       onLongPress: () {
-        _showDeleteFoodDialog(food.id);
+        _showDeleteFoodDialog(food.id); // Show delete dialog on long press
       },
       child: Card(
         color: Colors.white,
@@ -419,6 +446,7 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
     );
   }
 
+  // Show dialog to confirm deletion of food item
   void _showDeleteFoodDialog(String foodId) {
     showDialog(
       context: context,
@@ -429,14 +457,14 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(); // Cancel action
               },
               child: Text('Cancel'),
             ),
             TextButton(
               onPressed: () async {
                 await _deleteFood(foodId); // Delete food item
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(); // Close dialog
               },
               child: Text('Delete'),
             ),
@@ -446,6 +474,7 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
     );
   }
 
+  // Delete food item from Firestore
   Future<void> _deleteFood(String foodId) async {
     try {
       await FirebaseFirestore.instance
@@ -458,15 +487,16 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
           .delete();
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Food item deleted successfully!')),
+        SnackBar(content: Text('Food item deleted successfully!')), // Success message
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error deleting food item: $e')),
+        SnackBar(content: Text('Error deleting food item: $e')), // Error message
       );
     }
   }
 
+  // Build daily nutrition chart
   Widget _buildDailyNutritionChart() {
     DateTime now = DateTime.now();
     DateTime tenPM = DateTime(now.year, now.month, now.day, 22, 0); // 10 PM today
@@ -510,17 +540,17 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return Center(child: CircularProgressIndicator()); // Loading indicator
           }
           if (snapshot.hasError) {
-            return Center(child: Text('Error fetching nutrition data'));
+            return Center(child: Text('Error fetching nutrition data')); // Error message
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('No nutrition data available for this date.'));
+            return Center(child: Text('No nutrition data available for this date.')); // No data message
           }
 
           final foodItems = snapshot.data!.docs;
-          final nutritionData = _calculateDailyNutrition(foodItems);
+          final nutritionData = _calculateDailyNutrition(foodItems); // Calculate nutrition data
 
           return Column(
             children: [
@@ -529,7 +559,7 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 20), // Add some space between the title and the chart
-              _buildPieChart(nutritionData, chartSize: 80), // Pass a larger size if needed
+              _buildPieChart(nutritionData, chartSize: 80), // Build pie chart
             ],
           );
         },
@@ -537,6 +567,7 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
     }
   }
 
+  // Calculate daily nutrition values from food items
   Map<String, double> _calculateDailyNutrition(List<QueryDocumentSnapshot> foodItems) {
     double totalCarbs = 0;
     double totalProtein = 0;
@@ -545,11 +576,11 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
     double totalVitamins = 0;
 
     for (var food in foodItems) {
-      totalCarbs += (food['carbs'] ?? 0).toDouble();
-      totalProtein += (food['protein'] ?? 0).toDouble();
-      totalFat += (food['fat'] ?? 0).toDouble();
-      totalCalcium += (food['calcium'] ?? 0).toDouble();
-      totalVitamins += (food['vitamins'] ?? 0).toDouble();
+      totalCarbs += (food['carbs'] ?? 0).toDouble(); // Sum carbohydrates
+      totalProtein += (food['protein'] ?? 0).toDouble(); // Sum protein
+      totalFat += (food['fat'] ?? 0).toDouble(); // Sum fat
+      totalCalcium += (food['calcium'] ?? 0).toDouble(); // Sum calcium
+      totalVitamins += (food['vitamins'] ?? 0).toDouble(); // Sum vitamins
     }
 
     return {
@@ -561,33 +592,34 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
     };
   }
 
+  // Build pie chart for daily nutrition
   Widget _buildPieChart(Map<String, double> nutritionData, {double chartSize = 50}) {
     List<PieChartSectionData> sections = nutritionData.entries
         .map((entry) {
       Color color;
       switch (entry.key) {
         case 'Carbs':
-          color = Colors.blue;
+          color = Colors.blue; // Color for carbs
           break;
         case 'Protein':
-          color = Colors.green;
+          color = Colors.green; // Color for protein
           break;
         case 'Fat':
-          color = Colors.red;
+          color = Colors.red; // Color for fat
           break;
         case 'Calcium':
-          color = Colors.orange;
+          color = Colors.orange; // Color for calcium
           break;
         case 'Vitamins':
-          color = Colors.purple;
+          color = Colors.purple; // Color for vitamins
           break;
         default:
-          color = Colors.grey;
+          color = Colors.grey; // Default color
       }
 
       return PieChartSectionData(
         value: entry.value,
-        title: '${entry.key}: ${entry.value.toStringAsFixed(1)}g',
+        title: '${entry.key}: ${entry.value.toStringAsFixed(1)}g', // Display nutrient amount
         radius: chartSize, // Use the passed size
         titleStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.white),
         color: color,
@@ -604,7 +636,7 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
           borderData: FlBorderData(show: false),
           pieTouchData: PieTouchData(
             touchCallback: (FlTouchEvent event, pieTouchResponse) {
-              setState(() {});
+              setState(() {}); // Refresh on touch
             },
           ),
         ),
@@ -612,13 +644,14 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
     );
   }
 
+  // Build the personalized diet plans tab
   Widget _buildPersonalizedDietPlansTab() {
     if (_isLoading) {
       return Center(
-        child: CircularProgressIndicator(),
+        child: CircularProgressIndicator(), // Loading indicator
       );
     } else {
-      List<String> dietPlanSections = _dietPlan.split('\n');
+      List<String> dietPlanSections = _dietPlan.split('\n'); // Split diet plan into sections
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         child: SingleChildScrollView(
@@ -637,6 +670,7 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
     }
   }
 
+  // Build individual diet card
   Widget _buildDietCard(String title, String content) {
     return Card(
       color: Colors.white,
@@ -665,6 +699,7 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
     );
   }
 
+  // Build meal history list with date filter
   Widget _buildMealHistory() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
@@ -673,21 +708,34 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
           .collection('pets')
           .doc(widget.petId)
           .collection('meals')
-          .where('date', isLessThanOrEqualTo: DateTime.now())
+          .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(DateTime(
+        _selectedDate.year,
+        _selectedDate.month,
+        _selectedDate.day,
+        0,
+        0,
+      )))
+          .where('date', isLessThanOrEqualTo: Timestamp.fromDate(DateTime(
+        _selectedDate.year,
+        _selectedDate.month,
+        _selectedDate.day,
+        23,
+        59,
+      )))
           .orderBy('date', descending: true)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return Center(child: CircularProgressIndicator()); // Loading indicator
         }
         if (snapshot.hasError) {
-          return Center(child: Text('Error fetching meal history'));
+          return Center(child: Text('Error fetching meal history')); // Error message
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(child: Text('No meal history available'));
+          return Center(child: Text('No meal history available for selected date.')); // No data message
         }
 
-        final meals = snapshot.data!.docs;
+        final meals = snapshot.data!.docs; // List of meal documents
 
         return ListView.builder(
           shrinkWrap: true,
@@ -695,13 +743,14 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
           itemCount: meals.length,
           itemBuilder: (context, index) {
             final meal = meals[index];
-            return _buildMealCard(meal, true);
+            return _buildMealCard(meal, true); // Build meal card for each meal
           },
         );
       },
     );
   }
 
+  // Build upcoming meals list
   Widget _buildUpcomingMeals() {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
@@ -715,16 +764,16 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          return Center(child: CircularProgressIndicator()); // Loading indicator
         }
         if (snapshot.hasError) {
-          return Center(child: Text('Error fetching upcoming meals'));
+          return Center(child: Text('Error fetching upcoming meals')); // Error message
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(child: Text('No upcoming meals available'));
+          return Center(child: Text('No upcoming meals available')); // No data message
         }
 
-        final upcomingMeals = snapshot.data!.docs;
+        final upcomingMeals = snapshot.data!.docs; // List of upcoming meal documents
 
         return ListView.builder(
           shrinkWrap: true,
@@ -732,18 +781,20 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
           itemCount: upcomingMeals.length,
           itemBuilder: (context, index) {
             final meal = upcomingMeals[index];
-            return _buildMealCard(meal, false);
+            return _buildMealCard(meal, false); // Build meal card for each upcoming meal
           },
         );
       },
     );
   }
 
+  // Build individual meal card
   Widget _buildMealCard(DocumentSnapshot meal, bool isHistory) {
-    String formattedDate = DateFormat('dd/MM/yyyy HH:mm').format((meal['date'] as Timestamp).toDate());
+    String formattedDate = DateFormat('dd/MM/yyyy HH:mm').format((meal['date'] as Timestamp).toDate()); // Format date
 
     return InkWell(
       onTap: () {
+        // Navigate to meal details screen
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -757,7 +808,7 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
         );
       },
       onLongPress: () {
-        _showDeleteDialog(meal.id);
+        _showDeleteDialog(meal.id); // Show delete dialog on long press
       },
       child: Card(
         color: Colors.white,
@@ -778,26 +829,27 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
     );
   }
 
+// Show dialog to confirm deletion of meal
   void _showDeleteDialog(String mealId) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Delete Meal'),
-          content: Text('Are you sure you want to delete this meal?'),
+          title: Text('Delete Meal'), // Title of the dialog
+          content: Text('Are you sure you want to delete this meal?'), // Confirmation message
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(); // Cancel action: closes the dialog
               },
-              child: Text('Cancel'),
+              child: Text('Cancel'), // Cancel button text
             ),
             TextButton(
               onPressed: () async {
-                await _deleteMeal(mealId); // Delete meal
-                Navigator.of(context).pop();
+                await _deleteMeal(mealId); // Call function to delete the meal
+                Navigator.of(context).pop(); // Close dialog after deletion
               },
-              child: Text('Delete'),
+              child: Text('Delete'), // Delete button text
             ),
           ],
         );
@@ -805,6 +857,7 @@ class _NutritionPageState extends State<NutritionPage> with SingleTickerProvider
     );
   }
 
+// Delete meal from Firestore
 Future<void> _deleteMeal(String mealId) async {
   try {
     await FirebaseFirestore.instance
@@ -817,15 +870,16 @@ Future<void> _deleteMeal(String mealId) async {
         .delete();
 
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Meal deleted successfully!')),
+      SnackBar(content: Text('Meal deleted successfully!')), // Success message
     );
   } catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Error deleting meal: $e')),
+      SnackBar(content: Text('Error deleting meal: $e')), // Error message
     );
   }
 }
 
+// Build section header with title and add button
 Widget _buildSectionHeader(String title, {required VoidCallback onAddPressed}) {
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -842,7 +896,7 @@ Widget _buildSectionHeader(String title, {required VoidCallback onAddPressed}) {
         onPressed: onAddPressed,
         child: Row(
           children: [
-            Icon(Icons.add, color: Colors.black),
+            Icon(Icons.add, color: Colors.black), // Add button icon
             Text('Add', style: TextStyle(color: Colors.black)),
           ],
         ),
@@ -851,4 +905,3 @@ Widget _buildSectionHeader(String title, {required VoidCallback onAddPressed}) {
   );
 }
 }
-

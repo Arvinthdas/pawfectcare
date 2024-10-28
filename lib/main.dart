@@ -1,86 +1,114 @@
-import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:timezone/data/latest.dart' as tz;
-import 'package:timezone/timezone.dart' as tz;
-import 'login_screen.dart';
-import 'home_screen.dart';
+import 'package:flutter/material.dart'; // Import the Flutter Material package for UI components
+import 'package:firebase_core/firebase_core.dart'; // Import Firebase core package for initialization
+import 'package:firebase_auth/firebase_auth.dart'; // Import Firebase authentication package
+import 'package:permission_handler/permission_handler.dart'; // Import package for handling permissions
+import 'package:flutter_local_notifications/flutter_local_notifications.dart'; // Import package for local notifications
+import 'package:timezone/data/latest.dart'
+    as tz; // Import timezone data for handling time zones
+import 'package:timezone/timezone.dart' as tz; // Import timezone utilities
+import 'login_screen.dart'; // Import the login screen widget
+import 'home_screen.dart'; // Import the home screen widget
 
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+// Initialize FlutterLocalNotificationsPlugin instance for notifications
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  WidgetsFlutterBinding
+      .ensureInitialized(); // Ensure Flutter bindings are initialized
+  await Firebase.initializeApp(); // Initialize Firebase
 
-  tz.initializeTimeZones();
-  tz.setLocalLocation(tz.getLocation('Asia/Kuala_Lumpur'));
+  tz.initializeTimeZones(); // Initialize time zones
+  tz.setLocalLocation(
+      tz.getLocation('Asia/Kuala_Lumpur')); // Set local timezone
 
-  await _initializeNotifications();
-  runApp(MyApp());
+  await _initializeNotifications(); // Initialize notifications
+  runApp(MyApp()); // Run the main application
 }
 
 Future<void> _initializeNotifications() async {
-  const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
-  final InitializationSettings initializationSettings = InitializationSettings(android: initializationSettingsAndroid);
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-  _createNotificationChannel();
+  // Define Android-specific settings for notifications
+  const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  // Combine Android settings with platform-specific settings
+  final InitializationSettings initializationSettings =
+      InitializationSettings(android: initializationSettingsAndroid);
+
+  await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings); // Initialize notifications with settings
+  _createNotificationChannel(); // Create a notification channel
 }
 
 Future<void> _createNotificationChannel() async {
+  // Define a notification channel for Android
   const AndroidNotificationChannel channel = AndroidNotificationChannel(
-    'vaccination_channel',
-    'Vaccination Notifications',
-    description: 'This channel is for vaccination notifications',
-    importance: Importance.max,
+    'vaccination_channel', // Channel ID
+    'Vaccination Notifications', // Channel name
+    description:
+        'This channel is for vaccination notifications', // Channel description
+    importance: Importance.max, // Importance level for notifications
   );
 
-  final androidPlugin = flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+  // Resolve platform-specific implementation for Android
+  final androidPlugin =
+      flutterLocalNotificationsPlugin.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
+
   if (androidPlugin != null) {
-    await androidPlugin.createNotificationChannel(channel);
+    await androidPlugin.createNotificationChannel(
+        channel); // Create the channel if Android plugin is available
   }
 }
 
+// Main application widget
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'PetCare App',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: SplashScreen(), // Start with SplashScreen
-      debugShowCheckedModeBanner: false,
+      title: 'PetCare App', // Application title
+      theme:
+          ThemeData(primarySwatch: Colors.blue), // Theme settings for the app
+      home: SplashScreen(), // Start with the SplashScreen
+      debugShowCheckedModeBanner: false, // Hide debug banner
     );
   }
 }
 
+// Splash screen widget
 class SplashScreen extends StatefulWidget {
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
+// State for the SplashScreen
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller; // Animation controller for animations
+  late Animation<double> _fadeAnimation; // Fade animation
+  late Animation<double> _scaleAnimation; // Scale animation
 
   @override
   void initState() {
     super.initState();
 
-    // Initialize AnimationController
+    // Initialize AnimationController with duration
     _controller = AnimationController(
-      vsync: this,
-      duration: Duration(seconds: 2),
+      vsync: this, // Provide the TickerProvider
+      duration: Duration(seconds: 2), // Duration for the animation
     );
 
     // Initialize fade and scale animations
     _fadeAnimation = Tween<double>(begin: 0, end: 1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
+      CurvedAnimation(
+          parent: _controller,
+          curve: Curves.easeIn), // Curve for fade animation
     );
 
     _scaleAnimation = Tween<double>(begin: 0.5, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
+      CurvedAnimation(
+          parent: _controller,
+          curve: Curves.easeOut), // Curve for scale animation
     );
 
     // Start the animation
@@ -90,26 +118,27 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     Future.delayed(Duration(seconds: 3), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => AuthChecker()),
+        MaterialPageRoute(
+            builder: (context) => AuthChecker()), // Navigate to AuthChecker
       );
     });
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller.dispose(); // Dispose of the animation controller
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.white, // Background color of the splash screen
       body: Center(
         child: FadeTransition(
-          opacity: _fadeAnimation,
+          opacity: _fadeAnimation, // Use fade animation
           child: ScaleTransition(
-            scale: _scaleAnimation,
+            scale: _scaleAnimation, // Use scale animation
             child: Image.asset(
               'assets/images/splash.png', // Path to your logo image
               width: 500, // Adjust the size as needed
@@ -122,35 +151,44 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 }
 
+// AuthChecker widget to determine user authentication status
 class AuthChecker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<User?>(
-      stream: FirebaseAuth.instance.authStateChanges(),
+      stream: FirebaseAuth.instance
+          .authStateChanges(), // Listen to authentication state changes
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+            body: Center(
+                child:
+                    CircularProgressIndicator()), // Show loading indicator while waiting
           );
         } else if (snapshot.hasData) {
-          return HomeScreen();
+          return HomeScreen(); // If authenticated, navigate to HomeScreen
         } else {
-          _requestPermissions();
-          return LoginScreen();
+          _requestPermissions(); // Request permissions if not authenticated
+          return LoginScreen(); // Show LoginScreen if not authenticated
         }
       },
     );
   }
 
+  // Function to request necessary permissions
   void _requestPermissions() async {
-    var storageStatus = await Permission.storage.status;
+    var storageStatus =
+        await Permission.storage.status; // Check storage permission status
     if (!storageStatus.isGranted) {
-      await Permission.storage.request();
+      await Permission.storage
+          .request(); // Request storage permission if not granted
     }
 
-    var notificationStatus = await Permission.notification.status;
+    var notificationStatus = await Permission
+        .notification.status; // Check notification permission status
     if (!notificationStatus.isGranted) {
-      await Permission.notification.request();
+      await Permission.notification
+          .request(); // Request notification permission if not granted
     }
   }
 }

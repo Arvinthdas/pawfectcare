@@ -9,9 +9,9 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 class HealthLogDetailScreen extends StatefulWidget {
-  late final DocumentSnapshot logRecord;
-  final String userId;
-  final String petName; // Added petName parameter
+  late final DocumentSnapshot logRecord; // Log record from Firestore
+  final String userId; // User ID
+  final String petName; // Pet name for notifications
 
   HealthLogDetailScreen({
     required this.logRecord,
@@ -24,61 +24,75 @@ class HealthLogDetailScreen extends StatefulWidget {
 }
 
 class _HealthLogDetailScreenState extends State<HealthLogDetailScreen> {
-  final _formKey = GlobalKey<FormState>();
-  late TextEditingController _titleController;
-  late TextEditingController _doctorController;
-  late TextEditingController _clinicController;
-  late TextEditingController _treatmentController;
-  late TextEditingController _notesController;
-  DateTime? _selectedDate;
-  bool _isEditing = false;
-  File? _selectedImage;
+  final _formKey = GlobalKey<FormState>(); // Form key for validation
+  late TextEditingController _titleController; // Controller for task title
+  late TextEditingController _doctorController; // Controller for doctor name
+  late TextEditingController _clinicController; // Controller for clinic name
+  late TextEditingController
+      _treatmentController; // Controller for treatment details
+  late TextEditingController _notesController; // Controller for notes
+  DateTime? _selectedDate; // Selected date for the log entry
+  bool _isEditing = false; // Edit mode toggle
+  File? _selectedImage; // Holds the selected image
 
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-  FlutterLocalNotificationsPlugin();
+      FlutterLocalNotificationsPlugin(); // Notification plugin instance
 
   @override
   void initState() {
     super.initState();
-    _initializeNotifications();
-    _titleController = TextEditingController(text: widget.logRecord['title'] ?? '');
+    _initializeNotifications(); // Initialize notifications
+    _titleController = TextEditingController(
+        text: widget.logRecord['title'] ?? ''); // Initialize controllers
     if (widget.logRecord['date'] != null) {
-      _selectedDate = DateFormat('dd/MM/yyyy HH:mm').parse(widget.logRecord['date']);
+      _selectedDate = DateFormat('dd/MM/yyyy HH:mm')
+          .parse(widget.logRecord['date']); // Parse date
     }
-    _doctorController = TextEditingController(text: widget.logRecord['doctor'] ?? '');
-    _clinicController = TextEditingController(text: widget.logRecord['clinic'] ?? '');
-    _treatmentController = TextEditingController(text: widget.logRecord['treatment'] ?? '');
-    _notesController = TextEditingController(text: widget.logRecord['notes'] ?? '');
+    _doctorController =
+        TextEditingController(text: widget.logRecord['doctor'] ?? '');
+    _clinicController =
+        TextEditingController(text: widget.logRecord['clinic'] ?? '');
+    _treatmentController =
+        TextEditingController(text: widget.logRecord['treatment'] ?? '');
+    _notesController =
+        TextEditingController(text: widget.logRecord['notes'] ?? '');
   }
 
   void _initializeNotifications() {
     const AndroidInitializationSettings initializationSettingsAndroid =
-    AndroidInitializationSettings('@mipmap/ic_launcher');
+        AndroidInitializationSettings(
+            '@mipmap/ic_launcher'); // Android notification settings
 
-    const InitializationSettings initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid,
+    const InitializationSettings initializationSettings =
+        InitializationSettings(
+      android: initializationSettingsAndroid, // Set Android settings
     );
 
-    flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    flutterLocalNotificationsPlugin
+        .initialize(initializationSettings); // Initialize plugin
   }
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? pickedDate = await showDatePicker(
+      // Date picker
       context: context,
-      initialDate: _selectedDate ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+      initialDate: _selectedDate ?? DateTime.now(), // Default to today
+      firstDate: DateTime(2000), // Earliest selectable date
+      lastDate: DateTime(2101), // Latest selectable date
     );
 
     if (pickedDate != null) {
       final TimeOfDay? pickedTime = await showTimePicker(
+        // Time picker
         context: context,
-        initialTime: TimeOfDay.fromDateTime(_selectedDate ?? DateTime.now()),
+        initialTime: TimeOfDay.fromDateTime(
+            _selectedDate ?? DateTime.now()), // Default to current time
       );
 
       if (pickedTime != null) {
         setState(() {
           _selectedDate = DateTime(
+            // Combine date and time
             pickedDate.year,
             pickedDate.month,
             pickedDate.day,
@@ -91,12 +105,13 @@ class _HealthLogDetailScreenState extends State<HealthLogDetailScreen> {
   }
 
   Future<void> _scheduleNotification(DateTime scheduledDateTime) async {
-    final tz.TZDateTime tzScheduledDateTime = tz.TZDateTime.from(scheduledDateTime, tz.local);
+    final tz.TZDateTime tzScheduledDateTime =
+        tz.TZDateTime.from(scheduledDateTime, tz.local); // Convert to TZ date
 
     await flutterLocalNotificationsPlugin.zonedSchedule(
       0, // Notification ID
       'Medical Appointment Reminder',
-      '${widget.petName}`s ${_titleController.text} appointment', // Use petName and title
+      '${widget.petName}`s ${_titleController.text} appointment', // Notification content
       tzScheduledDateTime,
       const NotificationDetails(
         android: AndroidNotificationDetails(
@@ -108,25 +123,29 @@ class _HealthLogDetailScreenState extends State<HealthLogDetailScreen> {
         ),
       ),
       androidAllowWhileIdle: true,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,
     );
   }
 
   void _saveRecord() async {
     if (_formKey.currentState!.validate()) {
-      bool? confirmed = await _showConfirmationDialog();
+      // Validate form
+      bool? confirmed = await _showConfirmationDialog(); // Confirmation dialog
       if (confirmed == true) {
         String? imageUrl;
 
         if (_selectedImage != null) {
-          imageUrl = await _uploadImageToFirebase(_selectedImage!);
+          imageUrl = await _uploadImageToFirebase(
+              _selectedImage!); // Upload image if selected
         }
 
         await widget.logRecord.reference.update({
           'title': _titleController.text,
           'date': _selectedDate != null
-              ? DateFormat('dd/MM/yyyy HH:mm').format(_selectedDate!)
+              ? DateFormat('dd/MM/yyyy HH:mm')
+                  .format(_selectedDate!) // Format date
               : null,
           'doctor': _doctorController.text,
           'clinic': _clinicController.text,
@@ -134,19 +153,20 @@ class _HealthLogDetailScreenState extends State<HealthLogDetailScreen> {
           'notes': _notesController.text,
           'imageUrl': imageUrl,
           'timestamp': _selectedDate != null
-              ? Timestamp.fromDate(_selectedDate!)
+              ? Timestamp.fromDate(_selectedDate!) // Update timestamp
               : null,
         }).then((_) {
           setState(() {
-            (widget.logRecord.data() as Map<String, dynamic>)['imageUrl'] = imageUrl;
-            _selectedImage = null;
-            _isEditing = false;
+            (widget.logRecord.data() as Map<String, dynamic>)['imageUrl'] =
+                imageUrl; // Update local record
+            _selectedImage = null; // Clear selected image
+            _isEditing = false; // Exit edit mode
           });
-          _showMessage('Changes saved successfully.');
+          _showMessage('Changes saved successfully.'); // Success message
 
           // Schedule notification after saving changes
           if (_selectedDate != null) {
-            _scheduleNotification(_selectedDate!);
+            _scheduleNotification(_selectedDate!); // Schedule notification
           }
         });
       }
@@ -154,7 +174,8 @@ class _HealthLogDetailScreenState extends State<HealthLogDetailScreen> {
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message))); // Show message
   }
 
   Future<bool?> _showConfirmationDialog() {
@@ -162,17 +183,19 @@ class _HealthLogDetailScreenState extends State<HealthLogDetailScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Confirm Save'),
-          content: Text('Are you sure you want to save the changes?'),
+          title: const Text('Confirm Save'),
+          content: const Text('Are you sure you want to save the changes?'),
           actions: <Widget>[
             TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text('Cancel', style: TextStyle(color: Colors.black)),
+              onPressed: () =>
+                  Navigator.of(context).pop(false), // Cancel action
+              child: const Text('Cancel', style: TextStyle(color: Colors.black)),
             ),
             ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFE2BF65)),
-              child: Text('Save', style: TextStyle(color: Colors.black)),
+              onPressed: () => Navigator.of(context).pop(true), // Save action
+              style:
+                  ElevatedButton.styleFrom(backgroundColor: const Color(0xFFE2BF65)),
+              child: const Text('Save', style: TextStyle(color: Colors.black)),
             ),
           ],
         );
@@ -182,39 +205,45 @@ class _HealthLogDetailScreenState extends State<HealthLogDetailScreen> {
 
   Future<String?> _uploadImageToFirebase(File imageFile) async {
     try {
-      String fileName = 'medical_records/${widget.userId}/${DateTime.now().millisecondsSinceEpoch}.jpg';
-      Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
-      UploadTask uploadTask = storageRef.putFile(imageFile);
-      TaskSnapshot snapshot = await uploadTask;
-      return await snapshot.ref.getDownloadURL();
+      String fileName =
+          'medical_records/${widget.userId}/${DateTime.now().millisecondsSinceEpoch}.jpg'; // Image file path
+      Reference storageRef = FirebaseStorage.instance
+          .ref()
+          .child(fileName); // Reference to storage
+      UploadTask uploadTask = storageRef.putFile(imageFile); // Upload task
+      TaskSnapshot snapshot = await uploadTask; // Wait for upload to complete
+      return await snapshot.ref.getDownloadURL(); // Return download URL
     } catch (e) {
-      print('Error uploading image: $e');
-      return null;
+      print('Error uploading image: $e'); // Log errors
+      return null; // Return null on failure
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF7EFF1),
+      backgroundColor: const Color(0xFFF7EFF1), // Background color
       appBar: AppBar(
-        title: Text('Medical Record Details',
+        title: const Text(
+          'Medical Record Details',
           style: TextStyle(
             fontFamily: 'Poppins',
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
         ),
-        backgroundColor: Color(0xFFE2BF65),
+        backgroundColor: const Color(0xFFE2BF65), // App bar color
         actions: [
           IconButton(
-            icon: Icon(_isEditing ? Icons.save : Icons.edit),
+            icon: Icon(_isEditing
+                ? Icons.save
+                : Icons.edit), // Icon changes based on editing state
             onPressed: () {
               if (_isEditing) {
-                _saveRecord();
+                _saveRecord(); // Save changes if editing
               } else {
                 setState(() {
-                  _isEditing = true;
+                  _isEditing = true; // Enter edit mode
                 });
               }
             },
@@ -222,13 +251,15 @@ class _HealthLogDetailScreenState extends State<HealthLogDetailScreen> {
         ],
       ),
       body: FutureBuilder<DocumentSnapshot>(
+        // Fetch log record
         future: widget.logRecord.reference.get(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(
+                child: CircularProgressIndicator()); // Loading indicator
           }
-          final logRecord = snapshot.data!;
-          return _buildForm(logRecord);
+          final logRecord = snapshot.data!; // Retrieved log record
+          return _buildForm(logRecord); // Build form with data
         },
       ),
     );
@@ -236,74 +267,91 @@ class _HealthLogDetailScreenState extends State<HealthLogDetailScreen> {
 
   Widget _buildForm(DocumentSnapshot logRecord) {
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16), // Padding for the form
       child: Form(
-        key: _formKey,
+        key: _formKey, // Form key for validation
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment:
+              CrossAxisAlignment.start, // Align children to start
           children: [
-            _buildTextField(_titleController, 'Title', emptyMsg: 'Title cannot be empty'),
-            SizedBox(height: 10),
+            _buildTextField(_titleController, 'Title',
+                emptyMsg: 'Title cannot be empty'), // Title field
+            const SizedBox(height: 10), // Space between fields
             GestureDetector(
               onTap: () {
                 if (_isEditing) {
-                  _selectDate(context);
+                  _selectDate(context); // Open date picker if editing
                 }
               },
               child: AbsorbPointer(
+                // Prevents editing directly in the text field
                 child: TextFormField(
                   controller: TextEditingController(
                     text: _selectedDate != null
-                        ? DateFormat('dd/MM/yyyy HH:mm').format(_selectedDate!) // Display both date and time
+                        ? DateFormat('dd/MM/yyyy HH:mm')
+                            .format(_selectedDate!) // Format date
                         : '',
                   ),
-                  decoration: InputDecoration(
-                    labelText: 'Date & Time',
+                  decoration: const InputDecoration(
+                    labelText: 'Date & Time', // Label for date field
                     labelStyle: TextStyle(color: Colors.black),
                     enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey),
+                      borderSide:
+                          BorderSide(color: Colors.grey), // Border color
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Color(0xFFE2BF65)),
+                      borderSide: BorderSide(
+                          color: Color(0xFFE2BF65)), // Focused border color
                     ),
-                    suffixIcon: Icon(Icons.calendar_today, color: Color(0xFFE2BF65)),
+                    suffixIcon: Icon(Icons.calendar_today,
+                        color: Color(0xFFE2BF65)), // Calendar icon
                   ),
-                  enabled: _isEditing,
-                  validator: (value) => _selectedDate == null ? 'Please select a date' : null,
+                  enabled: _isEditing, // Enable field only if editing
+                  validator: (value) => _selectedDate == null
+                      ? 'Please select a date'
+                      : null, // Validation
                 ),
               ),
             ),
-            SizedBox(height: 20),
-            _buildTextField(_doctorController, 'Doctor', emptyMsg: 'Doctor name cannot be empty'),
-            _buildTextField(_clinicController, 'Clinic', emptyMsg: 'Clinic name cannot be empty'),
-            _buildTextField(_treatmentController, 'Treatment', emptyMsg: 'Treatment details cannot be empty'),
-            _buildTextField(_notesController, 'Notes'), // Updated to make Notes optional
-            _buildImageSection(logRecord),
+            const SizedBox(height: 20), // Space between fields
+            _buildTextField(_doctorController, 'Doctor',
+                emptyMsg: 'Doctor name cannot be empty'), // Doctor field
+            _buildTextField(_clinicController, 'Clinic',
+                emptyMsg: 'Clinic name cannot be empty'), // Clinic field
+            _buildTextField(_treatmentController, 'Treatment',
+                emptyMsg:
+                    'Treatment details cannot be empty'), // Treatment field
+            _buildTextField(_notesController, 'Notes'), // Notes field
+            _buildImageSection(logRecord), // Image section display
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String label, {String? emptyMsg}) {
+  Widget _buildTextField(TextEditingController controller, String label,
+      {String? emptyMsg}) {
     return Column(
       children: [
         TextFormField(
-          controller: controller,
+          controller: controller, // Controller for the text field
           decoration: InputDecoration(
-            labelText: label,
-            labelStyle: TextStyle(color: Colors.black),
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.grey),
+            labelText: label, // Label for the text field
+            labelStyle: const TextStyle(color: Colors.black),
+            enabledBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.grey), // Border color
             ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFFE2BF65)),
+            focusedBorder: const OutlineInputBorder(
+              borderSide:
+                  BorderSide(color: Color(0xFFE2BF65)), // Focused border color
             ),
           ),
-          enabled: _isEditing,
-          validator: (value) => emptyMsg != null && value!.isEmpty ? emptyMsg : null,
+          enabled: _isEditing, // Enable field only if editing
+          validator: (value) => emptyMsg != null && value!.isEmpty
+              ? emptyMsg
+              : null, // Validation message
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20), // Space between fields
       ],
     );
   }
@@ -312,42 +360,53 @@ class _HealthLogDetailScreenState extends State<HealthLogDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Uploaded Image', style: TextStyle(fontWeight: FontWeight.bold)),
-        SizedBox(height: 10),
+        const Text('Uploaded Image',
+            style: TextStyle(
+                fontWeight: FontWeight.bold)), // Section title for image
+        const SizedBox(height: 10), // Space between title and image
         Container(
-          height: 200,
-          width: 380,
-          color: Colors.grey[200],
-          child: _selectedImage == null
+          height: 200, // Fixed height for the image container
+          width: 380, // Fixed width for the image container
+          color: Colors.grey[200], // Background color for the container
+          child: _selectedImage == null // Check if there is a selected image
               ? (logRecord['imageUrl'] != null
-              ? Image.network(
-            logRecord['imageUrl'],
-            fit: BoxFit.cover,
-          )
-              : Center(child: Text('No image uploaded')))
+                  ? Image.network(
+                      // Display image from URL
+                      logRecord['imageUrl'],
+                      fit: BoxFit.cover, // Fill container
+                    )
+                  : const Center(
+                      child:
+                          Text('No image uploaded'))) // Placeholder if no image
               : Image.file(
-            _selectedImage!,
-            fit: BoxFit.cover,
-          ),
+                  // Display selected image
+                  _selectedImage!,
+                  fit: BoxFit.cover, // Fill container
+                ),
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20), // Space below image
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             ElevatedButton(
-              onPressed: _isEditing ? _pickImage : null,
-              child: Text('Change Image'),
+              onPressed: _isEditing
+                  ? _pickImage
+                  : null, // Allow image selection if editing
+              child: const Text('Change Image'),
               style: ElevatedButton.styleFrom(
                 foregroundColor: Colors.black,
-                backgroundColor: Color(0xFFE2BF65),
+                backgroundColor: const Color(0xFFE2BF65), // Button background color
               ),
             ),
-            if (logRecord['imageUrl'] != null || _selectedImage != null)
+            if (logRecord['imageUrl'] != null ||
+                _selectedImage != null) // Display remove button if image exists
               TextButton(
-                onPressed: _isEditing ? _removeImage : null,
-                child: Text('Remove Image'),
+                onPressed: _isEditing
+                    ? _removeImage
+                    : null, // Allow removal if editing
+                child: const Text('Remove Image'),
                 style: TextButton.styleFrom(
-                  backgroundColor: Color(0xFFE2BF65),
+                  backgroundColor: const Color(0xFFE2BF65), // Button background color
                   foregroundColor: Colors.black,
                 ),
               ),
@@ -358,27 +417,32 @@ class _HealthLogDetailScreenState extends State<HealthLogDetailScreen> {
   }
 
   Future<void> _pickImage() async {
-    final ImagePicker _picker = ImagePicker();
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    final ImagePicker _picker = ImagePicker(); // Initialize image picker
+    final pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery); // Open gallery for image selection
     if (pickedFile != null) {
       setState(() {
-        _selectedImage = File(pickedFile.path);
+        _selectedImage = File(pickedFile.path); // Set selected image
       });
     }
   }
 
   void _removeImage() async {
-    bool? confirmed = await _showConfirmationDialogRemove();
+    bool? confirmed =
+        await _showConfirmationDialogRemove(); // Confirmation for image removal
     if (confirmed == true) {
       try {
-        await widget.logRecord.reference.update({'imageUrl': null});
-        DocumentSnapshot updatedLogRecord = await widget.logRecord.reference.get();
+        await widget.logRecord.reference
+            .update({'imageUrl': null}); // Remove image URL from Firestore
+        DocumentSnapshot updatedLogRecord =
+            await widget.logRecord.reference.get(); // Fetch updated record
         setState(() {
-          _selectedImage = null;
-          (widget.logRecord.data() as Map<String, dynamic>)['imageUrl'] = updatedLogRecord['imageUrl'];
+          _selectedImage = null; // Clear selected image
+          (widget.logRecord.data() as Map<String, dynamic>)['imageUrl'] =
+              updatedLogRecord['imageUrl']; // Update local state
         });
       } catch (e) {
-        print('Error removing image from Firestore: $e');
+        print('Error removing image from Firestore: $e'); // Log errors
       }
     }
   }
@@ -388,17 +452,20 @@ class _HealthLogDetailScreenState extends State<HealthLogDetailScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Confirm Removal'),
-          content: Text('Are you sure you want to remove the image?'),
+          title: const Text('Confirm Removal'),
+          content: const Text(
+              'Are you sure you want to remove the image?'), // Confirmation dialog message
           actions: <Widget>[
             TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text('Cancel'),
+              onPressed: () =>
+                  Navigator.of(context).pop(false), // Cancel action
+              child: const Text('Cancel'),
             ),
             ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              style: ElevatedButton.styleFrom(backgroundColor: Color(0xFFE2BF65)),
-              child: Text('Remove'),
+              onPressed: () => Navigator.of(context).pop(true), // Remove action
+              style:
+                  ElevatedButton.styleFrom(backgroundColor: const Color(0xFFE2BF65)),
+              child: const Text('Remove'),
             ),
           ],
         );

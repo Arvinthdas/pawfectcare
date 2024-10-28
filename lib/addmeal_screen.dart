@@ -9,9 +9,9 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 class AddMealScreen extends StatefulWidget {
-  final String petId;
-  final String userId;
-  final String petName;
+  final String petId; // ID of the pet
+  final String userId; // ID of the user
+  final String petName; // Name of the pet
 
   AddMealScreen({required this.petId, required this.userId, required this.petName});
 
@@ -23,17 +23,18 @@ class _AddMealScreenState extends State<AddMealScreen> {
   final TextEditingController _mealNameController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
-  File? _selectedImage;
-  bool _isUploading = false;
+  File? _selectedImage; // Variable for the selected image
+  bool _isUploading = false; // Flag to indicate upload status
 
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin(); // For local notifications
 
   @override
   void initState() {
     super.initState();
-    _initializeNotifications();
+    _initializeNotifications(); // Initialize notifications
   }
 
+  // Initialize notification settings
   Future<void> _initializeNotifications() async {
     const AndroidInitializationSettings initializationSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
 
@@ -42,35 +43,39 @@ class _AddMealScreenState extends State<AddMealScreen> {
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   }
 
+  // Function to pick an image from the gallery
   Future<void> _pickImage() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
-        _selectedImage = File(pickedFile.path);
+        _selectedImage = File(pickedFile.path); // Set the selected image
       });
     }
   }
 
+  // Function to add meal details
   Future<void> _addMeal() async {
     if (_mealNameController.text.isEmpty || _dateController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill in all required fields')),
+        SnackBar(content: Text('Please fill in all required fields')), // Show error if fields are empty
       );
       return;
     }
 
     setState(() {
-      _isUploading = true;
+      _isUploading = true; // Start the upload process
     });
 
     try {
-      DateTime mealDate = DateFormat('dd/MM/yyyy HH:mm').parse(_dateController.text);
+      DateTime mealDate = DateFormat('dd/MM/yyyy HH:mm').parse(_dateController.text); // Parse date
       String? imageUrl;
 
+      // Upload image if selected
       if (_selectedImage != null) {
         imageUrl = await _uploadImageToFirebase(_selectedImage!);
       }
 
+      // Add meal details to Firestore
       await FirebaseFirestore.instance
           .collection('users')
           .doc(widget.userId)
@@ -81,77 +86,82 @@ class _AddMealScreenState extends State<AddMealScreen> {
         'mealName': _mealNameController.text,
         'date': mealDate,
         'notes': _notesController.text,
-        'imageUrl': imageUrl,
+        'imageUrl': imageUrl, // Optional image URL
       });
 
-      // Schedule notification
+      // Schedule a notification for the meal
       await _scheduleNotification(mealDate);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Meal added successfully!')),
+        SnackBar(content: Text('Meal added successfully!')), // Success message
       );
 
-      // Clear form and go back to the previous screen
+      // Clear the form and go back
       _clearForm();
       Navigator.pop(context);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error adding meal: $e')),
+        SnackBar(content: Text('Error adding meal: $e')), // Error message
       );
     } finally {
       setState(() {
-        _isUploading = false;
+        _isUploading = false; // Stop the upload process
       });
     }
   }
 
+  // Function to upload an image to Firebase Storage
   Future<String?> _uploadImageToFirebase(File imageFile) async {
     try {
-      String fileName = 'meals/${widget.userId}/${DateTime.now().millisecondsSinceEpoch}.jpg';
-      Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
-      UploadTask uploadTask = storageRef.putFile(imageFile);
-      TaskSnapshot snapshot = await uploadTask;
-      return await snapshot.ref.getDownloadURL();
+      String fileName = 'meals/${widget.userId}/${DateTime.now().millisecondsSinceEpoch}.jpg'; // Unique file name
+      Reference storageRef = FirebaseStorage.instance.ref().child(fileName); // Reference to storage
+      UploadTask uploadTask = storageRef.putFile(imageFile); // Upload task
+      TaskSnapshot snapshot = await uploadTask; // Wait for completion
+      return await snapshot.ref.getDownloadURL(); // Get download URL
     } catch (e) {
-      print('Error uploading image: $e');
-      return null;
+      print('Error uploading image: $e'); // Log error
+      return null; // Return null if failed
     }
   }
 
+  // Function to schedule a notification
   Future<void> _scheduleNotification(DateTime mealDate) async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      'meal_channel',
-      'Meal Notifications',
-      channelDescription: 'Channel for meal notifications',
-      importance: Importance.max,
-      priority: Priority.high,
+      'meal_channel', // Channel ID
+      'Meal Notifications', // Channel name
+      channelDescription: 'Channel for meal notifications', // Channel description
+      importance: Importance.max, // Notification importance
+      priority: Priority.high, // Notification priority
       showWhen: false,
     );
 
     const NotificationDetails platformChannelSpecifics = NotificationDetails(android: androidPlatformChannelSpecifics);
 
+    // Schedule the notification
     await flutterLocalNotificationsPlugin.zonedSchedule(
       0,
-      'Meal Reminder',
-      'Do not forget to prepare meal for ${widget.petName}',
-      tz.TZDateTime.from(mealDate, tz.local),
+      'Meal Reminder', // Notification title
+      'Do not forget to prepare meal for ${widget.petName}', // Notification body
+      tz.TZDateTime.from(mealDate, tz.local), // Convert to TZDateTime
       platformChannelSpecifics,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime, // Interpret as absolute time
     );
   }
 
+  // Clear input fields
   void _clearForm() {
     _mealNameController.clear();
     _dateController.clear();
     _notesController.clear();
     setState(() {
-      _selectedImage = null;
+      _selectedImage = null; // Clear selected image
     });
   }
 
+  // Remove the selected image
   void _removeImage() {
     setState(() {
-      _selectedImage = null;
+      _selectedImage = null; // Clear selected image
     });
   }
 
@@ -159,68 +169,68 @@ class _AddMealScreenState extends State<AddMealScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Meal',style: TextStyle(
+        title: Text('Add Meal', style: TextStyle(
           fontFamily: 'Poppins',
           fontSize: 20,
           fontWeight: FontWeight.bold,
         )),
-        backgroundColor: Color(0xFFE2BF65),
+        backgroundColor: Color(0xFFE2BF65), // AppBar color
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(16.0), // Padding for the body
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Title *', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text('Title *', style: TextStyle(fontWeight: FontWeight.bold)), // Meal title label
             SizedBox(height: 5),
             TextField(
-              controller: _mealNameController,
+              controller: _mealNameController, // Controller for meal name input
               decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Enter Meal Name',
+                border: OutlineInputBorder(), // Border style
+                hintText: 'Enter Meal Name', // Hint text
                 filled: true,
-                fillColor: Colors.grey[200],
+                fillColor: Colors.grey[200], // Fill color for text field
               ),
             ),
             SizedBox(height: 15),
-            Text('Date & Time *', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text('Date & Time *', style: TextStyle(fontWeight: FontWeight.bold)), // Date/time label
             SizedBox(height: 5),
             TextField(
-              controller: _dateController,
+              controller: _dateController, // Controller for date input
               decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Enter Date & Time',
+                border: OutlineInputBorder(), // Border style
+                hintText: 'Enter Date & Time', // Hint text
                 filled: true,
-                fillColor: Colors.grey[200],
+                fillColor: Colors.grey[200], // Fill color for text field
               ),
-              readOnly: true,
-              onTap: _selectDateTime,
+              readOnly: true, // Make field read-only
+              onTap: _selectDateTime, // Function to select date/time
             ),
             SizedBox(height: 15),
-            Text('Notes', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text('Notes', style: TextStyle(fontWeight: FontWeight.bold)), // Notes label
             SizedBox(height: 5),
             TextField(
-              controller: _notesController,
+              controller: _notesController, // Controller for notes input
               decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                hintText: 'Enter Notes',
+                border: OutlineInputBorder(), // Border style
+                hintText: 'Enter Notes', // Hint text
                 filled: true,
-                fillColor: Colors.grey[200],
+                fillColor: Colors.grey[200], // Fill color for text field
               ),
-              maxLines: 3,
+              maxLines: 3, // Maximum lines for notes
             ),
             SizedBox(height: 15),
-            Text('Upload Image (optional)', style: TextStyle(fontWeight: FontWeight.bold)),
+            Text('Upload Image (optional)', style: TextStyle(fontWeight: FontWeight.bold)), // Image upload label
             SizedBox(height: 5),
             Container(
               height: 150,
-              color: Colors.grey[200],
+              color: Colors.grey[200], // Background color for image preview
               child: _selectedImage == null
-                  ? Center(child: Text('Image Preview'))
+                  ? Center(child: Text('Image Preview')) // Placeholder if no image selected
                   : Stack(
                 children: [
                   Image.file(
-                    _selectedImage!,
+                    _selectedImage!, // Show selected image
                     fit: BoxFit.cover,
                     width: double.infinity,
                   ),
@@ -228,12 +238,12 @@ class _AddMealScreenState extends State<AddMealScreen> {
                     top: 8,
                     right: 8,
                     child: GestureDetector(
-                      onTap: _removeImage,
+                      onTap: _removeImage, // Remove image on tap
                       child: Container(
-                        color: Colors.black54,
+                        color: Colors.black54, // Background for close button
                         child: Padding(
                           padding: const EdgeInsets.all(4.0),
-                          child: Icon(Icons.close, color: Colors.white),
+                          child: Icon(Icons.close, color: Colors.white), // Close icon
                         ),
                       ),
                     ),
@@ -243,26 +253,23 @@ class _AddMealScreenState extends State<AddMealScreen> {
             ),
             SizedBox(height: 10),
             ElevatedButton(
-              onPressed: _pickImage,
-              child: Text('Pick Image'),
+              onPressed: _pickImage, // Function to pick an image
+              child: Text('Pick Image'), // Button text
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFE2BF65),
-                foregroundColor: Colors.black,
+                backgroundColor: Color(0xFFE2BF65), // Button color
+                foregroundColor: Colors.black, // Text color
               ),
             ),
             SizedBox(height: 20),
             _isUploading
-                ? Center(child: CircularProgressIndicator())
+                ? Center(child: CircularProgressIndicator()) // Show loading indicator if uploading
                 : SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _addMeal,
-                child: Text('Add Meal',
-                style: TextStyle(
-                  color: Colors.black,
-                ),),
+                onPressed: _addMeal, // Function to add meal
+                child: Text('Add Meal', style: TextStyle(color: Colors.black)), // Button text
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFE2BF65),
+                  backgroundColor: Color(0xFFE2BF65), // Button color
                 ),
               ),
             ),
@@ -272,18 +279,19 @@ class _AddMealScreenState extends State<AddMealScreen> {
     );
   }
 
+  // Function to select date and time
   Future<void> _selectDateTime() async {
     DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2101),
+      initialDate: DateTime.now(), // Initial date
+      firstDate: DateTime.now(), // First selectable date
+      lastDate: DateTime(2101), // Last selectable date
     );
 
     if (pickedDate != null) {
       TimeOfDay? pickedTime = await showTimePicker(
         context: context,
-        initialTime: TimeOfDay.now(),
+        initialTime: TimeOfDay.now(), // Initial time
       );
 
       if (pickedTime != null) {
@@ -295,9 +303,9 @@ class _AddMealScreenState extends State<AddMealScreen> {
           pickedTime.minute,
         );
 
-        String formattedDateTime = DateFormat('dd/MM/yyyy HH:mm').format(selectedDateTime);
+        String formattedDateTime = DateFormat('dd/MM/yyyy HH:mm').format(selectedDateTime); // Format date/time
         setState(() {
-          _dateController.text = formattedDateTime;
+          _dateController.text = formattedDateTime; // Update date controller
         });
       }
     }

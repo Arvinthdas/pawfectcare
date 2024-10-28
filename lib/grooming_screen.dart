@@ -1,126 +1,151 @@
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:intl/intl.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
-import 'addgrooming_screen.dart'; // Assume this is the screen to add grooming tasks
-import 'groomingdetails_screen.dart'; // Screen to show details of grooming tasks
+import 'package:flutter/material.dart'; // For UI components
+import 'package:cloud_firestore/cloud_firestore.dart'; // For Firestore database access
+import 'package:intl/intl.dart'; // For date formatting
+import 'package:http/http.dart' as http; // For making HTTP requests
+import 'dart:convert'; // For JSON encoding/decoding
+import 'package:youtube_player_flutter/youtube_player_flutter.dart'; // For YouTube video playback
+import 'addgrooming_screen.dart'; // Screen for adding grooming tasks
+import 'groomingdetails_screen.dart'; // Screen for viewing grooming task details
 
 class GroomingPage extends StatefulWidget {
-  final String petId;
-  final String userId;
-  final String petBreed; // Added breed information
-  final String petName;
+  final String petId; // ID of the pet
+  final String userId; // ID of the user
+  final String petBreed; // Breed of the pet
+  final String petName; // Name of the pet
 
-  GroomingPage({required this.petId, required this.userId, required this.petBreed, required this.petName});
+  GroomingPage(
+      {required this.petId,
+      required this.userId,
+      required this.petBreed,
+      required this.petName});
 
   @override
-  _GroomingPageState createState() => _GroomingPageState();
+  _GroomingPageState createState() =>
+      _GroomingPageState(); // State for this widget
 }
 
-class _GroomingPageState extends State<GroomingPage> with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  String _searchQuery = '';
-  String _skinIssue = '';
-  List<dynamic> _videos = [];
-  final String youtubeApiKey = 'AIzaSyBlSI4WvUAcAdrJ07JMbqhNBRd7LzPai1U'; // Replace with your actual YouTube API key
-  YoutubePlayerController? _youtubePlayerController;
+class _GroomingPageState extends State<GroomingPage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController; // Controller for the tabs
+  String _searchQuery = ''; // Query for searching grooming tasks
+  String _skinIssue = ''; // Skin issue for fetching videos
+  List<dynamic> _videos = []; // List to hold video data
+  final String youtubeApiKey =
+      'AIzaSyBlSI4WvUAcAdrJ07JMbqhNBRd7LzPai1U'; // YouTube API key
+  YoutubePlayerController?
+      _youtubePlayerController; // Controller for YouTube player
 
   @override
   void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    super.initState(); // Initialize state
+    _tabController =
+        TabController(length: 2, vsync: this); // Set up the tab controller
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
-    _youtubePlayerController?.dispose();
-    super.dispose();
+    _tabController.dispose(); // Dispose of the tab controller
+    _youtubePlayerController?.dispose(); // Dispose of the YouTube controller
+    super.dispose(); // Call the superclass dispose method
   }
 
-  // Fetch YouTube videos based on breed and skin issue
   Future<void> _fetchVideos(String breed, String issue) async {
-    final String query = '$breed $issue';
+    final String query = '$breed $issue'; // Build search query
     final String url =
-        'https://www.googleapis.com/youtube/v3/search?key=$youtubeApiKey&part=snippet&type=video&q=$query';
+        'https://www.googleapis.com/youtube/v3/search?key=$youtubeApiKey&part=snippet&type=video&q=$query'; // Construct API URL
 
-    final response = await http.get(Uri.parse(url));
+    final response = await http.get(Uri.parse(url)); // Send GET request
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
+      // Check for a successful response
+      final data = json.decode(response.body); // Decode the JSON response
       setState(() {
-        _videos = data['items'] ?? [];
+        _videos = data['items'] ?? []; // Store videos in the state
       });
     } else {
-      print('Failed to fetch videos: ${response.statusCode}');
+      print(
+          'Failed to fetch videos: ${response.statusCode}'); // Log error if request fails
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF7EFF1),
+      // Scaffold widget to provide structure
+      backgroundColor: const Color(0xFFF7EFF1), // Set background color
       appBar: AppBar(
-        backgroundColor: Color(0xFFE2BF65),
-        title: Text(
-          'Grooming',
+        // AppBar widget for the title and tabs
+        backgroundColor: const Color(0xFFE2BF65), // AppBar color
+        title: const Text(
+          'Grooming', // Title text
           style: TextStyle(
               color: Colors.black,
               fontFamily: 'Poppins',
               fontSize: 20,
-              fontWeight: FontWeight.bold),
+              fontWeight: FontWeight.bold), // Title styling
         ),
         bottom: TabBar(
+          // TabBar for switching between views
           controller: _tabController,
-          indicatorColor: Color(0xFF037171),
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.black,
-          labelStyle: TextStyle(fontSize: 15,fontStyle: FontStyle.italic ,fontWeight: FontWeight.bold),
+          indicatorColor: const Color(0xFF037171), // Indicator color
+          labelColor: Colors.white, // Color for selected label
+          unselectedLabelColor: Colors.black, // Color for unselected labels
+          labelStyle: const TextStyle(
+              fontSize: 15,
+              fontStyle: FontStyle.italic,
+              fontWeight: FontWeight.bold), // Label styling
           tabs: [
-            Tab(text: 'Grooming Task History'),
-            Tab(text: 'Skin Issues Tips & Guides'),
+            const Tab(text: 'Grooming Task History'), // First tab
+            const Tab(text: 'Skin Issues Tips & Guides'), // Second tab
           ],
         ),
       ),
       body: TabBarView(
+        // Content for each tab
         controller: _tabController,
         children: [
-          _buildGroomingScheduleTab(),
-          _buildSkinCoatHealthTab(),
+          _buildGroomingScheduleTab(), // Tab for grooming schedule
+          _buildSkinCoatHealthTab(), // Tab for skin and coat health
         ],
       ),
     );
   }
 
-  // Grooming Schedule Tab
   Widget _buildGroomingScheduleTab() {
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16.0),
+      // Allows scrolling for content
+      padding: const EdgeInsets.all(16.0), // Padding around the content
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        // Column for vertical arrangement
+        crossAxisAlignment: CrossAxisAlignment.start, // Align items to start
         children: [
           _buildSectionHeader('Grooming Task History', onAddPressed: () {
             Navigator.push(
+              // Navigate to add grooming screen
               context,
               MaterialPageRoute(
-                builder: (context) => AddGroomingScreen(petId: widget.petId, userId: widget.userId, petName: widget.petName),
+                // Create a route to the new screen
+                builder: (context) => AddGroomingScreen(
+                    petId: widget.petId,
+                    userId: widget.userId,
+                    petName: widget.petName),
               ),
             );
           }),
-          SizedBox(height: 10),
+          const SizedBox(height: 10), // Spacing after header
           TextField(
-            onChanged: (value) => setState(() => _searchQuery = value),
-            decoration: InputDecoration(
-              labelText: 'Search Grooming Tasks',
-              border: OutlineInputBorder(),
+            // Search field for grooming tasks
+            onChanged: (value) =>
+                setState(() => _searchQuery = value), // Update search query
+            decoration: const InputDecoration(
+              labelText: 'Search Grooming Tasks', // Placeholder for search
+              border: OutlineInputBorder(), // Input border style
             ),
           ),
-          SizedBox(height: 10),
-          _buildGroomingTasks(),
-          SizedBox(height: 20),
-          _buildUpcomingGroomingTasks(),
+          const SizedBox(height: 10), // Spacing after search field
+          _buildGroomingTasks(), // Build list of grooming tasks
+          const SizedBox(height: 20), // Spacing before upcoming tasks
+          _buildUpcomingGroomingTasks(), // Build upcoming grooming tasks section
         ],
       ),
     );
@@ -128,48 +153,66 @@ class _GroomingPageState extends State<GroomingPage> with SingleTickerProviderSt
 
   Widget _buildGroomingTasks() {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.userId)
-          .collection('pets')
-          .doc(widget.petId)
-          .collection('groomingTasks')
-          .where('date', isLessThanOrEqualTo: DateTime.now())
-          .orderBy('date', descending: true)
-          .snapshots(),
+      // Listen to grooming tasks stream
+      stream: FirebaseFirestore.instance // Access Firestore instance
+          .collection('users') // Access the users collection
+          .doc(widget.userId) // Access specific user document
+          .collection('pets') // Access pets collection
+          .doc(widget.petId) // Access specific pet document
+          .collection('groomingTasks') // Access grooming tasks collection
+          .where('date',
+              isLessThanOrEqualTo: DateTime.now()) // Filter past tasks
+          .orderBy('date', descending: true) // Order by date
+          .snapshots(), // Listen for real-time updates
       builder: (context, snapshot) {
+        // Build method for the snapshot
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          // Check if data is loading
+          return const Center(
+              child: CircularProgressIndicator()); // Show loading spinner
         }
         if (snapshot.hasError) {
-          return Center(child: Text('Error fetching grooming tasks'));
+          // Check for errors
+          return const Center(
+              child:
+                  Text('Error fetching grooming tasks')); // Show error message
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(child: Text('No grooming tasks available'));
+          // Check if no tasks available
+          return const Center(
+              child:
+                  Text('No grooming tasks available')); // Show no tasks message
         }
 
         final tasks = snapshot.data!.docs.where((task) {
-          final taskName = task['taskName']?.toLowerCase() ?? '';
-          final taskDate = (task['date'] as Timestamp).toDate();
-          final formattedDate = DateFormat('dd/MM/yyyy').format(taskDate);
+          // Filter tasks based on search query
+          final taskName =
+              task['taskName']?.toLowerCase() ?? ''; // Get task name
+          final taskDate = (task['date'] as Timestamp)
+              .toDate(); // Convert timestamp to DateTime
+          final formattedDate =
+              DateFormat('dd/MM/yyyy').format(taskDate); // Format date
 
-          // Check if the search query is either in task name or matches the date
+          // Check if task name or formatted date matches search query
           return taskName.contains(_searchQuery.toLowerCase()) ||
-              formattedDate == _searchQuery; // Compare formatted date with the search query
-        }).toList();
+              formattedDate == _searchQuery;
+        }).toList(); // Convert filtered tasks to list
 
         return ListView.builder(
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          itemCount: tasks.length,
+          // ListView to display tasks
+          shrinkWrap: true, // Allow ListView to take only necessary space
+          physics: const NeverScrollableScrollPhysics(), // Disable scrolling
+          itemCount: tasks.length, // Number of tasks
           itemBuilder: (context, index) {
-            final task = tasks[index];
+            // Build method for each task
+            final task = tasks[index]; // Get task at current index
             return _buildGroomingCard(
-              task['taskName'] ?? 'No Task Name',
-              task['date'] ?? Timestamp.now(),
-              task['productsUsed'] ?? 'No Products Used',
-              task['notes'] ?? 'No Notes',
-              task,
+              // Build individual grooming card
+              task['taskName'] ?? 'No Task Name', // Task name
+              task['date'] ?? Timestamp.now(), // Task date
+              task['productsUsed'] ?? 'No Products Used', // Products used
+              task['notes'] ?? 'No Notes', // Additional notes
+              task, // Pass entire task document
             );
           },
         );
@@ -177,48 +220,67 @@ class _GroomingPageState extends State<GroomingPage> with SingleTickerProviderSt
     );
   }
 
-
   Widget _buildUpcomingGroomingTasks() {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.userId)
-          .collection('pets')
-          .doc(widget.petId)
-          .collection('groomingTasks')
-          .where('date', isGreaterThan: DateTime.now())
-          .orderBy('date', descending: true)
-          .snapshots(),
+      // Listen to upcoming tasks stream
+      stream: FirebaseFirestore.instance // Access Firestore instance
+          .collection('users') // Access the users collection
+          .doc(widget.userId) // Access specific user document
+          .collection('pets') // Access pets collection
+          .doc(widget.petId) // Access specific pet document
+          .collection('groomingTasks') // Access grooming tasks collection
+          .where('date', isGreaterThan: DateTime.now()) // Filter future tasks
+          .orderBy('date', descending: true) // Order by date
+          .snapshots(), // Listen for real-time updates
       builder: (context, snapshot) {
+        // Build method for the snapshot
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
+          // Check if data is loading
+          return const Center(
+              child: CircularProgressIndicator()); // Show loading spinner
         }
         if (snapshot.hasError) {
-          return Center(child: Text('Error fetching upcoming grooming tasks'));
+          // Check for errors
+          return const Center(
+              child: Text(
+                  'Error fetching upcoming grooming tasks')); // Show error message
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(child: Text('No upcoming grooming tasks available'));
+          // Check if no upcoming tasks are found
+          return const Center(
+              child: Text(
+                  'No upcoming grooming tasks available')); // Show no upcoming tasks message
         }
 
-        final upcomingTasks = snapshot.data!.docs;
+        final upcomingTasks =
+            snapshot.data!.docs; // Get the list of upcoming tasks
 
         return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          // Column for upcoming tasks
+          crossAxisAlignment:
+              CrossAxisAlignment.start, // Align items to the start
           children: [
-            Text('Upcoming Grooming Tasks', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            SizedBox(height: 15),
+            const Text('Upcoming Grooming Tasks',
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold)), // Header for upcoming tasks
+            const SizedBox(height: 15), // Spacing before the upcoming tasks list
             ListView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: upcomingTasks.length,
+              // ListView to display upcoming tasks
+              shrinkWrap: true, // Allow ListView to take only necessary space
+              physics: const NeverScrollableScrollPhysics(), // Disable scrolling
+              itemCount: upcomingTasks.length, // Number of upcoming tasks
               itemBuilder: (context, index) {
-                final task = upcomingTasks[index];
+                // Build method for each upcoming task
+                final task =
+                    upcomingTasks[index]; // Get task at the current index
                 return _buildGroomingCard(
-                  task['taskName'] ?? 'No Task Name',
-                  task['date'] ?? Timestamp.now(),
-                  task['productsUsed'] ?? 'No Products Used',
-                  task['notes'] ?? 'No Notes',
-                  task,
+                  // Build individual grooming card
+                  task['taskName'] ?? 'No Task Name', // Task name
+                  task['date'] ?? Timestamp.now(), // Task date
+                  task['productsUsed'] ?? 'No Products Used', // Products used
+                  task['notes'] ?? 'No Notes', // Additional notes
+                  task, // Pass entire task document
                 );
               },
             ),
@@ -228,21 +290,30 @@ class _GroomingPageState extends State<GroomingPage> with SingleTickerProviderSt
     );
   }
 
-  Widget _buildGroomingCard(String taskName, dynamic date, String productsUsed, String notes, DocumentSnapshot taskRecord) {
-    String formattedDate;
+  Widget _buildGroomingCard(String taskName, dynamic date, String productsUsed,
+      String notes, DocumentSnapshot taskRecord) {
+    String formattedDate; // Variable to hold the formatted date
 
     if (date is Timestamp) {
-      formattedDate = DateFormat('dd/MM/yyyy HH:mm').format(date.toDate());
+      // Check if the date is a Timestamp
+      formattedDate = DateFormat('dd/MM/yyyy HH:mm')
+          .format(date.toDate()); // Format the date
     } else {
-      formattedDate = date.toString();
+      formattedDate =
+          date.toString(); // Convert date to string if not a Timestamp
     }
 
     return InkWell(
+      // InkWell widget to make the card tappable
       onTap: () {
+        // On tap action
         Navigator.push(
+          // Navigate to the GroomingDetailScreen
           context,
           MaterialPageRoute(
+            // Create a route to the new screen
             builder: (context) => GroomingDetailScreen(
+              // Pass the grooming record and other data
               groomingRecord: taskRecord,
               petId: widget.petId,
               userId: widget.userId,
@@ -252,20 +323,34 @@ class _GroomingPageState extends State<GroomingPage> with SingleTickerProviderSt
         );
       },
       child: Card(
-        color: Colors.white,
-        elevation: 3,
+        // Card widget for displaying grooming task details
+        color: Colors.white, // Card background color
+        elevation: 3, // Elevation for shadow effect
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+          // Shape of the card
+          borderRadius: BorderRadius.circular(10), // Rounded corners
         ),
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
+          // Padding around the card content
+          padding: const EdgeInsets.all(12.0), // Padding value
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            // Column to arrange text widgets vertically
+            crossAxisAlignment:
+                CrossAxisAlignment.start, // Align items to the start
             children: [
-              Text(taskName, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              Text('Date: $formattedDate', style: TextStyle(fontSize: 16, color: Colors.grey[700])),
-              Text('Products Used: $productsUsed', style: TextStyle(fontSize: 16, color: Colors.grey[700])),
-              Text('Notes: $notes', style: TextStyle(fontSize: 16, color: Colors.grey[700])),
+              Text(taskName,
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold)), // Task name
+              Text('Date: $formattedDate',
+                  style: TextStyle(
+                      fontSize: 16, color: Colors.grey[700])), // Formatted date
+              Text('Products Used: $productsUsed',
+                  style: TextStyle(
+                      fontSize: 16, color: Colors.grey[700])), // Products used
+              Text('Notes: $notes',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey[700])), // Additional notes
             ],
           ),
         ),
@@ -273,24 +358,32 @@ class _GroomingPageState extends State<GroomingPage> with SingleTickerProviderSt
     );
   }
 
-  Widget _buildSectionHeader(String title, {required VoidCallback onAddPressed}) {
+  Widget _buildSectionHeader(String title,
+      {required VoidCallback onAddPressed}) {
+    // Method to build section header
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      // Row for header and button
+      mainAxisAlignment:
+          MainAxisAlignment.spaceBetween, // Space between header and button
       children: [
         Text(
-          title,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
+          // Header text
+          title, // Section title
+          style: const TextStyle(
+            // Text style for the header
+            fontSize: 20, // Font size
+            fontWeight: FontWeight.bold, // Font weight
+            color: Colors.black87, // Text color
           ),
         ),
         TextButton(
-          onPressed: onAddPressed,
-          child: Row(
+          // Button to add a new grooming task
+          onPressed: onAddPressed, // Function to call on button press
+          child: const Row(
+            // Row for button content
             children: [
-              Icon(Icons.add, color: Colors.black),
-              Text('Add', style: TextStyle(color: Colors.black)),
+              Icon(Icons.add, color: Colors.black), // Add icon
+              Text('Add', style: TextStyle(color: Colors.black)), // Add text
             ],
           ),
         ),
@@ -298,55 +391,70 @@ class _GroomingPageState extends State<GroomingPage> with SingleTickerProviderSt
     );
   }
 
-  // Skin & Coat Health Tab
   Widget _buildSkinCoatHealthTab() {
+    // Method to build the skin and coat health tab
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16.0),
+      // Allows scrolling for content
+      padding: const EdgeInsets.all(16.0), // Padding around the content
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        // Column for vertical arrangement
+        crossAxisAlignment: CrossAxisAlignment.start, // Align items to start
         children: [
-          _buildSkinIssueForm(),
-          SizedBox(height: 20),
-          _buildVideosSection(),
-          SizedBox(height: 20),
-          _buildTipsSection(),
+          _buildSkinIssueForm(), // Form to add skin issue
+          const SizedBox(height: 20), // Spacing after the form
+          _buildVideosSection(), // Section to display YouTube videos
+          const SizedBox(height: 20), // Spacing after video section
+          _buildTipsSection(), // Section for pet care tips
         ],
       ),
     );
   }
 
-  // 1st Compartment: Form to Add Pet's Skin Issue
   Widget _buildSkinIssueForm() {
+    // Method to build the skin issue form
     return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      // Card widget for the form
+      elevation: 3, // Elevation for shadow effect
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10)), // Rounded corners
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        // Padding around the card content
+        padding: const EdgeInsets.all(16.0), // Padding value
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          // Column for vertical arrangement
+          crossAxisAlignment: CrossAxisAlignment.start, // Align items to start
           children: [
-            Text(
+            const Text(
+              // Header for the form
               'Add Skin Issue',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontSize: 20, fontWeight: FontWeight.bold), // Header style
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10), // Spacing after the header
             TextField(
+              // TextField for entering skin issue
               onChanged: (value) {
-                _skinIssue = value;
+                // Callback on text change
+                _skinIssue = value; // Update skin issue variable
               },
-              decoration: InputDecoration(
-                labelText: 'Enter skin issue',
-                border: OutlineInputBorder(),
+              decoration: const InputDecoration(
+                // Decoration for the TextField
+                labelText: 'Enter skin issue', // Label for input
+                border: OutlineInputBorder(), // Border style
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10), // Spacing after the TextField
             ElevatedButton(
+              // Button to search for videos
               onPressed: () {
+                // Callback on button press
                 if (_skinIssue.isNotEmpty) {
-                  _fetchVideos(widget.petBreed, _skinIssue);
+                  // Check if skin issue is not empty
+                  _fetchVideos(widget.petBreed,
+                      _skinIssue); // Fetch videos based on breed and skin issue
                 }
               },
-              child: Text('Search Videos'),
+              child: const Text('Search Videos'), // Button text
             ),
           ],
         ),
@@ -354,34 +462,49 @@ class _GroomingPageState extends State<GroomingPage> with SingleTickerProviderSt
     );
   }
 
-  // 2nd Compartment: Display YouTube Videos with Embedded Player
   Widget _buildVideosSection() {
+    // Method to build the YouTube videos section
     return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      // Card widget for the videos section
+      elevation: 3, // Elevation for shadow effect
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10)), // Rounded corners
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        // Padding around the card content
+        padding: const EdgeInsets.all(16.0), // Padding value
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          // Column for vertical arrangement
+          crossAxisAlignment: CrossAxisAlignment.start, // Align items to start
           children: [
-            Text(
+            const Text(
+              // Header for the videos section
               'YouTube Videos',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontSize: 20, fontWeight: FontWeight.bold), // Header style
             ),
-            SizedBox(height: 10),
-            _videos.isEmpty
-                ? Text('No videos found. Please add a skin issue and search.')
+            const SizedBox(height: 10), // Spacing after the header
+            _videos.isEmpty // Check if there are no videos
+                ? const Text(
+                    'No videos found. Please add a skin issue and search.') // Message for no videos
                 : ListView.builder(
-              shrinkWrap: true,
-              physics: NeverScrollableScrollPhysics(),
-              itemCount: _videos.length,
-              itemBuilder: (context, index) {
-                final video = _videos[index];
-                final videoId = video['id']['videoId'];
-                final title = video['snippet']['title'];
-                return _buildYoutubePlayer(videoId, title);
-              },
-            ),
+                    // ListView to display videos
+                    shrinkWrap:
+                        true, // Allow ListView to take only necessary space
+                    physics:
+                        const NeverScrollableScrollPhysics(), // Disable scrolling
+                    itemCount: _videos.length, // Number of videos
+                    itemBuilder: (context, index) {
+                      // Build method for each video
+                      final video =
+                          _videos[index]; // Get video at current index
+                      final videoId =
+                          video['id']['videoId']; // Extract video ID
+                      final title =
+                          video['snippet']['title']; // Extract video title
+                      return _buildYoutubePlayer(
+                          videoId, title); // Build YouTube player for the video
+                    },
+                  ),
           ],
         ),
       ),
@@ -389,50 +512,65 @@ class _GroomingPageState extends State<GroomingPage> with SingleTickerProviderSt
   }
 
   Widget _buildYoutubePlayer(String videoId, String title) {
+    // Method to build the YouTube player
     _youtubePlayerController = YoutubePlayerController(
-      initialVideoId: videoId,
-      flags: YoutubePlayerFlags(
-        autoPlay: false,
-        mute: false,
+      // Create a new YouTube player controller
+      initialVideoId: videoId, // Set the initial video ID
+      flags: const YoutubePlayerFlags(
+        // Configure player flags
+        autoPlay: false, // Disable auto play
+        mute: false, // Disable mute
       ),
     );
 
     return Column(
+      // Column to arrange video title and player
       children: [
-        Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        SizedBox(height: 8),
+        Text(title,
+            style: const TextStyle(
+                fontSize: 16, fontWeight: FontWeight.bold)), // Video title
+        const SizedBox(height: 8), // Spacing after the title
         YoutubePlayer(
-          controller: _youtubePlayerController!,
-          showVideoProgressIndicator: true,
-          progressIndicatorColor: Colors.blueAccent,
+          // YouTube player widget
+          controller: _youtubePlayerController!, // Pass the controller
+          showVideoProgressIndicator: true, // Show video progress indicator
+          progressIndicatorColor:
+              Colors.blueAccent, // Color for the progress indicator
         ),
-        SizedBox(height: 16),
+        const SizedBox(height: 16), // Spacing after the player
       ],
     );
   }
 
-  // 3rd Compartment: Hardcoded Tips for Pet Skin Care
   Widget _buildTipsSection() {
+    // Method to build the tips section
     return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
+      // Card widget for the tips section
+      elevation: 3, // Elevation for shadow effect
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10)), // Rounded corners
+      child: const Padding(
+        // Padding around the card content
+        padding: EdgeInsets.all(16.0), // Padding value
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          // Column for vertical arrangement
+          crossAxisAlignment: CrossAxisAlignment.start, // Align items to start
           children: [
             Text(
+              // Header for the tips section
               'Pet Skin Care Tips',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontSize: 20, fontWeight: FontWeight.bold), // Header style
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 10), // Spacing after the header
             Text(
+              // Tips for pet skin care
               '1. Regularly check your pet’s skin for signs of irritation, redness, or dryness.\n'
-                  '2. Use hypoallergenic shampoos that are gentle on the skin.\n'
-                  '3. Keep your pet’s skin moisturized, especially during dry seasons.\n'
-                  '4. Ensure a balanced diet with omega-3 fatty acids for healthy skin.\n'
-                  '5. Consult a vet if any unusual symptoms persist.',
-              style: TextStyle(fontSize: 16),
+              '2. Use hypoallergenic shampoos that are gentle on the skin.\n'
+              '3. Keep your pet’s skin moisturized, especially during dry seasons.\n'
+              '4. Ensure a balanced diet with omega-3 fatty acids for healthy skin.\n'
+              '5. Consult a vet if any unusual symptoms persist.',
+              style: TextStyle(fontSize: 16), // Style for tips text
             ),
           ],
         ),

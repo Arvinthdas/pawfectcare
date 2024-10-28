@@ -9,16 +9,16 @@ import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
 class VaccinationDetailScreen extends StatefulWidget {
-  final DocumentSnapshot vaccinationRecord;
-  final String petId;
-  final String userId;
-  final String petName;
+  final DocumentSnapshot vaccinationRecord; // Record of the vaccination
+  final String petId; // Pet's ID
+  final String userId; // User's ID
+  final String petName; // Pet's name
 
   VaccinationDetailScreen({
     required this.vaccinationRecord,
     required this.petId,
     required this.userId,
-    required this.petName
+    required this.petName,
   });
 
   @override
@@ -27,23 +27,26 @@ class VaccinationDetailScreen extends StatefulWidget {
 }
 
 class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
-  late TextEditingController _vaccineNameController;
-  late TextEditingController _clinicController;
-  late TextEditingController _notesController;
-  late DateTime _selectedDate;
-  late TimeOfDay _selectedTime;
-  File? _imageFile;
-  bool _isEditing = false;
-  late DocumentSnapshot _latestVaccinationRecord;
+  late TextEditingController
+      _vaccineNameController; // Controller for vaccine name input
+  late TextEditingController _clinicController; // Controller for clinic input
+  late TextEditingController _notesController; // Controller for notes input
+  late DateTime _selectedDate; // Selected vaccination date
+  late TimeOfDay _selectedTime; // Selected vaccination time
+  File? _imageFile; // Selected image file
+  bool _isEditing = false; // State for editing mode
+  late DocumentSnapshot _latestVaccinationRecord; // Latest vaccination record
 
   @override
   void initState() {
     super.initState();
-    _latestVaccinationRecord = widget.vaccinationRecord;
-    _fetchLatestVaccinationRecord();
-    _initializeFields();
+    _latestVaccinationRecord =
+        widget.vaccinationRecord; // Initialize with the passed record
+    _fetchLatestVaccinationRecord(); // Fetch the latest vaccination record
+    _initializeFields(); // Initialize the text fields
   }
 
+  // Fetch the latest vaccination record from Firestore
   Future<void> _fetchLatestVaccinationRecord() async {
     try {
       DocumentSnapshot updatedRecord = await FirebaseFirestore.instance
@@ -56,14 +59,15 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
           .get();
 
       setState(() {
-        _latestVaccinationRecord = updatedRecord;
-        _initializeFields();
+        _latestVaccinationRecord = updatedRecord; // Update the local record
+        _initializeFields(); // Reinitialize fields with the latest record data
       });
     } catch (e) {
-      print('Error fetching latest vaccination record: $e');
+      print('Error fetching latest vaccination record: $e'); // Handle errors
     }
   }
 
+  // Initialize text fields with existing vaccination record data
   void _initializeFields() {
     _vaccineNameController =
         TextEditingController(text: _latestVaccinationRecord['vaccineName']);
@@ -72,18 +76,21 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
     _notesController =
         TextEditingController(text: _latestVaccinationRecord['notes']);
 
-    String dateStr = _latestVaccinationRecord['date'];
+    String dateStr = _latestVaccinationRecord['date']; // Get date string
     try {
-      final dateTime = DateFormat('dd/MM/yyyy HH:mm').parse(dateStr);
-      _selectedDate = DateFormat('dd/MM/yyyy').parse(dateStr);
-      _selectedTime = TimeOfDay.fromDateTime(dateTime);
+      final dateTime =
+          DateFormat('dd/MM/yyyy HH:mm').parse(dateStr); // Parse date
+      _selectedDate =
+          DateFormat('dd/MM/yyyy').parse(dateStr); // Store selected date
+      _selectedTime = TimeOfDay.fromDateTime(dateTime); // Store selected time
     } catch (e) {
-      print('Error parsing date: $e');
-      _selectedDate = DateTime.now();
-      _selectedTime = TimeOfDay.now();
+      print('Error parsing date: $e'); // Handle parsing errors
+      _selectedDate = DateTime.now(); // Default to current date
+      _selectedTime = TimeOfDay.now(); // Default to current time
     }
   }
 
+  // Dispose controllers when not needed
   @override
   void dispose() {
     _vaccineNameController.dispose();
@@ -92,34 +99,38 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
     super.dispose();
   }
 
+  // Pick an image from the gallery
   Future<void> _pickImage() async {
     final pickedFile =
-    await ImagePicker().pickImage(source: ImageSource.gallery);
+        await ImagePicker().pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
-        _imageFile = File(pickedFile.path);
+        _imageFile = File(pickedFile.path); // Store selected image file
       });
     }
   }
 
+  // Upload the selected image to Firebase Storage
   Future<String> _uploadImageToStorage(String userId) async {
     if (_imageFile != null) {
       try {
         String fileName =
-            'vaccinations/${userId}/${DateTime.now().millisecondsSinceEpoch}.jpg';
+            'vaccinations/${userId}/${DateTime.now().millisecondsSinceEpoch}.jpg'; // Unique file name
         Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
-        UploadTask uploadTask = storageRef.putFile(_imageFile!);
+        UploadTask uploadTask = storageRef.putFile(_imageFile!); // Start upload
         TaskSnapshot snapshot = await uploadTask;
-        return await snapshot.ref.getDownloadURL();
+        return await snapshot.ref.getDownloadURL(); // Return the download URL
       } catch (e) {
-        print('Error uploading image: $e');
-        return '';
+        print('Error uploading image: $e'); // Handle upload errors
+        return ''; // Return empty string if upload fails
       }
     }
-    return '';
+    return ''; // Return empty string if no image selected
   }
 
+  // Save changes to the vaccination record
   Future<void> _saveChanges() async {
+    // Validate required fields
     if (_vaccineNameController.text.isEmpty ||
         _clinicController.text.isEmpty ||
         _selectedDate == null ||
@@ -141,12 +152,14 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
         _selectedDate.day,
         _selectedTime.hour,
         _selectedTime.minute,
-      );
+      ); // Combine date and time
       final formattedDate =
-      DateFormat('dd/MM/yyyy HH:mm').format(updatedDateTime);
+          DateFormat('dd/MM/yyyy HH:mm').format(updatedDateTime); // Format date
 
-      String imageUrl = await _uploadImageToStorage(widget.userId);
+      String imageUrl = await _uploadImageToStorage(
+          widget.userId); // Upload image and get URL
 
+      // Update Firestore with the new data
       await FirebaseFirestore.instance
           .collection('users')
           .doc(widget.userId)
@@ -162,20 +175,24 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
         'documentUrl': imageUrl,
       });
 
-      _scheduleNotification(updatedDateTime,_vaccineNameController.text, widget.petName);
-      _showMessage('Changes saved successfully');
+      _scheduleNotification(updatedDateTime, _vaccineNameController.text,
+          widget.petName); // Schedule notification
+      _showMessage('Changes saved successfully'); // Show success message
       setState(() {
-        _isEditing = false;
+        _isEditing = false; // Exit editing mode
       });
     }
   }
 
-  Future<void> _scheduleNotification(DateTime scheduledTime,String title, String petName) async {
+  // Schedule a notification for the vaccination
+  Future<void> _scheduleNotification(
+      DateTime scheduledTime, String title, String petName) async {
     FlutterLocalNotificationsPlugin notificationsPlugin =
-    FlutterLocalNotificationsPlugin();
+        FlutterLocalNotificationsPlugin();
 
+    // Define Android notification details
     const AndroidNotificationDetails androidDetails =
-    AndroidNotificationDetails(
+        AndroidNotificationDetails(
       'vaccine_channel_id',
       'Vaccination Notifications',
       channelDescription: 'Reminder for upcoming vaccinations',
@@ -184,28 +201,31 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
     );
 
     const NotificationDetails platformDetails =
-    NotificationDetails(android: androidDetails);
+        NotificationDetails(android: androidDetails);
 
-    tz.TZDateTime scheduledDate = tz.TZDateTime.from(scheduledTime, tz.local);
+    tz.TZDateTime scheduledDate = tz.TZDateTime.from(
+        scheduledTime, tz.local); // Convert to timezone-aware date
 
     await notificationsPlugin.zonedSchedule(
       widget.vaccinationRecord.hashCode,
       'Vaccination Reminder',
-      '$petName `s $title vaccination appointment',
+      '$petName\'s $title vaccination appointment',
       scheduledDate,
       platformDetails,
       uiLocalNotificationDateInterpretation:
-      UILocalNotificationDateInterpretation.absoluteTime,
+          UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,
     );
   }
 
+  // Show a message using SnackBar
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
     );
   }
 
+  // Select a date for vaccination
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -215,11 +235,12 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
     );
     if (picked != null && picked != _selectedDate) {
       setState(() {
-        _selectedDate = picked;
+        _selectedDate = picked; // Update selected date
       });
     }
   }
 
+  // Select a time for vaccination
   Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
@@ -227,11 +248,12 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
     );
     if (picked != null && picked != _selectedTime) {
       setState(() {
-        _selectedTime = picked;
+        _selectedTime = picked; // Update selected time
       });
     }
   }
 
+  // Build image display for vaccination record
   Widget _buildImageDisplay() {
     if (_imageFile != null) {
       return Container(
@@ -239,61 +261,71 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
         width: 380,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10), // Rounded corners
-          border: Border.all(color: Colors.grey[300]!, width: 1), // Border color
+          border:
+              Border.all(color: Colors.grey[300]!, width: 1), // Border color
           color: Colors.grey[200], // Background color
         ),
         child: GestureDetector(
           onTap: () {
             if (_isEditing) {
-              _showRemoveImageDialog();
+              _showRemoveImageDialog(); // Show dialog to remove image
             }
           },
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(10), // Ensure image fits within rounded corners
+            borderRadius: BorderRadius.circular(
+                10), // Ensure image fits within rounded corners
             child: Image.file(
-              _imageFile!,
+              _imageFile!, // Display the selected image
               fit: BoxFit.cover,
             ),
           ),
         ),
       );
     } else {
+      // If no image has been uploaded, check for an existing URL in Firestore
       String? documentUrl = _latestVaccinationRecord.data() != null &&
-          (_latestVaccinationRecord.data() as Map<String, dynamic>)
-              .containsKey('documentUrl')
+              (_latestVaccinationRecord.data() as Map<String, dynamic>)
+                  .containsKey('documentUrl')
           ? _latestVaccinationRecord['documentUrl']
           : null;
 
       if (documentUrl != null && documentUrl.isNotEmpty) {
+        // Display the image from the URL if it exists
         return Container(
           height: 200,
           width: 380,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10), // Rounded corners
-            border: Border.all(color: Colors.grey[300]!, width: 1), // Border color
+            border:
+                Border.all(color: Colors.grey[300]!, width: 1), // Border color
             color: Colors.grey[200], // Background color
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(10), // Ensure image fits within rounded corners
+            borderRadius: BorderRadius.circular(
+                10), // Ensure image fits within rounded corners
             child: Image.network(
-              documentUrl,
+              documentUrl, // Display image from the network
               fit: BoxFit.cover,
             ),
           ),
         );
       } else {
+        // Show a placeholder if no image is available
         return Container(
           height: 200,
           width: 380,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10), // Rounded corners
-            border: Border.all(color: Colors.grey[300]!, width: 1), // Border color
+            border:
+                Border.all(color: Colors.grey[300]!, width: 1), // Border color
             color: Colors.grey[200], // Background color
           ),
-          child: Center( // Center the text inside the container
+          child: Center(
+            // Center the text inside the container
             child: Text(
               'No image uploaded',
-              style: TextStyle(color: Colors.grey[600]), // Optional styling for the text
+              style: TextStyle(
+                  color: Colors.grey[600]), // Optional styling for the text
             ),
           ),
         );
@@ -301,27 +333,28 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
     }
   }
 
-
-
-  Future<bool?> _showConfirmationDialog({required String title, required String content}) {
+  // Show a confirmation dialog with title and content
+  Future<bool?> _showConfirmationDialog(
+      {required String title, required String content}) {
     return showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(title),
-          content: Text(content),
+          title: Text(title), // Set the title of the dialog
+          content: Text(content), // Set the content of the dialog
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(false); // Close the dialog
+                Navigator.of(context)
+                    .pop(false); // Close the dialog without confirmation
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'), // Cancel button
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(true); // Confirm
+                Navigator.of(context).pop(true); // Confirm action
               },
-              child: Text('Confirm'),
+              child: const Text('Confirm'), // Confirm button
             ),
           ],
         );
@@ -329,6 +362,7 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
     );
   }
 
+  // Show a dialog to confirm removal of the image
   void _showRemoveImageDialog() async {
     // Show confirmation dialog before removing the image
     bool? confirmed = await _showConfirmationDialog(
@@ -341,8 +375,8 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
     }
   }
 
+  // Clear the image locally and update the Firestore record
   void _removeImage() {
-    // Clear the image locally and update the Firestore record
     setState(() {
       _imageFile = null; // Clear the local image file
 
@@ -359,9 +393,9 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
     _removeImageFromFirestore();
   }
 
+  // Update Firestore to remove the image URL
   Future<void> _removeImageFromFirestore() async {
     try {
-      // Update Firestore to remove the image URL
       await FirebaseFirestore.instance
           .collection('users')
           .doc(widget.userId)
@@ -369,9 +403,9 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
           .doc(widget.petId)
           .collection('vaccinations')
           .doc(widget.vaccinationRecord.id)
-          .update({'documentUrl': ''});
+          .update({'documentUrl': ''}); // Clear the document URL
 
-      // After removing from Firestore, we should fetch the latest data to update the local state
+      // Fetch the latest data to update the local state
       DocumentSnapshot updatedRecord = await FirebaseFirestore.instance
           .collection('users')
           .doc(widget.userId)
@@ -382,22 +416,22 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
           .get();
 
       setState(() {
-        _latestVaccinationRecord = updatedRecord;
+        _latestVaccinationRecord = updatedRecord; // Update local state
       });
 
-      _showMessage('Image removed successfully.');
+      _showMessage('Image removed successfully.'); // Show success message
     } catch (e) {
-      print('Error removing image from Firestore: $e');
-      _showMessage('Failed to remove the image.');
+      print('Error removing image from Firestore: $e'); // Handle errors
+      _showMessage('Failed to remove the image.'); // Show failure message
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF7EFF1),
+      backgroundColor: const Color(0xFFF7EFF1),
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Vaccination Details',
           style: TextStyle(
             fontFamily: 'Poppins',
@@ -405,45 +439,46 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
             fontSize: 20,
           ),
         ),
-        backgroundColor: Color(0xFFE2BF65),
+        backgroundColor: const Color(0xFFE2BF65), // AppBar color
         actions: [
           if (_isEditing)
             IconButton(
-              icon: Icon(Icons.save),
-              onPressed: _saveChanges,
+              icon: const Icon(Icons.save), // Save icon
+              onPressed: _saveChanges, // Call save changes function
             )
           else
             IconButton(
-              icon: Icon(Icons.edit),
+              icon: const Icon(Icons.edit), // Edit icon
               onPressed: () {
                 setState(() {
-                  _isEditing = true;
+                  _isEditing = true; // Enter editing mode
                 });
               },
             ),
         ],
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             _buildTextField(
-              _vaccineNameController,
+              _vaccineNameController, // Vaccine name input
               'Vaccine Name',
               _isEditing,
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             GestureDetector(
               onTap: () {
                 if (_isEditing) {
-                  _selectDate(context);
+                  _selectDate(context); // Allow date selection if editing
                 }
               },
               child: AbsorbPointer(
                 child: _buildTextField(
                   TextEditingController(
                     text: _selectedDate != null
-                        ? "${_selectedDate.toLocal()}".split(' ')[0]
+                        ? "${_selectedDate.toLocal()}"
+                            .split(' ')[0] // Display selected date
                         : '',
                   ),
                   'Vaccination Date',
@@ -451,55 +486,63 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             GestureDetector(
               onTap: () {
                 if (_isEditing) {
-                  _selectTime(context);
+                  _selectTime(context); // Allow time selection if editing
                 }
               },
               child: AbsorbPointer(
                 child: _buildTextField(
                   TextEditingController(
-                    text: _selectedTime.format(context),
+                    text:
+                        _selectedTime.format(context), // Display selected time
                   ),
                   'Vaccination Time',
                   true,
                 ),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             _buildTextField(
-              _clinicController,
+              _clinicController, // Clinic input
               'Clinic',
               _isEditing,
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             _buildTextField(
-              _notesController,
+              _notesController, // Notes input
               'Notes',
               _isEditing,
             ),
-            SizedBox(height: 20),
-            _buildImageDisplay(),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
+            _buildImageDisplay(), // Display the uploaded image
+            const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _isEditing ? _pickImage : null,
-              child: Text(
+              onPressed: _isEditing
+                  ? _pickImage
+                  : null, // Pick image only if in editing mode
+              child: const Text(
                 'Upload New Image',
                 style: TextStyle(color: Colors.black),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFE2BF65), // Background color
+                backgroundColor: const Color(0xFFE2BF65), // Button background color
               ),
             ),
             // Show the Remove Image button only if there is an image
-            if (_imageFile != null || (_latestVaccinationRecord.data() != null && _latestVaccinationRecord['documentUrl'] != null && _latestVaccinationRecord['documentUrl'] != ''))
+            if (_imageFile != null ||
+                (_latestVaccinationRecord.data() != null &&
+                    _latestVaccinationRecord['documentUrl'] != null &&
+                    _latestVaccinationRecord['documentUrl'] != ''))
               TextButton(
-                onPressed: _isEditing ? _showRemoveImageDialog : null,
-                child: Text('Remove Image'),
+                onPressed: _isEditing
+                    ? _showRemoveImageDialog
+                    : null, // Allow removal if editing
+                child: const Text('Remove Image'),
                 style: TextButton.styleFrom(
-                  backgroundColor: Color(0xFFE2BF65),
+                  backgroundColor: const Color(0xFFE2BF65),
                   foregroundColor: Colors.black,
                 ),
               ),
@@ -509,7 +552,6 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
     );
   }
 
-
   // Create a reusable method for text fields
   Widget _buildTextField(
       TextEditingController controller, String label, bool enabled) {
@@ -517,30 +559,30 @@ class _VaccinationDetailScreenState extends State<VaccinationDetailScreen> {
       controller: controller,
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: Colors.black),
+        labelStyle: const TextStyle(color: Colors.black),
         enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide(
+          borderSide: const BorderSide(
               color: Colors.grey,
               width: 2), // Color and width for enabled border
           borderRadius: BorderRadius.circular(10), // Rounded corners
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(
+          borderSide: const BorderSide(
               color: Color(0xFFE2BF65),
               width: 2), // Color and width for focused border
           borderRadius: BorderRadius.circular(10), // Rounded corners
         ),
         errorBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.red, width: 2), // Error border
+          borderSide: const BorderSide(color: Colors.red, width: 2), // Error border
           borderRadius: BorderRadius.circular(10), // Rounded corners
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderSide:
-          BorderSide(color: Colors.red, width: 2), // Focused error border
+              const BorderSide(color: Colors.red, width: 2), // Focused error border
           borderRadius: BorderRadius.circular(10), // Rounded corners
         ),
       ),
-      enabled: enabled,
+      enabled: enabled, // Enable or disable based on editing state
     );
   }
 }

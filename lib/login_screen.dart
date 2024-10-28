@@ -101,7 +101,8 @@ class _LoginScreenState extends State<LoginScreen> {
       }
 
       // Obtain the auth details from the request
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
       // Create a new credential
       final credential = GoogleAuthProvider.credential(
@@ -131,7 +132,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF7EFF1),
+      backgroundColor: const Color(0xFFF7EFF1),
       body: Stack(
         children: [
           Positioned(
@@ -139,7 +140,7 @@ class _LoginScreenState extends State<LoginScreen> {
             right: -50,
             child: CircleAvatar(
               radius: 100,
-              backgroundColor: Color(0xFFE2BF65).withOpacity(0.4),
+              backgroundColor: const Color(0xFFE2BF65).withOpacity(0.4),
             ),
           ),
           Positioned(
@@ -147,10 +148,10 @@ class _LoginScreenState extends State<LoginScreen> {
             left: -80,
             child: CircleAvatar(
               radius: 140,
-              backgroundColor: Color(0xFFE2BF65).withOpacity(0.4),
+              backgroundColor: const Color(0xFFE2BF65).withOpacity(0.4),
             ),
           ),
-          Positioned(
+          const Positioned(
             top: 50,
             left: -60,
             child: CircleAvatar(
@@ -158,7 +159,7 @@ class _LoginScreenState extends State<LoginScreen> {
               backgroundColor: Color(0xFF61481C),
             ),
           ),
-          Positioned(
+          const Positioned(
             bottom: 100,
             right: -30,
             child: CircleAvatar(
@@ -173,27 +174,29 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(80), // Adjust the value for more or less rounding
+                    borderRadius: BorderRadius.circular(
+                        80), // Adjust the value for more or less rounding
                     child: Image.asset(
                       'assets/images/Pawfectcare.png',
                       height: 200,
                       width: 200,
                     ),
                   ),
-                  SizedBox(height: 40),
+                  const SizedBox(height: 40),
 
                   if (errorMessage.isNotEmpty)
                     Text(
                       errorMessage,
-                      style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          color: Colors.red, fontWeight: FontWeight.bold),
                     ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
 
                   // Email TextField
                   TextField(
                     controller: emailController,
                     decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.email),
+                      prefixIcon: const Icon(Icons.email),
                       hintText: 'Email Address',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -203,22 +206,25 @@ class _LoginScreenState extends State<LoginScreen> {
                       fillColor: Colors.grey[300],
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
                   // Password TextField with visibility toggle
                   TextField(
                     controller: passwordController,
                     obscureText: !_isPasswordVisible, // Toggle visibility
                     decoration: InputDecoration(
-                      prefixIcon: Icon(Icons.lock),
+                      prefixIcon: const Icon(Icons.lock),
                       hintText: 'Password',
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                          _isPasswordVisible
+                              ? Icons.visibility
+                              : Icons.visibility_off,
                         ),
                         onPressed: () {
                           setState(() {
-                            _isPasswordVisible = !_isPasswordVisible; // Toggle state
+                            _isPasswordVisible =
+                                !_isPasswordVisible; // Toggle state
                           });
                         },
                       ),
@@ -230,7 +236,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       fillColor: Colors.grey[300],
                     ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
 
                   // Forgot Password
                   Align(
@@ -239,10 +245,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => ForgotPasswordScreen()),
+                          MaterialPageRoute(
+                              builder: (context) => ForgotPasswordScreen()),
                         );
                       },
-                      child: Text(
+                      child: const Text(
                         'Forgot Password?',
                         style: TextStyle(
                           color: Color(0xFFE2BF65),
@@ -250,35 +257,35 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
                   // Login Button
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFFE2BF65),
+                        backgroundColor: const Color(0xFFE2BF65),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                       onPressed: _isLoading ? null : login,
                       child: _isLoading
-                          ? CircularProgressIndicator(color: Colors.black)
-                          : Text(
-                        'LOGIN',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                          ? const CircularProgressIndicator(color: Colors.black)
+                          : const Text(
+                              'LOGIN',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
                   // Connect with
-                  Text('or connect with'),
-                  SizedBox(height: 20),
+                  const Text('or connect with'),
+                  const SizedBox(height: 20),
 
                   // Google Button
                   // Inside the build method, replace the Google sign-in button with the following:
@@ -287,24 +294,32 @@ class _LoginScreenState extends State<LoginScreen> {
                     width: double.infinity,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white, // Google button is white by default
+                        backgroundColor:
+                            Colors.white, // Google button is white by default
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
-                          side: BorderSide(color: Colors.grey), // Add border to match the Google button style
+                          side: const BorderSide(
+                              color: Colors
+                                  .grey), // Add border to match the Google button style
                         ),
-                        padding: EdgeInsets.symmetric(vertical: 12), // Adjust padding
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12), // Adjust padding
                       ),
-                      onPressed: _isLoading ? null : _signInWithGoogle, // Your existing Google sign-in function
+                      onPressed: _isLoading
+                          ? null
+                          : _signInWithGoogle, // Your existing Google sign-in function
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Image.asset(
                             'assets/images/google.png', // Ensure this matches your actual path
                             height: 24, // Adjust as needed
-                            width: 24,  // Adjust as needed
+                            width: 24, // Adjust as needed
                           ),
-                          SizedBox(width: 12), // Add some spacing between the icon and text
-                          Text(
+                          const SizedBox(
+                              width:
+                                  12), // Add some spacing between the icon and text
+                          const Text(
                             'Sign in with Google',
                             style: TextStyle(
                               color: Colors.black,
@@ -317,21 +332,22 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
 
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
                   // Register Prompt
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("Don't have an account?"),
+                      const Text("Don't have an account?"),
                       TextButton(
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => RegisterScreen()),
+                            MaterialPageRoute(
+                                builder: (context) => RegisterScreen()),
                           );
                         },
-                        child: Text(
+                        child: const Text(
                           'Register Now',
                           style: TextStyle(
                             color: Color(0xFFE2BF65),
