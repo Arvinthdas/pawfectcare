@@ -290,67 +290,67 @@ class _GroomingPageState extends State<GroomingPage>
     );
   }
 
-  Widget _buildGroomingCard(String taskName, dynamic date, String productsUsed,
-      String notes, DocumentSnapshot taskRecord) {
-    String formattedDate; // Variable to hold the formatted date
+  Widget _buildGroomingCard(String taskName, dynamic date, String productsUsed, String notes, DocumentSnapshot taskRecord) {
+    String formattedDate;
 
     if (date is Timestamp) {
-      // Check if the date is a Timestamp
-      formattedDate = DateFormat('dd/MM/yyyy HH:mm')
-          .format(date.toDate()); // Format the date
+      formattedDate = DateFormat('dd/MM/yyyy HH:mm').format(date.toDate());
     } else {
-      formattedDate =
-          date.toString(); // Convert date to string if not a Timestamp
+      formattedDate = date.toString();
     }
 
-    return InkWell(
-      // InkWell widget to make the card tappable
-      onTap: () {
-        // On tap action
-        Navigator.push(
-          // Navigate to the GroomingDetailScreen
-          context,
-          MaterialPageRoute(
-            // Create a route to the new screen
-            builder: (context) => GroomingDetailScreen(
-              // Pass the grooming record and other data
-              groomingRecord: taskRecord,
-              petId: widget.petId,
-              userId: widget.userId,
-              petName: widget.petName,
-            ),
-          ),
+    return GestureDetector(
+      onLongPress: () {
+        // Show confirmation dialog on long press
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Delete Confirmation'),
+              content: const Text('Are you sure you want to delete this task?'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close dialog
+                  },
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    // Delete the task from Firestore
+                    await taskRecord.reference.delete();
+                    Navigator.of(context).pop(); // Close dialog after deletion
+
+                    // Show success message
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Delete Successful'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                  child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                ),
+              ],
+            );
+          },
         );
       },
       child: Card(
-        // Card widget for displaying grooming task details
-        color: Colors.white, // Card background color
-        elevation: 3, // Elevation for shadow effect
+        color: Colors.white,
+        elevation: 3,
         shape: RoundedRectangleBorder(
-          // Shape of the card
-          borderRadius: BorderRadius.circular(10), // Rounded corners
+          borderRadius: BorderRadius.circular(10),
         ),
         child: Padding(
-          // Padding around the card content
-          padding: const EdgeInsets.all(12.0), // Padding value
+          padding: const EdgeInsets.all(12.0),
           child: Column(
-            // Column to arrange text widgets vertically
-            crossAxisAlignment:
-                CrossAxisAlignment.start, // Align items to the start
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(taskName,
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold)), // Task name
-              Text('Date: $formattedDate',
-                  style: TextStyle(
-                      fontSize: 16, color: Colors.grey[700])), // Formatted date
-              Text('Products Used: $productsUsed',
-                  style: TextStyle(
-                      fontSize: 16, color: Colors.grey[700])), // Products used
-              Text('Notes: $notes',
-                  style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey[700])), // Additional notes
+              Text(taskName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text('Date: $formattedDate', style: TextStyle(fontSize: 16, color: Colors.grey[700])),
+              Text('Products Used: $productsUsed', style: TextStyle(fontSize: 16, color: Colors.grey[700])),
+              Text('Notes: $notes', style: TextStyle(fontSize: 16, color: Colors.grey[700])),
             ],
           ),
         ),
