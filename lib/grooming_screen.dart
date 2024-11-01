@@ -290,16 +290,37 @@ class _GroomingPageState extends State<GroomingPage>
     );
   }
 
-  Widget _buildGroomingCard(String taskName, dynamic date, String productsUsed, String notes, DocumentSnapshot taskRecord) {
-    String formattedDate;
+  Widget _buildGroomingCard(String taskName, dynamic date, String productsUsed,
+      String notes, DocumentSnapshot taskRecord) {
+    String formattedDate; // Variable to hold the formatted date
 
     if (date is Timestamp) {
-      formattedDate = DateFormat('dd/MM/yyyy HH:mm').format(date.toDate());
+      // Check if the date is a Timestamp
+      formattedDate = DateFormat('dd/MM/yyyy HH:mm')
+          .format(date.toDate()); // Format the date
     } else {
-      formattedDate = date.toString();
+      formattedDate =
+          date.toString(); // Convert date to string if not a Timestamp
     }
 
     return GestureDetector(
+      onTap: () {
+        // On tap action
+        Navigator.push(
+          // Navigate to the GroomingDetailScreen
+          context,
+          MaterialPageRoute(
+            // Create a route to the new screen
+            builder: (context) => GroomingDetailScreen(
+              // Pass the grooming record and other data
+              groomingRecord: taskRecord,
+              petId: widget.petId,
+              userId: widget.userId,
+              petName: widget.petName,
+            ),
+          ),
+        );
+      },
       onLongPress: () {
         // Show confirmation dialog on long press
         showDialog(
@@ -337,26 +358,41 @@ class _GroomingPageState extends State<GroomingPage>
         );
       },
       child: Card(
-        color: Colors.white,
-        elevation: 3,
+        // Card widget for displaying grooming task details
+        color: Colors.white, // Card background color
+        elevation: 3, // Elevation for shadow effect
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+          // Shape of the card
+          borderRadius: BorderRadius.circular(10), // Rounded corners
         ),
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
+          // Padding around the card content
+          padding: const EdgeInsets.all(12.0), // Padding value
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            // Column to arrange text widgets vertically
+            crossAxisAlignment:
+            CrossAxisAlignment.start, // Align items to the start
             children: [
-              Text(taskName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              Text('Date: $formattedDate', style: TextStyle(fontSize: 16, color: Colors.grey[700])),
-              Text('Products Used: $productsUsed', style: TextStyle(fontSize: 16, color: Colors.grey[700])),
-              Text('Notes: $notes', style: TextStyle(fontSize: 16, color: Colors.grey[700])),
+              Text(taskName,
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold)), // Task name
+              Text('Date: $formattedDate',
+                  style: TextStyle(
+                      fontSize: 16, color: Colors.grey[700])), // Formatted date
+              Text('Products Used: $productsUsed',
+                  style: TextStyle(
+                      fontSize: 16, color: Colors.grey[700])), // Products used
+              Text('Notes: $notes',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey[700])), // Additional notes
             ],
           ),
         ),
       ),
     );
   }
+
 
   Widget _buildSectionHeader(String title,
       {required VoidCallback onAddPressed}) {
