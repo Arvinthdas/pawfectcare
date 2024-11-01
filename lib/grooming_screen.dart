@@ -49,6 +49,9 @@ class _GroomingPageState extends State<GroomingPage>
     super.dispose(); // Call the superclass dispose method
   }
 
+  List<YoutubePlayerController> _youtubePlayerControllers = [];
+
+
   Future<void> _fetchVideos(String breed, String issue) async {
     final String query = '$breed $issue'; // Build search query
     final String url =
@@ -60,13 +63,19 @@ class _GroomingPageState extends State<GroomingPage>
       // Check for a successful response
       final data = json.decode(response.body); // Decode the JSON response
       setState(() {
-        _videos = data['items'] ?? []; // Store videos in the state
+        _videos = data['items'] ?? []; // Update _videos with fetched video data
+        _youtubePlayerControllers = _videos.map((video) {
+          return YoutubePlayerController(
+            initialVideoId: video['id']['videoId'],
+            flags: const YoutubePlayerFlags(autoPlay: false, mute: false),
+          );
+        }).toList(); // Update controllers based on the videos
       });
     } else {
-      print(
-          'Failed to fetch videos: ${response.statusCode}'); // Log error if request fails
+      print('Failed to fetch videos: ${response.statusCode}'); // Log error if request fails
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -537,8 +546,7 @@ class _GroomingPageState extends State<GroomingPage>
                           video['id']['videoId']; // Extract video ID
                       final title =
                           video['snippet']['title']; // Extract video title
-                      return _buildYoutubePlayer(
-                          videoId, title); // Build YouTube player for the video
+                      return _buildYoutubePlayer(index); // Build YouTube player for the video
                     },
                   ),
           ],
@@ -547,36 +555,29 @@ class _GroomingPageState extends State<GroomingPage>
     );
   }
 
-  Widget _buildYoutubePlayer(String videoId, String title) {
-    // Method to build the YouTube player
-    _youtubePlayerController = YoutubePlayerController(
-      // Create a new YouTube player controller
-      initialVideoId: videoId, // Set the initial video ID
-      flags: const YoutubePlayerFlags(
-        // Configure player flags
-        autoPlay: false, // Disable auto play
-        mute: false, // Disable mute
-      ),
-    );
+  Widget _buildYoutubePlayer(int index) {
+    final video = _videos[index]; // Get the video at the specified index
+    final videoController = _youtubePlayerControllers[index]; // Get the corresponding controller
+    final title = video['snippet']['title']; // Get the video title
 
     return Column(
-      // Column to arrange video title and player
       children: [
-        Text(title,
-            style: const TextStyle(
-                fontSize: 16, fontWeight: FontWeight.bold)), // Video title
-        const SizedBox(height: 8), // Spacing after the title
-        YoutubePlayer(
-          // YouTube player widget
-          controller: _youtubePlayerController!, // Pass the controller
-          showVideoProgressIndicator: true, // Show video progress indicator
-          progressIndicatorColor:
-              Colors.blueAccent, // Color for the progress indicator
+        Text(
+          title,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 16), // Spacing after the player
+        const SizedBox(height: 8),
+        YoutubePlayer(
+          controller: videoController,
+          showVideoProgressIndicator: true,
+          progressIndicatorColor: Colors.blueAccent,
+        ),
+        const SizedBox(height: 16),
       ],
     );
   }
+
+
 
   Widget _buildTipsSection() {
     // Method to build the tips section
