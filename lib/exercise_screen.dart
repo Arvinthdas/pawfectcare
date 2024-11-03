@@ -59,7 +59,7 @@ class _ExerciseMonitoringPageState extends State<ExerciseMonitoringPage> {
           await _loadBreedSpecificData(widget.petType);
       // Generate an exercise plan using the loaded breed data.
       Map<String, dynamic> exerciseInfo =
-          _generateExercisePlanWithDecisionTree(breedData);
+      _generateExercisePlanWithConditions(breedData);
 
       setState(() {
         _exerciseRecommendations =
@@ -93,7 +93,7 @@ class _ExerciseMonitoringPageState extends State<ExerciseMonitoringPage> {
   }
 
   // Function to generate exercise plan using decision logic based on breed data.
-  Map<String, dynamic> _generateExercisePlanWithDecisionTree(
+  Map<String, dynamic> _generateExercisePlanWithConditions(
       Map<String, dynamic> breedData) {
     String breed = widget.breed.toLowerCase(); // Convert breed to lowercase.
     int age = widget.age; // Get the pet's age.
