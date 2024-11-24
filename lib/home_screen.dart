@@ -27,7 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoadingNews = true; // Loading state for news articles
 
   final String apiKey =
-      '784971b15e5c460e943f7e70adba0831'; // Replace with your actual API key
+      'News Api Key'; // Replace with your actual API key
 
   @override
   void initState() {
