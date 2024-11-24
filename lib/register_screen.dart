@@ -26,9 +26,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   // API keys for external services
   final String apiKey =
-      'XOfHWWJgQcCgZGlFEREVDQ==DWSUUw0KN5cGogaA'; // Replace with your API Ninja key
+      'Ninja API Key'; // Replace with your API Ninja key
   final String zeroBounceApiKey =
-      'f9bf0e1152d5400795b03e6d4dca6165'; // Replace with your ZeroBounce API key
+      'ZeroBounce API Key'; // Replace with your ZeroBounce API key
 
   @override
   void initState() {
