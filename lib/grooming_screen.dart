@@ -31,7 +31,7 @@ class _GroomingPageState extends State<GroomingPage>
   String _skinIssue = ''; // Skin issue for fetching videos
   List<dynamic> _videos = []; // List to hold video data
   final String youtubeApiKey =
-      'AIzaSyBlSI4WvUAcAdrJ07JMbqhNBRd7LzPai1U'; // YouTube API key
+      'Youtube API Key'; // YouTube API key
   YoutubePlayerController?
       _youtubePlayerController; // Controller for YouTube player
 
